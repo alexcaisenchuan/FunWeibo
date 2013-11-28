@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical" >
+	    <!-- 分隔线 -->
+	    <View 
+	        android:layout_width="match_parent"
+	        android:layout_height="1dp"
+	        android:background="@color/sepline"
+	        />
+	    
+	    <!-- 文字输入框 -->
+	    <EditText 
+	        android:id="@+id/edit_new_weibo_content"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:minLines="5"
+	        android:hint="@string/text_new_weibo_text_hint"
+	        android:textSize="15sp"
+	        />
+	    
+	    <!-- 地址及字数信息 -->
+	    <RelativeLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal"
+	        android:paddingTop="5sp"
+	        android:paddingBottom="5sp"
+	        >
+	        
+	        <TextView 
+	            android:id="@+id/text_location"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:textSize="15sp"
+	            android:layout_alignParentLeft="true"
+	            android:paddingLeft="8sp"
+	            />
+	        
+	        <TextView 
+	            android:id="@+id/text_words_limit"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:textSize="15sp"
+	            android:layout_alignParentRight="true"
+	            android:paddingRight="8sp"
+	            />
+	    </RelativeLayout>
+	    
+	    <!-- 图片 -->
+	    <LinearLayout 
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_marginTop="5dp"
+	        android:padding="3dp"
+	        android:orientation="vertical"
+            android:background="@drawable/border"
+            android:layout_gravity="center"
+	        >
+	        
+		    <ImageView 
+		        android:id="@+id/img_weibo_pic"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:adjustViewBounds="true"
+		        android:maxHeight="300dp"
+		        android:layout_gravity="center_horizontal"
+		        android:scaleType="fitXY"
+		        android:src="@drawable/take_photo"
+		        />
+		    
+	    </LinearLayout>
+	</LinearLayout>
+</ScrollView>

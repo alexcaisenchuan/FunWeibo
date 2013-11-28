@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <color name="white">#FFFFFFFF</color>
+    
+    <color name="sepline">#E5879DB2</color>
+    
+	<color name="suggest_list_background">#E5FFDB5E</color>
+    
+	<color name="weibo_time">#09376B</color>
+	
+</resources>

@@ -1,0 +1,58 @@
+<resources>
+
+    <string name="app_name">wemap</string>
+
+    <!-- ActivityLogin -->
+    <string name="btn_weibo_login">登录新浪微博</string>
+    
+    <!-- Hints -->
+    <string name="hint_login_faild">登录失败！</string>
+    <string name="hint_login_success">登录成功！</string>
+    <string name="hint_binary_stream">Get binary stream！</string>
+    <string name="hint_weibo_auth_code_success">认证code成功</string>
+    <string name="hint_weibo_auth_success">认证成功，有效期：</string>
+    <string name="hint_weibo_auth_error">认证失败：</string>
+    <string name="hint_weibo_auth_cancel">认证取消：</string>
+    <string name="hint_weibo_auth_exception">认证Exception：</string>
+    <string name="hint_activate">Activate!</string>
+    <string name="hint_deactivate">DeActivate!</string>
+    <string name="hint_error">错误：</string>
+    <string name="hint_network_error">网络错误：</string>
+    <string name="hint_logining">登录中...</string>
+    <string name="hint_ret_error">操作失败：</string>
+    <string name="hint_json_parse_faild">JSON解析失败！</string>
+    <string name="hint_auth_invalid">授权信息无效！</string>
+    <string name="hint_weibo_param_invalid">微博信息无效！</string>
+    <string name="hint_photo_saved">照片已保存到：</string>
+    <string name="hint_no_any_content_in_new_weibo">您还什么都没写呢！</string>
+    <string name="hint_add_suggest_success">添加公共墙微博成功！</string>
+    <string name="hint_add_suggest_faild">添加公共墙微博失败！</string>
+    <string name="hint_add_weibo_success">添加微博成功！</string>
+    <string name="hint_add_weibo_faild">添加微博失败！</string>
+    <string name="hint_location_invalid">位置信息无效！</string>
+    <string name="hint_loading_in_progress">加载中...</string>
+    <string name="hint_no_more">没有更多了哦~</string>
+    <string name="hint_read_weibo_error">读取微博错误</string>
+    
+    <!-- Buttons -->
+    <string name="button_refresh">刷新</string>
+    <string name="button_nearby">周边美食</string>
+    
+    <!-- Text -->
+    <string name="text_weibo_num">条微博</string>
+    <string name="text_detail_weibo">微博正文</string>
+    <string name="text_new_weibo">新微博</string>
+    <string name="text_back">返回   |</string>
+    <string name="text_post">|  发布</string>
+    <string name="text_new_weibo_text_hint">说点什么。。。</string>
+    <string name="text_get_location">获取位置</string>
+    <string name="text_share_photo">分享图片</string>
+    
+    <!-- 错误提示 -->
+    <string name="weibo_error_not_exist">原微博已删除！</string>
+    <string name="weibo_error_request_freq_beyond_limit">微博繁忙，请稍后再试 ^_^</string>
+    
+    <!-- commons -->
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+</resources>
