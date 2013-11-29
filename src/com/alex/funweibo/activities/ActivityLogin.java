@@ -11,6 +11,7 @@ package com.alex.funweibo.activities;
 
 import java.text.SimpleDateFormat;
 
+import com.alex.common.AppConfig;
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
 import com.alex.common.utils.SmartToast;
@@ -18,7 +19,6 @@ import com.alex.common.utils.KLog;
 import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.Weibo;
 import com.weibo.sdk.android.WeiboAuthListener;
-import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.WeiboDialogError;
 import com.weibo.sdk.android.WeiboException;
 import com.weibo.sdk.android.keep.AccessTokenKeeper;
@@ -27,7 +27,6 @@ import com.weibo.sdk.android.sso.SsoHandler;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 
@@ -152,7 +151,7 @@ public class ActivityLogin extends BaseActivity implements OnClickListener{
         super.onCreate(savedInstanceState);
     
         //创建微博对象
-        mWeibo = Weibo.getInstance(WeiboDefines.APP_KEY, WeiboDefines.REDIRECT_URL,WeiboDefines.SCOPE);
+        mWeibo = Weibo.getInstance(AppConfig.WEIBO_APP_KEY, AppConfig.WEIBO_REDIRECT_URL, AppConfig.WEIBO_SCOPE);
         
         //读取保存参数
         if(mApp.isWeiboAuthValid()) {

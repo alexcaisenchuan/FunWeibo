@@ -10,6 +10,7 @@
 package com.alex.funweibo;
 
 import com.alex.funweibo.model.Position;
+import com.alex.common.AppConfig;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.baidu.location.BDLocation;
@@ -121,12 +122,6 @@ public class AppControl extends Application{
      * 常量
      *-------------------------*/
     private static final String TAG = "AppControl";
-
-    /**图片缓存文件报名*/
-    private static final String SYSTEMCACHE = "thinkandroid";
-    
-    /**百度 API KEY*/
-    private static final String BAIDU_API_KEY = "39d04bfdd31123df43863ab71c8cbb9b";
     
     /*--------------------------
      * 成员变量
@@ -172,7 +167,7 @@ public class AppControl extends Application{
         
         //设置定位相关参数
         mLocationClient = new LocationClient(getApplicationContext());
-        mLocationClient.setAK(BAIDU_API_KEY);      //设置Access Key
+        mLocationClient.setAK(AppConfig.BAIDU_API_KEY);      //设置Access Key
         // 设置定位参数
         mLocOpt.setOpenGps(true);
         mLocOpt.setAddrType("all");//返回的定位结果包含地址信息
@@ -259,7 +254,7 @@ public class AppControl extends Application{
      */
     public TAFileCache getFileCache() {
         if (mFileCache == null) {
-            TACacheParams cacheParams = new TACacheParams(this, SYSTEMCACHE);
+            TACacheParams cacheParams = new TACacheParams(this, AppConfig.SYSTEMCACHE);
             TAFileCache fileCache = new TAFileCache(cacheParams);
             mFileCache = fileCache;
         }

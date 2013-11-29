@@ -47,7 +47,7 @@
         <!-- google map key -->
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyA1kmYfPCXg-duliYpr_--OSHsHYnnRmuw"/>
+            android:value="AIzaSyAM2xLDsfV-0H6kCCErtIpTdNBCItqAiu0"/>
         
         <!-- 百度地图定位服务 -->
         <service android:name="com.baidu.location.f" android:enabled="true" android:process=":remote">
