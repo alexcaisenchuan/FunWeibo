@@ -38,10 +38,13 @@ import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.api.WeiboAPI.SORT2;
 import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Poi;
+import com.weibo.sdk.android.model.PoiCategory;
 import com.weibo.sdk.android.model.PoiList;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.WeiboException;
 
+import android.app.ActionBar;
+import android.app.ActionBar.OnNavigationListener;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -61,6 +64,7 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 /**
@@ -333,6 +337,29 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
         }
     }
     
+    /**
+     * 下载菜单选择监听器
+     */
+    private class SpinnerSelectListener implements OnNavigationListener {
+
+        @Override
+        public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+            if(itemPosition >= 0 && itemPosition < PoiCategory.mCategorys.size()) {
+                PoiCategory c = PoiCategory.mCategorys.get(itemPosition);
+                if(c != null) {
+                    String category = c.id;
+                    KLog.d(TAG, "onNavigationItemSelected , pos : %d , id : %d , category : %s",
+                                 itemPosition, itemId, category);
+                    if(category != null && !category.equals(mCurrentCategory)) {
+                        //类型改变才重新读取
+                        selectCategory(category);
+                    }
+                }
+            }
+            return false;
+        }
+        
+    }
     /*--------------------------
      * 成员变量
      *-------------------------*/
@@ -351,8 +378,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
     ////////////////////////////数据/////////////////////////
     /**Poi列表*/
     private PoiList mPoiList = null;
-    /**查询poi列表的当前页码*/
-    private int mCurrPoiPage = 0;
     /**微博列表*/
     private List<Status> mStatus = new ArrayList<Status>();
     
@@ -365,6 +390,10 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
     private boolean mGettingPoiList = false;
     /**首次读取poi列表的标志位*/
     private boolean mFirstGetPoiList = false;
+    /**当前分类*/
+    private String mCurrentCategory = "";
+    /**查询poi列表的当前页码*/
+    private int mCurrPoiPage = 0;
     
     /////////////////////////其他///////////////////////////
     /**图片缓存加载器*/
@@ -373,7 +402,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
     private BDLocationListener mLocListener = new MyLocationListener();
     /**位置API*/
     private PlaceAPI mPlaceApi = null;
-    
     /*--------------------------
      * public方法
      *-------------------------*/
@@ -432,7 +460,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
     }
     
     private String[] mPlanetTitles = {"A"};
-    
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -455,13 +482,34 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
         mImageFetcher.setCallBackHandler(taBitmapCallBackHanlder);
         mImageFetcher.setFileCache(mApp.getFileCache());
         
+        //设置下拉菜单数据
+        ArrayAdapter<String> arrAdapter = new ArrayAdapter<String>(this, R.layout.list_spinner_poi_category);
+        for(PoiCategory c : PoiCategory.mCategorys) {
+            arrAdapter.add(c.name);
+        }
+        SpinnerAdapter adapter = arrAdapter;
+        /*SpinnerAdapter adapter = ArrayAdapter.createFromResource(this,
+                                                                 R.array.poi_category,
+                                                                 R.layout.list_spinner_poi_category);*/
+        // 将ActionBar的操作模型设置为NAVIGATION_MODE_LIST
+        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        // 为ActionBar设置下拉菜单和监听器
+        mActionBar.setListNavigationCallbacks(adapter, new SpinnerSelectListener());
+        //选择默认选中的项目
+        int pos = PoiCategory.getPositionById(PoiCategory.DEFAULT_POI_CATEGORY);
+        if(pos >= 0) {
+            mActionBar.setSelectedNavigationItem(pos);
+        }
+        
         //设置drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         // set up the drawer's list view with items and click listener
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
         // enable ActionBar app icon to behave as action to toggle nav drawer
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        if(mActionBar != null) {
+            mActionBar.setDisplayHomeAsUpEnabled(true);
+        }
         //getActionBar().setHomeButtonEnabled(true);
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the sliding drawer and the action bar app icon
@@ -501,7 +549,7 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
             mPlaceApi = new PlaceAPI(token);
             //若位置有效，则查询周边信息，否则等位置有效后再查询
             if(mApp.getCurrentLocation().isValid()) {
-                getNextNearbyPois();
+                selectCategory(PoiCategory.DEFAULT_POI_CATEGORY);     //读取默认类型 
                 mFirstGetPoiList = true;
             }
         } else {
@@ -601,6 +649,24 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
      * private方法
      *-------------------------*/
     /**
+     * 选择分类
+     */
+    private void selectCategory(String category) {
+        if(category != null) {
+            mCurrentCategory = category;
+            mCurrPoiPage = 0;       //复位当前页码
+            
+            //清空列表，显示加载提示
+            mStatus.clear();
+            mAdapter.notifyDataSetChanged();
+            setLoadView(true);
+            
+            //加载poi信息
+            getNextNearbyPois();
+        }
+    }
+    
+    /**
      * 读取附近的poi信息，每调用一次，都会尝试读取下一组poi
      */
     private void getNextNearbyPois() {
@@ -617,7 +683,7 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
                                      lon, 
                                      2000,
                                      "",
-                                     "64",
+                                     mCurrentCategory,
                                      5,
                                      page,
                                      false,

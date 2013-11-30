@@ -48,6 +48,8 @@ public abstract class BaseActivity extends FragmentActivity {
     protected AppControl mApp = null;
     /**Handler对象*/
     protected Handler mBaseHandler = null;
+    /**ActionBar*/
+    protected ActionBar mActionBar = null;
     
     /*--------------------------
      * public方法
@@ -95,10 +97,11 @@ public abstract class BaseActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mActionBar = getActionBar();
+        
         //默认打开ActionBar的返回键
-        ActionBar bar = getActionBar();
-        if(bar != null) {
-            bar.setDisplayHomeAsUpEnabled(true);
+        if(mActionBar != null) {
+            mActionBar.setDisplayHomeAsUpEnabled(true);
         }
         
         //读取应用信息

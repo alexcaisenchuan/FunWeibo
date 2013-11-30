@@ -48,11 +48,25 @@
     <string name="text_get_location">获取位置</string>
     <string name="text_share_photo">分享图片</string>
     
-    <!-- 错误提示 -->
+    <!-- 微博提示 -->
     <string name="weibo_error_not_exist">原微博已删除！</string>
     <string name="weibo_error_request_freq_beyond_limit">微博繁忙，请稍后再试 ^_^</string>
     
     <!-- commons -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+
+    
+    <!-- 字符数组 -->
+    <string-array name="poi_category">
+        <item id="10">出行住宿</item>
+        <item id="11">楼宇机构</item>
+        <item id="12">校园生活</item>
+        <item id="13">餐饮美食</item>
+        <item id="14">购物服务</item>
+        <item id="15">生活娱乐</item>
+        <item id="16">公园户外</item>
+        <item id="17">公司</item>
+        <item id="18">地点</item>
+    </string-array>
 </resources>

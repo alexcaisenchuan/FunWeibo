@@ -13,7 +13,6 @@ import java.io.File;
 
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
-import com.alex.common.exception.RetErrorException;
 import com.alex.funweibo.model.Position;
 import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.PhotoTake;
