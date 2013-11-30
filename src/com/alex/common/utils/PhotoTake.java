@@ -39,8 +39,6 @@ public class PhotoTake {
      *-------------------------*/
     private static final String TAG = "Photo";
     
-    /**启动Activity拍照时附带的request code，在接收Activity结果时需要用到*/
-    public static final int REQUEST_CODE_TAKE_PHOTO = 1;
     /**应用的基础文件在SD卡上的路径*/
     public static final String APP_DIR = "/wemap/";
     /**图片存储路径*/
@@ -60,7 +58,7 @@ public class PhotoTake {
      * @param activity 拍完照片后接收Result的Activity，您需要在此Activity中实现onActivityResult方法
      * @return 若成功，返回拍摄完照片的存储路径，若失败则返回null
      * */
-    public static String takePhoto(Activity activity) {
+    public static String takePhoto(Activity activity, int requestCode) {
         String filename = null;
         
         if(activity != null) {
@@ -72,7 +70,7 @@ public class PhotoTake {
             KLog.d(TAG, "img uri : " + imgUri);
             i.putExtra(MediaStore.EXTRA_OUTPUT, imgUri);
             
-            activity.startActivityForResult(i, REQUEST_CODE_TAKE_PHOTO);
+            activity.startActivityForResult(i, requestCode);
         }
         
         return filename;

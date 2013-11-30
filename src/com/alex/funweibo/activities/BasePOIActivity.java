@@ -8,8 +8,10 @@ import org.json.JSONException;
 
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
@@ -22,8 +24,6 @@ import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
-import com.huewu.pla.lib.internal.PLA_AbsListView;
-import com.huewu.pla.lib.internal.PLA_AbsListView.OnScrollListener;
 import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.api.PlaceAPI;
@@ -43,12 +43,16 @@ import com.weibo.sdk.android.model.PoiList;
  * 
  * @author caisenchuan
  */
-public abstract class BasePOIActivity extends BaseActivity implements OnScrollListener{
+public abstract class BasePOIActivity extends BaseActivity {
 
     /*--------------------------
      * 常量
      *-------------------------*/
     private static final String TAG = BasePOIActivity.class.getSimpleName();
+    
+    ///////////////intent/////////////////
+    /**设置默认显示的分类*/
+    public static final String INTENT_EXTRA_DEFAULT_CATEGORY = "default_category";
     
     ///////////////mBaseHandler msg what//////////////
     /**继承本类的自定义msg what要从此基值开始设置*/
@@ -58,6 +62,9 @@ public abstract class BasePOIActivity extends BaseActivity implements OnScrollLi
     private static final int MSG_SHOW_LOADING_HINT    = MSG_EXTEND_BASE + 1;
     /**关闭加载提示框*/
     private static final int MSG_DISMISS_LOADING_HINT = MSG_EXTEND_BASE + 2;
+    
+    /////////////////其他/////////////////
+    private static final int SCROLL_STATE_IDLE = 0;
     
     /*--------------------------
      * 自定义类型
@@ -87,8 +94,7 @@ public abstract class BasePOIActivity extends BaseActivity implements OnScrollLi
                     mPoiList = new PoiList(arg0);
                     list = mPoiList.getList();
                 } else {
-                    list = PoiList.getPoiList(arg0);
-                    mPoiList.appendList(list);
+                    list = mPoiList.appendList(arg0);
                 }
                 mCurrPoiPage++;
                 
@@ -227,28 +233,6 @@ public abstract class BasePOIActivity extends BaseActivity implements OnScrollLi
     /*--------------------------
      * public方法
      *-------------------------*/
-    @Override
-    public void onScrollStateChanged(PLA_AbsListView view, int scrollState) {
-        //KLog.d(TAG, "scrollState = " + scrollState);
-        //下拉到空闲是，且最后一个item的数等于数据的总数时，进行更新
-        if(mLastItem == mCount  && scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-            if(mPoiList == null || mPoiList.hasMore()) {
-                getNextNearbyPois();
-            } else {
-                SmartToast.showLongToast(this, R.string.hint_no_more, true);
-            }
-        }
-    }
-
-    @Override
-    public void onScroll(PLA_AbsListView view, int firstVisibleItem,
-            int visibleItemCount, int totalItemCount) {
-        /*KLog.d(TAG, "firstVisibleItem = %d , visibleItemCount = %d , totalItemCount = %d",
-                     firstVisibleItem, visibleItemCount, totalItemCount);
-         */
-        
-        mLastItem = firstVisibleItem + visibleItemCount - 1;  //减1是因为上面加了个addFooterView
-    }
     
     /*--------------------------
      * protected、packet方法
@@ -256,7 +240,13 @@ public abstract class BasePOIActivity extends BaseActivity implements OnScrollLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        //处理Intent信息
+        Intent it = getIntent();
+        String defaultCategory = it.getStringExtra(INTENT_EXTRA_DEFAULT_CATEGORY);
+        if(TextUtils.isEmpty(defaultCategory)) {
+            defaultCategory = PoiCategory.DEFAULT_POI_CATEGORY;
+        }
+        
         //底部加载提示
         mLoadView = getLayoutInflater().inflate(R.layout.footer_load, null);
         
@@ -270,6 +260,11 @@ public abstract class BasePOIActivity extends BaseActivity implements OnScrollLi
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         // 为ActionBar设置下拉菜单和监听器
         mActionBar.setListNavigationCallbacks(adapter, new SpinnerSelectListener());
+        //选择默认选中的项目
+        int pos = PoiCategory.getPositionById(defaultCategory);
+        if(pos >= 0) {
+            mActionBar.setSelectedNavigationItem(pos);
+        }
         
         //微博相关
         Oauth2AccessToken token = mApp.getAccessToken();
@@ -303,12 +298,46 @@ public abstract class BasePOIActivity extends BaseActivity implements OnScrollLi
     }
     
     /**
+     * 提供给子类的onScrollStateChanged调用
+     * @param view
+     * @param scrollState
+     */
+    protected void scrollStateChanged(int scrollState) {
+        KLog.d(TAG, "scrollState = " + scrollState);
+        //下拉到空闲是，且最后一个item的数等于数据的总数时，进行更新
+        if(mLastItem == mCount  && scrollState == SCROLL_STATE_IDLE) {
+            if(mPoiList == null || mPoiList.hasMore()) {
+                getNextNearbyPois();
+            } else {
+                SmartToast.showLongToast(this, R.string.hint_no_more, true);
+            }
+        }
+    }
+
+    /**
+     * 提供给子类的onScroll调用
+     * @param view
+     * @param firstVisibleItem
+     * @param visibleItemCount
+     * @param totalItemCount
+     */
+    protected void scroll(int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        KLog.d(TAG, "firstVisibleItem = %d , visibleItemCount = %d , totalItemCount = %d",
+                     firstVisibleItem, visibleItemCount, totalItemCount);
+        
+        mLastItem = firstVisibleItem + visibleItemCount - 1;  //减1是因为上面加了个addFooterView
+    }
+    
+    /**
      * 选择分类
      */
     protected void selectCategory(String category) {
         if(category != null) {
-            mCurrentCategory = category;
-            mCurrPoiPage = 0;       //复位当前页码
+            mCurrentCategory = category;    //设置分类
+            mCurrPoiPage = 0;               //复位当前页码
+            if(mPoiList != null) {
+                mPoiList.clear();           //清空列表
+            }
             
             //子类可能要做一些响应的处理
             onCategorySelected(category);

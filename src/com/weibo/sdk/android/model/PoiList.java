@@ -68,10 +68,34 @@ public class PoiList {
      * @param list 用于补充当前对象列表的list
      * @author caisenchuan
      */
-    public void appendList(List<Poi> list) {
+    public boolean addAll(List<Poi> list) {
+        boolean ret = false;
         if(list != null) {
-            mList.addAll(list);
+            ret = mList.addAll(list);
         }
+        return ret;
+    }
+    
+    /**
+     * 补充当前对象的列表，同时会更新total的值
+     * @param jsonStr 用于补充当前对象列表的json字符串，服务端返回
+     * @author caisenchuan
+     */
+    public List<Poi> appendList(String jsonStr) {
+        List<Poi> ret = new ArrayList<Poi>();
+        if(!TextUtils.isEmpty(jsonStr)) {
+            JSONObject json;
+            try {
+                json = new JSONObject(jsonStr);
+                ret = getPoiList(json);
+                mList.addAll(ret);
+                mTotal = json.getInt(TAG_TOTAL_NUM);
+                KLog.d(TAG, "total : " + mTotal);
+            } catch (JSONException e) {
+                KLog.w(TAG, "Exception", e);
+            }
+        }
+        return ret;
     }
     
     /**
@@ -84,6 +108,13 @@ public class PoiList {
     }
     
     /**
+     * 清空列表
+     */
+    public void clear() {
+        mList.clear();
+    }
+    
+    /**
      * 得到poi列表的总长度
      * @return
      * @author caisenchuan
@@ -92,6 +123,23 @@ public class PoiList {
         return mTotal;
     }
 
+    /**
+     * 读取某个偏移量对应的poi
+     * @param pos
+     * @return
+     */
+    public Poi get(int pos) {
+        return mList.get(pos);
+    }
+    
+    /**
+     * 获取当前poi列表长度
+     * @return
+     */
+    public int size() {
+        return mList.size();
+    }
+    
     /**
      * 判断是否还能继续加载poi项目
      * @return

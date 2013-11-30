@@ -18,6 +18,8 @@ import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.StringUtils;
 import com.huewu.pla.lib.MultiColumnListView;
+import com.huewu.pla.lib.internal.PLA_AbsListView;
+import com.huewu.pla.lib.internal.PLA_AbsListView.OnScrollListener;
 import com.huewu.pla.lib.internal.PLA_AdapterView;
 import com.huewu.pla.lib.internal.PLA_AdapterView.OnItemClickListener;
 import com.ta.util.bitmap.TABitmapCacheWork;
@@ -27,7 +29,6 @@ import com.ta.util.extend.draw.DensityUtils;
 import com.weibo.sdk.android.api.WeiboAPI.SORT2;
 import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Poi;
-import com.weibo.sdk.android.model.PoiCategory;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.WeiboException;
 
@@ -55,7 +56,7 @@ import android.widget.TextView;
  * 热门地点微博
  * @author caisenchuan
  */
-public class ActivityPopularPOIs extends BasePOIActivity implements OnClickListener {
+public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollListener, OnClickListener {
     /*--------------------------
      * 常量
      *-------------------------*/
@@ -160,7 +161,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnClickListe
             return convertView;
         }
     }
-    
     
     /**
      * 读取微博信息的回调函数
@@ -269,6 +269,17 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnClickListe
         return true; 
     }
     
+    @Override
+    public void onScrollStateChanged(PLA_AbsListView view, int scrollState) {
+        scrollStateChanged(scrollState);
+    }
+
+    @Override
+    public void onScroll(PLA_AbsListView view, int firstVisibleItem,
+            int visibleItemCount, int totalItemCount) {
+        scroll(firstVisibleItem, visibleItemCount, totalItemCount);
+    }
+    
     private String[] mPlanetTitles = {"A"};
     /*--------------------------
      * protected、packet方法
@@ -291,12 +302,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnClickListe
         mImageFetcher.setProcessDataHandler(downloadBitmapFetcher);
         mImageFetcher.setCallBackHandler(taBitmapCallBackHanlder);
         mImageFetcher.setFileCache(mApp.getFileCache());
-        
-        //选择默认选中的项目
-        int pos = PoiCategory.getPositionById(PoiCategory.DEFAULT_POI_CATEGORY);
-        if(pos >= 0) {
-            mActionBar.setSelectedNavigationItem(pos);
-        }
         
         //设置drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);

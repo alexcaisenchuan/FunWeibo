@@ -20,4 +20,6 @@ public class WeiboDefines {
     public static final int MAX_POI_SEARCH_RANGE = 10000;
     /**Poi每次读取的数目上限*/
     public static final int MAX_POI_COUNT_TO_GET_ONE_TIME = 50;
+    /**微博字数上限*/
+    public static final int MAX_STATUS_CONTENT_LENGTH = 140;
 }

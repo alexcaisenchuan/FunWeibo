@@ -4,10 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     
-    <Button 
-        android:id="@+id/weibo_login"
+    <ListView 
+        android:id="@+id/list_poi"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/button_weibo_login"
-        />
+        android:layout_height="match_parent"
+        >
+        
+    </ListView>
+    
 </LinearLayout>

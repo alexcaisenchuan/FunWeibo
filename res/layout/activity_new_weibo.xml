@@ -7,50 +7,46 @@
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
 	    android:orientation="vertical" >
-	    <!-- 分隔线 -->
-	    <View 
-	        android:layout_width="match_parent"
-	        android:layout_height="1dp"
-	        android:background="@color/sepline"
-	        />
 	    
+        <!-- 位置选择 -->
+        <TextView 
+            android:id="@+id/text_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            
+            android:paddingLeft="8dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="8dp"
+            
+            android:textSize="20sp"
+            android:text="@string/button_select_place"
+
+            android:background="@drawable/corner_background"
+            android:drawableLeft="@android:drawable/ic_menu_myplaces"
+            />
+        
 	    <!-- 文字输入框 -->
 	    <EditText 
 	        android:id="@+id/edit_new_weibo_content"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
+            android:gravity="top"
+            
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+
 	        android:minLines="5"
 	        android:hint="@string/text_new_weibo_text_hint"
 	        android:textSize="15sp"
+	        
+	        android:background="@android:drawable/editbox_background_normal"
 	        />
-	    
-	    <!-- 地址及字数信息 -->
-	    <RelativeLayout
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:orientation="horizontal"
-	        android:paddingTop="5sp"
-	        android:paddingBottom="5sp"
-	        >
-	        
-	        <TextView 
-	            android:id="@+id/text_location"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:textSize="15sp"
-	            android:layout_alignParentLeft="true"
-	            android:paddingLeft="8sp"
-	            />
-	        
-	        <TextView 
-	            android:id="@+id/text_words_limit"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:textSize="15sp"
-	            android:layout_alignParentRight="true"
-	            android:paddingRight="8sp"
-	            />
-	    </RelativeLayout>
 	    
 	    <!-- 图片 -->
 	    <LinearLayout 
@@ -73,7 +69,7 @@
 		        android:scaleType="fitXY"
 		        android:src="@drawable/take_photo"
 		        />
-		    
 	    </LinearLayout>
+	    
 	</LinearLayout>
 </ScrollView>

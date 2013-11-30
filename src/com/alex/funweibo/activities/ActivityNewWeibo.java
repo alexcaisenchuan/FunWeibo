@@ -19,7 +19,8 @@ import com.alex.common.utils.PhotoTake;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.weibo.sdk.android.Oauth2AccessToken;
-import com.weibo.sdk.android.api.StatusesAPI;
+import com.weibo.sdk.android.WeiboDefines;
+import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.WeiboException;
 import com.weibo.sdk.android.org.json.JSONException;
@@ -61,11 +62,13 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         @Override
         public void onComplete(String arg0) {
             try {
+                //KLog.d(TAG, arg0);
+                
                 //读取微博
                 Status status = new Status(arg0);
                 
                 if(status != null) {
-                    showToastOnUIThread(getString(R.string.hint_add_weibo_success));
+                    showToastOnUIThread(getString(R.string.hint_checkin_success));
                     
                     //删除照片
                     deletePhoto();
@@ -86,6 +89,12 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
      *-------------------------*/
     private static final String TAG = "ActivityNewWeibo";
     
+    ///////////////startActivityForResult参数/////////////////
+    /**拍照*/
+    public static final int REQUEST_CODE_TAKE_PHOTO = 1;
+    /**选择签到地点*/
+    public static final int REQUEST_CODE_SELECT_POI = 2;
+    
     ////////////////Activity启动参数///////////////////
     /**启动时是否要启动拍照*/
     public static final String INTENT_EXTRA_TAKE_PHOTO = "take_photo";
@@ -95,11 +104,12 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
      *-------------------------*/
     /**最近一张照片的存储路径*/
     private String mLastPicPath = "";
+    /**poi id*/
+    private String mPoiid = "";
     
-    /////////////////界面元素///////////////////////
+    /////////////////Views///////////////////////
     private EditText mEditNewWeiboContent = null;
     private TextView mTextLocation = null;
-    private TextView mTextWordsLimit = null;
     private ImageView mImageWeiboPic = null;
     
     /*--------------------------
@@ -110,6 +120,8 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         switch(v.getId()) {
             case R.id.text_location:
                 //定位按钮
+                Intent it = new Intent(ActivityNewWeibo.this, ActivityPoiSelect.class);
+                startActivityForResult(it, REQUEST_CODE_SELECT_POI);
                 break;
                 
             case R.id.img_weibo_pic:
@@ -161,30 +173,46 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         //设置界面元素
         mEditNewWeiboContent = (EditText)findViewById(R.id.edit_new_weibo_content);
         mTextLocation = (TextView)findViewById(R.id.text_location);
-        mTextWordsLimit = (TextView)findViewById(R.id.text_words_limit);
         mImageWeiboPic = (ImageView)findViewById(R.id.img_weibo_pic);
         
         mTextLocation.setOnClickListener(this);
         mImageWeiboPic.setOnClickListener(this);
         
-        setPostionDisplay();
+        //setPostionDisplay();      //显示当前地址
     }
     
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         
-        if(PhotoTake.REQUEST_CODE_TAKE_PHOTO == requestCode &&
-           Activity.RESULT_OK == resultCode) {
-            File file = new File(mLastPicPath);
-            if(file.exists()) {
-                Uri uri = Uri.fromFile(file);
-                mImageWeiboPic.setImageURI(uri);
+        switch(requestCode) {
+            case REQUEST_CODE_TAKE_PHOTO: {
+                if(Activity.RESULT_OK == resultCode) {
+                    File file = new File(mLastPicPath);
+                    if(file.exists()) {
+                        Uri uri = Uri.fromFile(file);
+                        mImageWeiboPic.setImageURI(uri);
+                    }
+                    
+                    SmartToast.showLongToast(this, 
+                                             String.format("%s%s", getString(R.string.hint_photo_saved), mLastPicPath),
+                                             true);
+                }
+                break;
             }
             
-            SmartToast.showLongToast(this, 
-                                     String.format("%s%s", getString(R.string.hint_photo_saved), mLastPicPath),
-                                     true);
+            case REQUEST_CODE_SELECT_POI: {
+                if(Activity.RESULT_OK == resultCode) {
+                    String poiid = data.getStringExtra(ActivityPoiSelect.INTENT_EXTRA_POI_ID);
+                    String poi_title = data.getStringExtra(ActivityPoiSelect.INTENT_EXTRA_POI_TITLE);
+                    if(!TextUtils.isEmpty(poiid)) {
+                        KLog.d(TAG, "poiid : %s", poiid);
+                        mPoiid = poiid;
+                        mTextLocation.setText(poi_title);
+                    }
+                }
+                break;
+            }
         }
     }
     
@@ -198,39 +226,35 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         String weiboContent = mEditNewWeiboContent.getText().toString();
         Oauth2AccessToken token = mApp.getAccessToken();
         boolean fileValid = photoValid();
+        String content = TextUtils.isEmpty(weiboContent) ? getString(R.string.text_share_photo) : weiboContent;
         
-        if(TextUtils.isEmpty(weiboContent) && !fileValid) {
-            //既没写字，也没有放图片
-            SmartToast.showLongToast(this, R.string.hint_no_any_content_in_new_weibo, true);
+        if(TextUtils.isEmpty(mPoiid)) {
+            //没有选择位置
+            SmartToast.showLongToast(this, R.string.hint_pls_select_poi, true);
+        } else if(!fileValid) {
+            //没有放图片
+            SmartToast.showLongToast(this, R.string.hint_pls_attach_photo, true);
+        } else if(content.length() > WeiboDefines.MAX_STATUS_CONTENT_LENGTH) {
+            //字数太多
+            SmartToast.showLongToast(this, R.string.hint_word_cnt_exceed_limit, true);
         } else if(token == null){
             //授权信息无效
             SmartToast.showLongToast(this, R.string.hint_auth_invalid, true);
-        } else if(!mApp.getCurrentLocation().isValid()) {
-            //位置信息无效，要求定位后才能发
-            SmartToast.showLongToast(this, R.string.hint_location_invalid, true);
         } else {
-            StatusesAPI status = new StatusesAPI(token);
-            String content = TextUtils.isEmpty(weiboContent) ? getString(R.string.text_share_photo) : weiboContent;
-            String latitude = "0.0";
+            PlaceAPI place = new PlaceAPI(token);
+            /*String latitude = "0.0";
             String longtitude = "0.0";
             if(mApp.getCurrentLocation().isValid()) {
                 latitude = String.valueOf(mApp.getCurrentLocation().latitude);
                 longtitude = String.valueOf(mApp.getCurrentLocation().longtitude);
-            }
+            }*/
             
-            if(fileValid) {
-                status.upload(content,
-                              mLastPicPath,
-                              latitude,
-                              longtitude,
-                              new AddWeiboListener(this));
-            } else {
-                status.update(content,
-                              latitude,
-                              longtitude,
-                              new AddWeiboListener(this));
-            }
-            
+            place.poisAddCheckin(mPoiid,
+                                 content,
+                                 mLastPicPath,
+                                 true,
+                                 new AddWeiboListener(this));
+
             //关闭此Activity
             finish();
         }
@@ -239,6 +263,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     /**
      * 设置界面上的位置信息显示
      */
+    @SuppressWarnings("unused")
     private void setPostionDisplay() {
         Position pos = mApp.getCurrentLocation();
         if(pos.isValid()) {
@@ -277,7 +302,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
      * @author caisenchuan
      */
     private void takePhoto() {
-        mLastPicPath = PhotoTake.takePhoto(this);
+        mLastPicPath = PhotoTake.takePhoto(this, REQUEST_CODE_TAKE_PHOTO);
     }
     
     /**

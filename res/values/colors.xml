@@ -9,4 +9,9 @@
     
 	<color name="weibo_time">#09376B</color>
 	
+	<color name="title">#656565</color>
+	
+	<color name="content">#7f7f7f</color>
+
+	<color name="content2">#9f9f9f</color>
 </resources>

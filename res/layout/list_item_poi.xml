@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" >
+    
+    <!-- 左侧小图标 -->
+    <ImageView
+        android:id="@+id/poi_pic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_dialog_map"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="10dp"/>
+
+    <!-- 右侧文字信息 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+	    
+	    <TextView
+	        android:id="@+id/poi_title"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textColor="@color/title"
+	        android:textSize="15sp" />
+	
+	    <TextView
+	        android:id="@+id/poi_content"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textColor="@color/content"
+	        android:textSize="15sp" />
+	    
+	    <TextView 
+	        android:id="@+id/poi_checkout_num"
+	        android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/content2"
+            android:textSize="10sp"
+	        />
+    </LinearLayout>
+    
+</LinearLayout>

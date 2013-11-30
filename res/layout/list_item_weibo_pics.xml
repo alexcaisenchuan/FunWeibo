@@ -17,7 +17,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:singleLine="false"
-        android:textColor="#656565" />
+        android:textColor="@color/title" />
 
     <TextView
         android:id="@+id/waterfall_content"
@@ -26,6 +26,6 @@
         android:layout_gravity="right|bottom"
         android:lines="3"
         android:ellipsize="end"
-        android:textColor="#9f9f9f" />
+        android:textColor="@color/content" />
     
 </LinearLayout>

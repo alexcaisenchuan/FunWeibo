@@ -2,9 +2,6 @@
 
     <string name="app_name">FunWeibo</string>
 
-    <!-- ActivityLogin -->
-    <string name="btn_weibo_login">登录新浪微博</string>
-    
     <!-- Hints -->
     <string name="hint_login_faild">登录失败！</string>
     <string name="hint_login_success">登录成功！</string>
@@ -33,10 +30,16 @@
     <string name="hint_loading_in_progress">加载中...</string>
     <string name="hint_no_more">没有更多了哦~</string>
     <string name="hint_read_weibo_error">读取微博错误</string>
+    <string name="hint_pls_attach_photo">请添加个图片吧，亲 ^_^</string>
+    <string name="hint_pls_select_poi">还没选择位置呢~</string>
+    <string name="hint_word_cnt_exceed_limit">亲，不能超过140个字哦</string>
+    <string name="hint_checkin_success">签到成功！</string>
     
     <!-- Buttons -->
+    <string name="button_weibo_login">登录新浪微博</string>
     <string name="button_refresh">刷新</string>
     <string name="button_nearby">周边美食</string>
+    <string name="button_select_place">选择地点</string>
     
     <!-- Text -->
     <string name="text_weibo_num">条微博</string>
@@ -47,6 +50,7 @@
     <string name="text_new_weibo_text_hint">说点什么。。。</string>
     <string name="text_get_location">获取位置</string>
     <string name="text_share_photo">分享图片</string>
+    <string name="text_checkin_num">签到次数: %s</string>
     
     <!-- 微博提示 -->
     <string name="weibo_error_not_exist">原微博已删除！</string>
@@ -55,18 +59,4 @@
     <!-- commons -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-
-    
-    <!-- 字符数组 -->
-    <string-array name="poi_category">
-        <item id="10">出行住宿</item>
-        <item id="11">楼宇机构</item>
-        <item id="12">校园生活</item>
-        <item id="13">餐饮美食</item>
-        <item id="14">购物服务</item>
-        <item id="15">生活娱乐</item>
-        <item id="16">公园户外</item>
-        <item id="17">公司</item>
-        <item id="18">地点</item>
-    </string-array>
 </resources>
