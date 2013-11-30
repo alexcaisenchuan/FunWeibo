@@ -9,42 +9,28 @@
  */
 package com.alex.funweibo.activities;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONException;
-
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
-import com.alex.funweibo.model.Position;
 import com.alex.common.utils.OnHttpRequestReturnListener;
-import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
-import com.baidu.location.BDLocation;
-import com.baidu.location.BDLocationListener;
+import com.alex.common.utils.StringUtils;
 import com.huewu.pla.lib.MultiColumnListView;
-import com.huewu.pla.lib.internal.PLA_AbsListView;
-import com.huewu.pla.lib.internal.PLA_AbsListView.OnScrollListener;
 import com.huewu.pla.lib.internal.PLA_AdapterView;
 import com.huewu.pla.lib.internal.PLA_AdapterView.OnItemClickListener;
 import com.ta.util.bitmap.TABitmapCacheWork;
 import com.ta.util.bitmap.TABitmapCallBackHanlder;
 import com.ta.util.bitmap.TADownloadBitmapHandler;
 import com.ta.util.extend.draw.DensityUtils;
-import com.weibo.sdk.android.Oauth2AccessToken;
-import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.api.WeiboAPI.SORT2;
 import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Poi;
 import com.weibo.sdk.android.model.PoiCategory;
-import com.weibo.sdk.android.model.PoiList;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.WeiboException;
 
-import android.app.ActionBar;
-import android.app.ActionBar.OnNavigationListener;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -52,7 +38,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -64,14 +49,13 @@ import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 
 /**
  * 热门地点微博
  * @author caisenchuan
  */
-public class ActivityPopularPOIs extends BaseActivity implements OnClickListener, OnScrollListener{
+public class ActivityPopularPOIs extends BasePOIActivity implements OnClickListener {
     /*--------------------------
      * 常量
      *-------------------------*/
@@ -79,11 +63,7 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
     
     ///////////////mBaseHandler msg what//////////////
     /**刷新列表内容*/
-    public static final int MSG_REFRESH_LIST         = MSG_EXTEND_BASE + 1;
-    /**打开加载提示框*/
-    public static final int MSG_SHOW_LOADING_HINT    = MSG_EXTEND_BASE + 2;
-    /**关闭加载提示框*/
-    public static final int MSG_DISMISS_LOADING_HINT = MSG_EXTEND_BASE + 3;
+    public static final int MSG_REFRESH_LIST = MSG_POI_ACTIVITY_BASE + 1;
     
     /*--------------------------
      * 自定义类型
@@ -174,95 +154,13 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
                 if(place != null) {
                     holder.mTitle.setText(place.title);
                 }
-                holder.mContent.setText(getStripContent(status.getText()));
+                holder.mContent.setText(StringUtils.getStripContent(status.getText()));
             }
             
             return convertView;
         }
     }
     
-    /**
-     * 读取微博信息的回调函数
-     * @author caisenchuan
-     */
-    private class GetPoisListener extends OnHttpRequestReturnListener {
-
-        /**
-         * 读取微博信息的回调函数
-         * @param base 用于显示Toast的Activity对象
-         */
-        public GetPoisListener(BaseActivity base) {
-            super(base);
-        }
-
-        /* (non-Javadoc)
-         * @see com.weibo.sdk.android.net.RequestListener#onComplete(java.lang.String)
-         */
-        @Override
-        public void onComplete(String arg0) {
-            try {
-                List<Poi> list = null;
-                if(mPoiList == null) {
-                    mPoiList = new PoiList(arg0);
-                    list = mPoiList.getList();
-                } else {
-                    list = PoiList.getPoiList(arg0);
-                    mPoiList.appendList(list);
-                }
-                mCurrPoiPage++;
-                
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    KLog.w(TAG, "Exception", e);
-                }
-                
-                getPoiListStatuses(list);
-            } catch (JSONException e) {
-                KLog.w(TAG, "JSONException while build status", e);
-                showToastOnUIThread(R.string.hint_json_parse_faild);
-                onLoadFinish();
-            } finally {
-                mGettingPoiList = false;
-            }
-        }
-        
-        /* (non-Javadoc)
-         * @see com.alex.wemap.utils.OnHttpRequestReturnListener#onComplete4binary(java.io.ByteArrayOutputStream)
-         */
-        @Override
-        public void onComplete4binary(ByteArrayOutputStream arg0) {
-            try {
-                super.onComplete4binary(arg0);
-            } finally {
-                onLoadFinish();
-            }
-        }
-        
-        /* (non-Javadoc)
-         * @see com.alex.wemap.utils.OnHttpRequestReturnListener#onError(com.weibo.sdk.android.WeiboException)
-         */
-        @Override
-        public void onError(com.weibo.sdk.android.WeiboException e) {
-            try {
-                super.onError(e);
-            } finally {
-                onLoadFinish();
-            }
-        }
-        
-        /* (non-Javadoc)
-         * @see com.alex.wemap.utils.OnHttpRequestReturnListener#onIOException(java.io.IOException)
-         */
-        @Override
-        public void onIOException(IOException e) {
-            try {
-                super.onIOException(e);
-            } finally {
-                onLoadFinish();
-            }
-        }
-    }
     
     /**
      * 读取微博信息的回调函数
@@ -300,29 +198,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
     }
     
     /**
-     * 百度定位的监听器
-     */
-    private class MyLocationListener implements BDLocationListener {
-        @Override
-        public void onReceiveLocation(BDLocation location) {
-            if (location == null) {
-                return;
-            }
-            
-            if(!mFirstGetPoiList) {
-                getNextNearbyPois();
-                mFirstGetPoiList = true;
-            }
-        }
-
-        public void onReceivePoi(BDLocation poiLocation) {
-            if (poiLocation == null) {
-                return;
-            }
-        }
-    }
-    
-    /**
      * 列表的某个条目被点击时的调用
      */
     private class MyOnItemClickListener implements OnItemClickListener {
@@ -337,71 +212,29 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
         }
     }
     
-    /**
-     * 下载菜单选择监听器
-     */
-    private class SpinnerSelectListener implements OnNavigationListener {
-
-        @Override
-        public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-            if(itemPosition >= 0 && itemPosition < PoiCategory.mCategorys.size()) {
-                PoiCategory c = PoiCategory.mCategorys.get(itemPosition);
-                if(c != null) {
-                    String category = c.id;
-                    KLog.d(TAG, "onNavigationItemSelected , pos : %d , id : %d , category : %s",
-                                 itemPosition, itemId, category);
-                    if(category != null && !category.equals(mCurrentCategory)) {
-                        //类型改变才重新读取
-                        selectCategory(category);
-                    }
-                }
-            }
-            return false;
-        }
-        
-    }
     /*--------------------------
      * 成员变量
      *-------------------------*/
     ////////////////////////////Views////////////////////////
     /**listview*/
     private MultiColumnListView mListContent = null;
-    /**底部加载提示*/
-    private View mLoadView = null;
     /**列表的Adapter*/
     private ListAdapter mAdapter = null;
-    
+    //侧边栏相关
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
     
     ////////////////////////////数据/////////////////////////
-    /**Poi列表*/
-    private PoiList mPoiList = null;
     /**微博列表*/
     private List<Status> mStatus = new ArrayList<Status>();
     
     ///////////////////////////标志位及计数//////////////////
-    /**列表中最后一个项目的序号*/
-    private int mLastItem = 0;
-    /**列表中项目的总个数*/
-    private int mCount = 0;
-    /**是否正在读取poi列表*/
-    private boolean mGettingPoiList = false;
-    /**首次读取poi列表的标志位*/
-    private boolean mFirstGetPoiList = false;
-    /**当前分类*/
-    private String mCurrentCategory = "";
-    /**查询poi列表的当前页码*/
-    private int mCurrPoiPage = 0;
     
     /////////////////////////其他///////////////////////////
     /**图片缓存加载器*/
     private TABitmapCacheWork mImageFetcher = null;
-    /** 定位监听器 */
-    private BDLocationListener mLocListener = new MyLocationListener();
-    /**位置API*/
-    private PlaceAPI mPlaceApi = null;
+    
     /*--------------------------
      * public方法
      *-------------------------*/
@@ -411,29 +244,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
             default:
                 break;
         }
-    }
-
-    @Override
-    public void onScrollStateChanged(PLA_AbsListView view, int scrollState) {
-        //KLog.d(TAG, "scrollState = " + scrollState);
-        //下拉到空闲是，且最后一个item的数等于数据的总数时，进行更新
-        if(mLastItem == mCount  && scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-            if(mPoiList == null || mPoiList.hasMore()) {
-                getNextNearbyPois();
-            } else {
-                SmartToast.showLongToast(this, R.string.hint_no_more, true);
-            }
-        }
-    }
-
-    @Override
-    public void onScroll(PLA_AbsListView view, int firstVisibleItem,
-            int visibleItemCount, int totalItemCount) {
-        /*KLog.d(TAG, "firstVisibleItem = %d , visibleItemCount = %d , totalItemCount = %d",
-                     firstVisibleItem, visibleItemCount, totalItemCount);
-         */
-        
-        mLastItem = firstVisibleItem + visibleItemCount - 1;  //减1是因为上面加了个addFooterView
     }
     
     @Override
@@ -482,19 +292,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
         mImageFetcher.setCallBackHandler(taBitmapCallBackHanlder);
         mImageFetcher.setFileCache(mApp.getFileCache());
         
-        //设置下拉菜单数据
-        ArrayAdapter<String> arrAdapter = new ArrayAdapter<String>(this, R.layout.list_spinner_poi_category);
-        for(PoiCategory c : PoiCategory.mCategorys) {
-            arrAdapter.add(c.name);
-        }
-        SpinnerAdapter adapter = arrAdapter;
-        /*SpinnerAdapter adapter = ArrayAdapter.createFromResource(this,
-                                                                 R.array.poi_category,
-                                                                 R.layout.list_spinner_poi_category);*/
-        // 将ActionBar的操作模型设置为NAVIGATION_MODE_LIST
-        mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        // 为ActionBar设置下拉菜单和监听器
-        mActionBar.setListNavigationCallbacks(adapter, new SpinnerSelectListener());
         //选择默认选中的项目
         int pos = PoiCategory.getPositionById(PoiCategory.DEFAULT_POI_CATEGORY);
         if(pos >= 0) {
@@ -532,8 +329,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
         
         //设置listview
         mListContent = (MultiColumnListView)findViewById(R.id.list_weibo_content);
-        //底部加载提示
-        mLoadView = getLayoutInflater().inflate(R.layout.footer_load, null);
         mListContent.addFooterView(mLoadView);
         //设置adapter
         mAdapter = new ListAdapter(this);
@@ -542,40 +337,17 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
         mListContent.setOnScrollListener(this);
         //监听点击
         mListContent.setOnItemClickListener(new MyOnItemClickListener());
-        
-        //刷新微博信息
-        Oauth2AccessToken token = mApp.getAccessToken();
-        if(token != null) {
-            mPlaceApi = new PlaceAPI(token);
-            //若位置有效，则查询周边信息，否则等位置有效后再查询
-            if(mApp.getCurrentLocation().isValid()) {
-                selectCategory(PoiCategory.DEFAULT_POI_CATEGORY);     //读取默认类型 
-                mFirstGetPoiList = true;
-            }
-        } else {
-            if(token == null) {
-                SmartToast.showShortToast(this, R.string.hint_auth_invalid, false);
-            }
-        }
     }
     
     @Override
     protected void onStart() {
         KLog.d(TAG, "onStart");
-
-        //注册定位监听器
-        mApp.getLocationClient().registerLocationListener(mLocListener);
-        
         super.onStart();
     }
     
     @Override
     protected void onStop() {
         KLog.d(TAG, "onStop");
-        
-        //取消注册定位监听器
-        mApp.getLocationClient().unRegisterLocationListener(mLocListener);
-        
         super.onStop();
     }
     
@@ -627,82 +399,34 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
                 break;
             }
             
-            case MSG_SHOW_LOADING_HINT: {
-                setLoadView(true);
-                break;
-            }
-            
-            case MSG_DISMISS_LOADING_HINT: {
-                setLoadView(false);
-                break;
-            }
-            
             default: {
-                KLog.w(TAG, "Unknown msg : " + msg.what);
                 super.handleBaseMessage(msg);
                 break;
             }
         }
-    };
+    }
     
+    ////////////////////实现的父类方法////////////////////////
+    @Override
+    protected void onGetPoiList(List<Poi> list) {
+        //暂停一段时间再请求，不要做得太频繁
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            KLog.w(TAG, "Exception", e);
+        }
+        
+        getPoiListStatuses(list);
+    }
+
+    @Override
+    protected void onCategorySelected(String category_id) {
+        mStatus.clear();
+        mAdapter.notifyDataSetChanged();
+    }
     /*--------------------------
      * private方法
      *-------------------------*/
-    /**
-     * 选择分类
-     */
-    private void selectCategory(String category) {
-        if(category != null) {
-            mCurrentCategory = category;
-            mCurrPoiPage = 0;       //复位当前页码
-            
-            //清空列表，显示加载提示
-            mStatus.clear();
-            mAdapter.notifyDataSetChanged();
-            setLoadView(true);
-            
-            //加载poi信息
-            getNextNearbyPois();
-        }
-    }
-    
-    /**
-     * 读取附近的poi信息，每调用一次，都会尝试读取下一组poi
-     */
-    private void getNextNearbyPois() {
-        if(mGettingPoiList) {
-            KLog.w(TAG, "Getting poi list already!");
-        } else {
-            if(mPlaceApi != null) {
-                Position pos = mApp.getCurrentLocation();
-                String lat = String.valueOf(pos.latitude);
-                String lon = String.valueOf(pos.longtitude);
-                int page = mCurrPoiPage + 1;        //读取下一组
-                KLog.d(TAG, "getNextNearbyPois, lat : %s , lon : %s , page : %s", lat, lon, page);
-                mPlaceApi.nearbyPois(lat,
-                                     lon, 
-                                     2000,
-                                     "",
-                                     mCurrentCategory,
-                                     5,
-                                     page,
-                                     false,
-                                     new GetPoisListener(this));
-                
-                sendMessageToBaseHandler(MSG_SHOW_LOADING_HINT);
-                mGettingPoiList = true;
-            }
-        }
-    }
-    
-    /**
-     * 加载完成时关闭加载提示以及设置变量（无论加载成功或失败都这么做）
-     */
-    private void onLoadFinish() {
-        sendMessageToBaseHandler(MSG_DISMISS_LOADING_HINT);
-        mGettingPoiList = false;
-    }
-    
     /**
      * 读取一组poi的对应微博
      * @param list
@@ -737,21 +461,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
     }
     
     /**
-     * 设置加载提示的显示
-     * @param enable
-     * @author caisenchuan
-     */
-    private void setLoadView(boolean enable) {
-        if(mLoadView != null) {
-            if(enable) {
-                mLoadView.setVisibility(View.VISIBLE);
-            } else {
-                mLoadView.setVisibility(View.GONE);
-            }
-        }
-    }
-    
-    /**
      * 读取某个位置上的项目
      */
     private Status getPosItem(int position) {
@@ -760,25 +469,6 @@ public class ActivityPopularPOIs extends BaseActivity implements OnClickListener
         if(mStatus != null) {
             if(position >= 0 && position < mStatus.size()) {
                 ret = mStatus.get(position);
-            }
-        }
-        
-        return ret;
-    }
-    
-    /**
-     * 获得处理过的正文
-     * @param text
-     * @return
-     * @author caisenchuan
-     */
-    private static String getStripContent(String text) {
-        String ret = "";
-        
-        if(!TextUtils.isEmpty(text)) {
-            int i = text.indexOf("我在这里");
-            if(i > 0) {
-                ret = text.substring(0, i);
             }
         }
         

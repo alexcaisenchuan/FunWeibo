@@ -3,6 +3,8 @@ package com.alex.common.utils;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.text.TextUtils;
+
 /**
  * 字符串处理
  * @author caisenchuan
@@ -80,6 +82,24 @@ public class StringUtils {
         return ret;
     }
     
+    /**
+     * 获得处理过的正文
+     * @param text
+     * @return
+     * @author caisenchuan
+     */
+    public static String getStripContent(String text) {
+        String ret = "";
+        
+        if(!TextUtils.isEmpty(text)) {
+            int i = text.indexOf("我在这里");
+            if(i > 0) {
+                ret = text.substring(0, i);
+            }
+        }
+        
+        return ret;
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
