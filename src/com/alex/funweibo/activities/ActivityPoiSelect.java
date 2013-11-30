@@ -57,6 +57,8 @@ public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListen
             public ImageView mPic;
             /**签到人数*/
             public TextView mCheckoutNum;
+            /**距离*/
+            public TextView mDistance;
         }
         
         /**
@@ -113,6 +115,7 @@ public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListen
                 holder.mAddress = (TextView)convertView.findViewById(R.id.poi_content);
                 holder.mPic = (ImageView)convertView.findViewById(R.id.poi_pic);
                 holder.mCheckoutNum = (TextView)convertView.findViewById(R.id.poi_checkout_num);
+                holder.mDistance = (TextView)convertView.findViewById(R.id.poi_distance);
                 convertView.setTag(holder);
             } else {
                 holder = (ListItemViewHolder)convertView.getTag();
@@ -127,6 +130,7 @@ public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListen
                 holder.mTitle.setText(poi.title);
                 holder.mAddress.setText(poi.address);
                 holder.mCheckoutNum.setText(String.format(getString(R.string.text_checkin_num), poi.checkin_num));
+                holder.mDistance.setText(String.format(getString(R.string.text_distance), poi.distance));
             }
             
             return convertView;
