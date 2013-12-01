@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONException;
-
 import android.app.ActionBar;
 import android.app.ActionBar.OnNavigationListener;
 import android.content.Intent;
@@ -505,7 +503,6 @@ public abstract class BasePOIActivity extends BaseActivity {
             }
         }
     };
-    
 
     /**
      * 加载完成时关闭加载提示以及设置变量（无论加载成功或失败都这么做）
@@ -513,21 +510,6 @@ public abstract class BasePOIActivity extends BaseActivity {
     protected void onLoadFinish() {
         sendMessageToBaseHandler(MSG_DISMISS_LOADING_HINT);
         mGettingPoiList = false;
-    }
-    
-    /**
-     * 设置加载提示的显示
-     * @param enable
-     * @author caisenchuan
-     */
-    protected void setLoadView(boolean enable) {
-        if(mLoadView != null) {
-            if(enable) {
-                mLoadView.setVisibility(View.VISIBLE);
-            } else {
-                mLoadView.setVisibility(View.GONE);
-            }
-        }
     }
     
     /**
@@ -573,4 +555,18 @@ public abstract class BasePOIActivity extends BaseActivity {
     /*--------------------------
      * private方法
      *-------------------------*/
+    /**
+     * 设置加载提示的显示
+     * @param enable
+     * @author caisenchuan
+     */
+    private void setLoadView(boolean enable) {
+        if(mLoadView != null) {
+            if(enable) {
+                mLoadView.setVisibility(View.VISIBLE);
+            } else {
+                mLoadView.setVisibility(View.GONE);
+            }
+        }
+    }
 }
