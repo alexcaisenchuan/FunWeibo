@@ -34,7 +34,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import android.text.TextUtils;
+
 import com.alex.common.utils.KLog;
+import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.http.Response;
 import com.weibo.sdk.android.org.json.JSONArray;
 import com.weibo.sdk.android.org.json.JSONException;
@@ -361,8 +364,12 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	public static List<Status> constructStatuses(String jsonStr)
 	                           throws JSONException, WeiboException {
 	    List<Status> ret = new ArrayList<Status>();
-	    JSONObject json = new JSONObject(jsonStr);
+	    if(TextUtils.isEmpty(jsonStr) || jsonStr.equals(WeiboDefines.RET_EMPTY_ARRAY)) {
+	        //返回[]则代表没有数据
+	        return ret;
+	    }
 	    
+	    JSONObject json = new JSONObject(jsonStr);
 	    JSONArray arr = json.getJSONArray("statuses");
 	    if(arr != null) {
 	        for(int i = 0; i < arr.length(); i++) {

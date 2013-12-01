@@ -13,6 +13,8 @@ public class PoiCategory {
     /*--------------------------
      * 常量
      *-------------------------*/
+    /**所有分类*/
+    public static final String ALL_CATEGORY = "0";
     /**默认Poi分类*/
     public static final String DEFAULT_POI_CATEGORY = "64";
     

@@ -2,6 +2,7 @@ package com.alex.funweibo.activities;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONException;
@@ -12,8 +13,15 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.SearchView;
+import android.widget.SearchView.OnCloseListener;
+import android.widget.SearchView.OnQueryTextListener;
 import android.widget.SpinnerAdapter;
 
 import com.alex.common.BaseActivity;
@@ -49,6 +57,9 @@ public abstract class BasePOIActivity extends BaseActivity {
      * 常量
      *-------------------------*/
     private static final String TAG = BasePOIActivity.class.getSimpleName();
+    
+    /**调试打印开关*/
+    private static final boolean VERBOSE = true;
     
     ///////////////intent/////////////////
     /**设置默认显示的分类*/
@@ -87,21 +98,28 @@ public abstract class BasePOIActivity extends BaseActivity {
          * @see com.weibo.sdk.android.net.RequestListener#onComplete(java.lang.String)
          */
         @Override
-        public void onComplete(String arg0) {
+        public void onComplete(String str) {
             try {
-                List<Poi> list = null;
-                if(mPoiList == null) {
-                    mPoiList = new PoiList(arg0);
-                    list = mPoiList.getList();
-                } else {
-                    list = mPoiList.appendList(arg0);
+                if(VERBOSE) {
+                    KLog.d(TAG, "GetPois , ret : %s", str);
                 }
-                mCurrPoiPage++;
-                
+
+                List<Poi> list = new ArrayList<Poi>();
+                if(!TextUtils.isEmpty(str) && 
+                   !str.startsWith(WeiboDefines.RET_EMPTY_ARRAY)) {
+                    //微博返回有效数组才解析
+                    if(mPoiList == null) {
+                        mPoiList = new PoiList(str);
+                        list = mPoiList.getList();
+                    } else {
+                        list = mPoiList.appendList(str);
+                    }
+                    mCurrPoiPage++;
+                }
                 onGetPoiList(list);
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 KLog.w(TAG, "JSONException while build status", e);
-                showToastOnUIThread(R.string.hint_json_parse_faild);
+                showToastOnUIThread(getString(R.string.hint_poi_read_faild) + e.toString());
                 onLoadFinish();
             } finally {
                 mGettingPoiList = false;
@@ -208,8 +226,12 @@ public abstract class BasePOIActivity extends BaseActivity {
     protected int mCount = 0;
     /**列表中最后一个项目的序号*/
     protected int mLastItem = 0;
+    /**poi查询字串，不查询时记得置空*/
+    protected String mPoiQuery = "";
     /**当前分类*/
     protected String mCurrentCategory = "";
+    /**上一次选择的分类*/
+    protected String mLastCategory = "";
     /**查询poi列表的当前页码*/
     protected int mCurrPoiPage = 0;
     /**是否正在读取poi列表*/
@@ -233,7 +255,66 @@ public abstract class BasePOIActivity extends BaseActivity {
     /*--------------------------
      * public方法
      *-------------------------*/
-    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_base_poi, menu);
+        MenuItem item = menu.findItem(R.id.item_search);
+        SearchView search = (SearchView)item.getActionView();
+        search.setIconifiedByDefault(true);
+        search.setOnQueryTextListener(new OnQueryTextListener() {
+            
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                KLog.d(TAG, "onQueryTextSubmit : %s", query);
+                searchPoi(query);
+                return true;
+            }
+            
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                KLog.d(TAG, "onQueryTextChange : %s", newText);
+                return true;
+            }
+        });
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        KLog.d(TAG, "currentapiVersion : %s", currentapiVersion);
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            // 4.0以上采用ActionExpandListener
+            item.setOnActionExpandListener(new OnActionExpandListener() {
+
+                @Override
+                public boolean onMenuItemActionCollapse(MenuItem item) {
+                    //搜索栏关闭
+                    KLog.d(TAG, "onMenuItemActionCollapse " + item.getItemId());
+                    closeSearch();
+                    return true;
+                }
+
+                @Override
+                public boolean onMenuItemActionExpand(MenuItem item) {
+                    //搜索栏展开
+                    KLog.d(TAG, "onMenuItemActionExpand " + item.getItemId());
+                    return true;
+                }
+            });
+        } else {
+            // 4.0以下采用onCloseListenerS
+            search.setOnCloseListener(new OnCloseListener() {
+
+                @Override
+                public boolean onClose() {
+                    KLog.d(TAG, "mSearchView on close ");
+                    closeSearch();
+                    return false;
+                }
+            });
+        }
+        
+        return true;
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -303,7 +384,7 @@ public abstract class BasePOIActivity extends BaseActivity {
      * @param scrollState
      */
     protected void scrollStateChanged(int scrollState) {
-        KLog.d(TAG, "scrollState = " + scrollState);
+        //KLog.d(TAG, "scrollState = " + scrollState);
         //下拉到空闲是，且最后一个item的数等于数据的总数时，进行更新
         if(mLastItem == mCount  && scrollState == SCROLL_STATE_IDLE) {
             if(mPoiList == null || mPoiList.hasMore()) {
@@ -322,10 +403,33 @@ public abstract class BasePOIActivity extends BaseActivity {
      * @param totalItemCount
      */
     protected void scroll(int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-        KLog.d(TAG, "firstVisibleItem = %d , visibleItemCount = %d , totalItemCount = %d",
-                     firstVisibleItem, visibleItemCount, totalItemCount);
+        //KLog.d(TAG, "firstVisibleItem = %d , visibleItemCount = %d , totalItemCount = %d",
+        //             firstVisibleItem, visibleItemCount, totalItemCount);
         
         mLastItem = firstVisibleItem + visibleItemCount - 1;  //减1是因为上面加了个addFooterView
+    }
+    
+    /**
+     * 关闭搜索
+     */
+    protected void closeSearch() {
+        if(!TextUtils.isEmpty(mPoiQuery)) {
+            //若之前进行过搜索，则在搜索框关闭时重新查询一下签到信息
+            mPoiQuery = "";
+            selectCategory(mLastCategory);
+        } else {
+            //如果之前没有进行过搜索则直接关闭搜索框
+            mPoiQuery = "";
+        }
+    }
+    
+    /**
+     * 搜索Poi
+     * @param query
+     */
+    protected void searchPoi(String query) {
+        mPoiQuery = query;
+        selectCategory(PoiCategory.ALL_CATEGORY);
     }
     
     /**
@@ -333,10 +437,11 @@ public abstract class BasePOIActivity extends BaseActivity {
      */
     protected void selectCategory(String category) {
         if(category != null) {
-            mCurrentCategory = category;    //设置分类
-            mCurrPoiPage = 0;               //复位当前页码
+            mLastCategory = mCurrentCategory;   //保存分类
+            mCurrentCategory = category;        //设置分类
+            mCurrPoiPage = 0;                   //复位当前页码
             if(mPoiList != null) {
-                mPoiList.clear();           //清空列表
+                mPoiList.clear();               //清空列表
             }
             
             //子类可能要做一些响应的处理
@@ -367,7 +472,7 @@ public abstract class BasePOIActivity extends BaseActivity {
                 mPlaceApi.nearbyPois(lat,
                                      lon, 
                                      mPoiSearchRange,
-                                     "",
+                                     mPoiQuery,
                                      mCurrentCategory,
                                      mPoiCountToGetOneTime,
                                      page,

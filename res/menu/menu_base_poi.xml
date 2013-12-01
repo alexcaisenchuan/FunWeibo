@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >  
+  
+    <item  
+        android:id="@+id/item_search"  
+        android:orderInCategory="3"  
+        android:showAsAction="ifRoom|collapseActionView"  
+        android:actionViewClass="android.widget.SearchView"  
+        android:icon="@android:drawable/ic_menu_search"  
+        android:title="@string/menu_search"/>  
+        
+</menu>  

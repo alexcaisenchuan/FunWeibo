@@ -14,6 +14,10 @@ public class WeiboDefines {
     public static final String PACKAGE_NAME = "packagename";
     
     public static final String KEY_HASH = "key_hash";
+
+    ////////////////////////返回值定义//////////////////////
+    /**返回空数组*/
+    public static final String RET_EMPTY_ARRAY = "[]";
     
     ////////////////////////各个最大值//////////////////////
     /**Poi搜索的最大半径，单位：米*/

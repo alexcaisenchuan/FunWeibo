@@ -34,6 +34,7 @@
     <string name="hint_pls_select_poi">还没选择位置呢~</string>
     <string name="hint_word_cnt_exceed_limit">亲，不能超过140个字哦</string>
     <string name="hint_checkin_success">签到成功！</string>
+    <string name="hint_poi_read_faild">Poi读取失败！</string>
     
     <!-- Buttons -->
     <string name="button_weibo_login">登录新浪微博</string>
@@ -60,4 +61,11 @@
     <!-- commons -->
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
+    
+    <!-- menu -->
+    <string name="menu_search">搜索</string>
+    <string name="menu_share">搜索</string>
+    <string name="menu_refresh">刷新</string>
+    <string name="menu_query_all">全部</string>
+    <string name="menu_query_item">部分</string>
 </resources>

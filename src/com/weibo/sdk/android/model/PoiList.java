@@ -55,12 +55,10 @@ public class PoiList {
      * 根据服务器返回的json字符串构造PoiList对象
      */
     public PoiList(String jsonStr) throws JSONException {
-        if(!TextUtils.isEmpty(jsonStr)) {
-            JSONObject json = new JSONObject(jsonStr);
-            mList = getPoiList(json);
-            mTotal = json.getInt(TAG_TOTAL_NUM);
-            KLog.d(TAG, "total : " + mTotal);
-        }
+        JSONObject json = new JSONObject(jsonStr);
+        mList = getPoiList(json);
+        mTotal = json.getInt(TAG_TOTAL_NUM);
+        KLog.d(TAG, "total : " + mTotal);
     }
     
     /**
@@ -68,7 +66,7 @@ public class PoiList {
      * @param list 用于补充当前对象列表的list
      * @author caisenchuan
      */
-    public boolean addAll(List<Poi> list) {
+    public synchronized boolean addAll(List<Poi> list) {
         boolean ret = false;
         if(list != null) {
             ret = mList.addAll(list);
@@ -80,21 +78,15 @@ public class PoiList {
      * 补充当前对象的列表，同时会更新total的值
      * @param jsonStr 用于补充当前对象列表的json字符串，服务端返回
      * @author caisenchuan
+     * @throws JSONException 
      */
-    public List<Poi> appendList(String jsonStr) {
+    public synchronized List<Poi> appendList(String jsonStr) throws JSONException {
         List<Poi> ret = new ArrayList<Poi>();
-        if(!TextUtils.isEmpty(jsonStr)) {
-            JSONObject json;
-            try {
-                json = new JSONObject(jsonStr);
-                ret = getPoiList(json);
-                mList.addAll(ret);
-                mTotal = json.getInt(TAG_TOTAL_NUM);
-                KLog.d(TAG, "total : " + mTotal);
-            } catch (JSONException e) {
-                KLog.w(TAG, "Exception", e);
-            }
-        }
+        JSONObject json = new JSONObject(jsonStr);
+        ret = getPoiList(json);
+        mList.addAll(ret);
+        mTotal = json.getInt(TAG_TOTAL_NUM);
+        KLog.d(TAG, "total : " + mTotal);
         return ret;
     }
     
@@ -103,14 +95,16 @@ public class PoiList {
      * @return
      * @author caisenchuan
      */
-    public List<Poi> getList() {
-        return mList;
+    public synchronized List<Poi> getList() {
+        List<Poi> list = new ArrayList<Poi>();
+        list.addAll(mList);
+        return list;
     }
     
     /**
      * 清空列表
      */
-    public void clear() {
+    public synchronized void clear() {
         mList.clear();
     }
     
@@ -128,7 +122,7 @@ public class PoiList {
      * @param pos
      * @return
      */
-    public Poi get(int pos) {
+    public synchronized Poi get(int pos) {
         return mList.get(pos);
     }
     
@@ -136,7 +130,7 @@ public class PoiList {
      * 获取当前poi列表长度
      * @return
      */
-    public int size() {
+    public synchronized int size() {
         return mList.size();
     }
     
@@ -145,21 +139,13 @@ public class PoiList {
      * @return
      * @author caisenchuan
      */
-    public boolean hasMore() {
+    public synchronized boolean hasMore() {
+        KLog.d(TAG, "hasMore , size : %s , total : %s", mList.size(), mTotal);
         if(mList.size() < mTotal) {
             return true;
         } else {
             return false;
         }
-    }
-    
-    /**
-     * 得到当前poi列表的长度
-     * @return
-     * @author caisenchuan
-     */
-    public int getCurrentLength() {
-        return mList.size();
     }
     
     /**

@@ -185,11 +185,13 @@ public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListen
             public void onItemClick(AdapterView<?> parent, View view,
                     int position, long id) {
                 Poi poi = getPosItem(position);
-                Intent data = new Intent();
-                data.putExtra(INTENT_EXTRA_POI_ID, poi.poiid);
-                data.putExtra(INTENT_EXTRA_POI_TITLE, poi.title);
-                setResult(RESULT_OK, data);
-                finish();       //点击后就返回了
+                if(poi != null) {
+                    Intent data = new Intent();
+                    data.putExtra(INTENT_EXTRA_POI_ID, poi.poiid);
+                    data.putExtra(INTENT_EXTRA_POI_TITLE, poi.title);
+                    setResult(RESULT_OK, data);
+                    finish();       //点击后就返回了
+                }
             }
         });
     }

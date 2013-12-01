@@ -41,7 +41,7 @@ public class AppControl extends Application{
     private class BaseLocationListener implements BDLocationListener {
         @Override
         public void onReceiveLocation(BDLocation location) {
-            KLog.d(TAG, "onReceiveLocation >>>>>>>>>>>>>>>>>>>>>>>");
+            //KLog.d(TAG, "onReceiveLocation >>>>>>>>>>>>>>>>>>>>>>>");
             
             if (location == null) {
                 return;
@@ -57,7 +57,7 @@ public class AppControl extends Application{
             }
             
             //打印调试
-            StringBuffer sb = new StringBuffer(256);
+            /*StringBuffer sb = new StringBuffer(256);
             sb.append("time : ");
             sb.append(location.getTime());
             sb.append("\nerror code : ");
@@ -82,7 +82,8 @@ public class AppControl extends Application{
             sb.append("\ncity : ");
             sb.append(location.getCity());
             
-            KLog.d(TAG, sb.toString());
+            KLog.d(TAG, sb.toString());*/
+            KLog.d(TAG, "onReceiveLocation , lat : %s , lon : %s", location.getLatitude(), location.getLongitude());
         }
 
         public void onReceivePoi(BDLocation poiLocation) {
