@@ -98,6 +98,10 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     ////////////////Activity启动参数///////////////////
     /**启动时是否要启动拍照*/
     public static final String INTENT_EXTRA_TAKE_PHOTO = "take_photo";
+    /**poi id*/
+    public static final String INTENT_EXTRA_POI_ID      = "poi_id";
+    /**poi名字*/
+    public static final String INTENT_EXTRA_POI_TITLE   = "poi_title";
     
     /*--------------------------
      * 成员变量
@@ -178,7 +182,8 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         mTextLocation.setOnClickListener(this);
         mImageWeiboPic.setOnClickListener(this);
         
-        //setPostionDisplay();      //显示当前地址
+        setPoiInfoWithIntent(getIntent());      //若传进来的intent有poi信息，则使用之
+        //setPostionDisplay();                  //显示当前地址
     }
     
     @Override
@@ -203,13 +208,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
             
             case REQUEST_CODE_SELECT_POI: {
                 if(Activity.RESULT_OK == resultCode) {
-                    String poiid = data.getStringExtra(ActivityPoiSelect.INTENT_EXTRA_POI_ID);
-                    String poi_title = data.getStringExtra(ActivityPoiSelect.INTENT_EXTRA_POI_TITLE);
-                    if(!TextUtils.isEmpty(poiid)) {
-                        KLog.d(TAG, "poiid : %s", poiid);
-                        mPoiid = poiid;
-                        mTextLocation.setText(poi_title);
-                    }
+                    setPoiInfoWithIntent(data);
                 }
                 break;
             }
@@ -316,6 +315,22 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
                 file.delete();
             }
             mLastPicPath = null;
+        }
+    }
+    
+    /**
+     * 使用Intent中的数据设置poi信息
+     * @param data
+     */
+    private void setPoiInfoWithIntent(Intent data) {
+        if(data != null) {
+            String poiid = data.getStringExtra(INTENT_EXTRA_POI_ID);
+            String poi_title = data.getStringExtra(INTENT_EXTRA_POI_TITLE);
+            if(!TextUtils.isEmpty(poiid)) {
+                KLog.d(TAG, "poiid : %s", poiid);
+                mPoiid = poiid;
+                mTextLocation.setText(poi_title);
+            }
         }
     }
 }

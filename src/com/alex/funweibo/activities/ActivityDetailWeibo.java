@@ -26,6 +26,7 @@ import com.weibo.sdk.android.api.CommentsAPI;
 import com.weibo.sdk.android.api.StatusesAPI;
 import com.weibo.sdk.android.api.WeiboAPI.AUTHOR_FILTER;
 import com.weibo.sdk.android.model.Comment;
+import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.User;
 import com.weibo.sdk.android.model.WeiboException;
@@ -38,7 +39,10 @@ import android.os.Message;
 import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -265,6 +269,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     private ImageView mUserFace = null;
     private TextView mWeiboTime = null;
     private TextView mWeiboSource = null;
+    private ImageView mImgMap = null;
     //listview第二行：微博信息
     private View mHeaderWeiboContent = null;
     private TextView mWeiboContent = null;
@@ -282,11 +287,36 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
+            case R.id.img_map: {
+                //打开地图
+                break;
+            }
+                
             default:
                 break;
         }
     }
     
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.  
+        super.onCreateOptionsMenu(menu);  
+        //添加菜单项  
+        MenuItem add=menu.add(0,0,0,"签到");
+        //绑定到ActionBar    
+        add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        //绑定点击事件
+        add.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                //拍照并创建新微博
+                checkinWithCurrentPoi();
+                return false;
+            }
+        });
+        return true; 
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -306,6 +336,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         mUserFace = (ImageView)mHeaderWeiboUserInfo.findViewById(R.id.img_userface);
         mWeiboTime = (TextView)mHeaderWeiboUserInfo.findViewById(R.id.text_weibo_time);
         mWeiboSource = (TextView)mHeaderWeiboUserInfo.findViewById(R.id.text_weibo_source);
+        mImgMap = (ImageView)mHeaderWeiboUserInfo.findViewById(R.id.img_map);
+        mImgMap.setOnClickListener(this);
         
         mHeaderWeiboContent = View.inflate(this, R.layout.header_weibo_content, null);
         mWeiboContent = (TextView)mHeaderWeiboContent.findViewById(R.id.text_weibo_content);
@@ -375,7 +407,10 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                     }
                     //设置微博信息
                     mWeiboTime.setText(StringUtils.getDateString(mStatus.getCreatedAt()));
-                    mWeiboSource.setText(Html.fromHtml(mStatus.getSource()));
+                    Place p = mStatus.getPlace();
+                    if(p != null) {
+                        mWeiboSource.setText(p.title);
+                    }
                     mWeiboContent.setText(mStatus.getText());
                     //微博配图
                     String pic_url = mStatus.getBmiddle_pic();
@@ -432,5 +467,20 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
             
             mWeiboMid = it.getLongExtra(INTENT_EXTRA_WEIBO_MID, -1L);
         }
+    }
+    
+    /**
+     * 使用当前地点签到
+     */
+    private void checkinWithCurrentPoi() {
+        Intent it = new Intent(ActivityDetailWeibo.this, ActivityNewWeibo.class);
+        if(mStatus != null) {
+            Place p = mStatus.getPlace();
+            if(p != null) {
+                it.putExtra(ActivityNewWeibo.INTENT_EXTRA_POI_ID, p.poiid);
+                it.putExtra(ActivityNewWeibo.INTENT_EXTRA_POI_TITLE, p.title);
+            }
+        }
+        startActivity(it);
     }
 }

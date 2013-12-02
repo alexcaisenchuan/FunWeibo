@@ -29,11 +29,6 @@ public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListen
      *-------------------------*/
     private static final String TAG = ActivityPoiSelect.class.getSimpleName();
     
-    /**poi id*/
-    public static final String INTENT_EXTRA_POI_ID      = "poi_id";
-    /**poi名字*/
-    public static final String INTENT_EXTRA_POI_TITLE   = "poi_title";
-    
     /**刷新列表内容*/
     public static final int MSG_REFRESH_LIST = MSG_POI_ACTIVITY_BASE + 1;
     
@@ -187,8 +182,8 @@ public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListen
                 Poi poi = getPosItem(position);
                 if(poi != null) {
                     Intent data = new Intent();
-                    data.putExtra(INTENT_EXTRA_POI_ID, poi.poiid);
-                    data.putExtra(INTENT_EXTRA_POI_TITLE, poi.title);
+                    data.putExtra(ActivityNewWeibo.INTENT_EXTRA_POI_ID, poi.poiid);
+                    data.putExtra(ActivityNewWeibo.INTENT_EXTRA_POI_TITLE, poi.title);
                     setResult(RESULT_OK, data);
                     finish();       //点击后就返回了
                 }
