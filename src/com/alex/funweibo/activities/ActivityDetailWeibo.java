@@ -328,6 +328,9 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_weibo);
         
+        //设置ActionBar
+        mActionBar.setTitle(R.string.text_hot_place);
+        
         //绑定界面元素
         mListWeiboContent = (ListView)findViewById(R.id.list_weibo_content);
         
@@ -410,6 +413,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                     Place p = mStatus.getPlace();
                     if(p != null) {
                         mWeiboSource.setText(p.title);
+                        mActionBar.setTitle(p.title);
                     }
                     mWeiboContent.setText(mStatus.getText());
                     //微博配图

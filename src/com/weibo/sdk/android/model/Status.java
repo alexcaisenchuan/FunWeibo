@@ -76,6 +76,7 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	private String original_pic;        //原始图片
 	private Status retweeted_status;    //转发的微博内容
 	private String mid;                 //mid
+	private long attitudes_count;       //赞的个数
 
 
 	/*package*/Status(Response res, Weibo weibo) throws WeiboException {
@@ -116,6 +117,7 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 			}
 			
 			mid=json.getString("mid");
+			attitudes_count=json.getLong("attitudes_count");
 			String geo= json.getString("geo");
 			if(geo!=null &&!"".equals(geo) &&!"null".equals(geo)){
 				getGeoInfo(geo);
@@ -349,10 +351,21 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 		return mid;
 	}
 	
+	/**
+	 * 读取地点信息
+	 * @return
+	 */
 	public Place getPlace() {
 	    return place;
 	}
 
+	/**
+	 * 读取赞的个数 
+	 * @return
+	 */
+	public long getAttitudesCount() {
+	    return attitudes_count;
+	}
 	/**
 	 * 使用返回的json字符串构建微博列表
 	 * @param jsonStr json字符串，"statuses"列表

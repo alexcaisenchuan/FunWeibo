@@ -84,6 +84,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             public TextView mContent;
             /**图片*/
             public ImageView mPic;
+            /**赞的个数*/
+            public TextView mLikeNum;
         }
         
         /**
@@ -139,6 +141,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 convertView = mInflater.inflate(R.layout.list_item_weibo_pics, null);
                 holder.mTitle = (TextView)convertView.findViewById(R.id.waterfall_title);
                 holder.mContent = (TextView)convertView.findViewById(R.id.waterfall_content);
+                holder.mLikeNum = (TextView)convertView.findViewById(R.id.waterfall_like_num);
                 holder.mPic = (ImageView)convertView.findViewById(R.id.waterfall_pic);
                 convertView.setTag(holder);
             } else {
@@ -156,6 +159,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                     holder.mTitle.setText(place.title);
                 }
                 holder.mContent.setText(StringUtils.getStripContent(status.getText()));
+                holder.mLikeNum.setText(String.valueOf(status.getAttitudesCount()));
             }
             
             return convertView;

@@ -44,6 +44,7 @@ public class PoiCategory {
         mCategorys.add(new PoiCategory("194", "公园户外", "0"));
         mCategorys.add(new PoiCategory("258", "公司", "0"));
         mCategorys.add(new PoiCategory("601", "地点", "0"));
+        mCategorys.add(new PoiCategory("0", "所有", "0"));
     }
     /*--------------------------
      * public方法
