@@ -17,8 +17,12 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.ta.util.bitmap.TABitmapCacheWork;
+import com.ta.util.bitmap.TABitmapCallBackHanlder;
+import com.ta.util.bitmap.TADownloadBitmapHandler;
 import com.ta.util.cache.TAFileCache;
 import com.ta.util.cache.TAFileCache.TACacheParams;
+import com.ta.util.extend.draw.DensityUtils;
 import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.keep.AccessTokenKeeper;
 import com.weibo.sdk.android.keep.UserInfoKeeper;
@@ -27,8 +31,8 @@ import android.app.Application;
 import android.text.TextUtils;
 
 /**
+ * 整个应用的控制
  * @author caisenchuan
- *
  */
 public class AppControl extends Application{
     /*--------------------------
@@ -145,6 +149,9 @@ public class AppControl extends Application{
     /** ThinkAndroid 文件缓存 */
     private TAFileCache mFileCache = null;
     
+    /**图片缓存加载器*/
+    private TABitmapCacheWork mImageFetcher = null;
+
     /*--------------------------
      * public方法
      *-------------------------*/
@@ -183,6 +190,21 @@ public class AppControl extends Application{
         
         //启动定位
         mLocationClient.start();
+        
+        //缓存设置
+        TACacheParams cacheParams = new TACacheParams(this, AppConfig.SYSTEMCACHE);
+        TAFileCache fileCache = new TAFileCache(cacheParams);
+        mFileCache = fileCache;
+        //图片缓存相关
+        TADownloadBitmapHandler f = new TADownloadBitmapHandler(this,
+                                                                DensityUtils.dipTopx(this, 128),
+                                                                DensityUtils.dipTopx(this, 128));
+        TABitmapCallBackHanlder taBitmapCallBackHanlder = new TABitmapCallBackHanlder();
+        taBitmapCallBackHanlder.setLoadingImage(this, R.drawable.empty_photo);
+        mImageFetcher = new TABitmapCacheWork(this);
+        mImageFetcher.setProcessDataHandler(f);
+        mImageFetcher.setCallBackHandler(taBitmapCallBackHanlder);
+        mImageFetcher.setFileCache(mFileCache);
         
         //设置其他
         SmartToast.initSingletonToast(getApplicationContext());
@@ -251,17 +273,18 @@ public class AppControl extends Application{
     /**
      * 获取文件缓存对象
      * @return
-     * @author caisenchuan
      */
     public TAFileCache getFileCache() {
-        if (mFileCache == null) {
-            TACacheParams cacheParams = new TACacheParams(this, AppConfig.SYSTEMCACHE);
-            TAFileCache fileCache = new TAFileCache(cacheParams);
-            mFileCache = fileCache;
-        }
         return mFileCache;
     }
     
+    /**
+     * 获取图片下载器
+     * @return
+     */
+    public TABitmapCacheWork getImageFetcher() {
+        return mImageFetcher;
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/

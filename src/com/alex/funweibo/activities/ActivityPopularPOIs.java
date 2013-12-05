@@ -17,15 +17,12 @@ import com.alex.funweibo.R;
 import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.StringUtils;
+import com.alex.common.utils.WeiboUtils;
 import com.huewu.pla.lib.MultiColumnListView;
 import com.huewu.pla.lib.internal.PLA_AbsListView;
 import com.huewu.pla.lib.internal.PLA_AbsListView.OnScrollListener;
 import com.huewu.pla.lib.internal.PLA_AdapterView;
 import com.huewu.pla.lib.internal.PLA_AdapterView.OnItemClickListener;
-import com.ta.util.bitmap.TABitmapCacheWork;
-import com.ta.util.bitmap.TABitmapCallBackHanlder;
-import com.ta.util.bitmap.TADownloadBitmapHandler;
-import com.ta.util.extend.draw.DensityUtils;
 import com.weibo.sdk.android.api.WeiboAPI.SORT2;
 import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Poi;
@@ -39,6 +36,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -151,7 +149,10 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             //设置条目内容
             Status status = getPosItem(position);
             //图片
-            mImageFetcher.loadFormCache(status.getBmiddle_pic(), holder.mPic);
+            String url = WeiboUtils.getStatusPicUrlByNetworkStatus(ActivityPopularPOIs.this, status, mApp.getFileCache());
+            if(!TextUtils.isEmpty(url)) {
+                mApp.getImageFetcher().loadFormCache(url, holder.mPic);
+            }
             //其他信息
             if(status != null) {
                 Place place = status.getPlace();
@@ -236,8 +237,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     ///////////////////////////标志位及计数//////////////////
     
     /////////////////////////其他///////////////////////////
-    /**图片缓存加载器*/
-    private TABitmapCacheWork mImageFetcher = null;
     
     /*--------------------------
      * public方法
@@ -295,17 +294,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_popular_poi);
-        
-        //图片缓存相关
-        TADownloadBitmapHandler downloadBitmapFetcher = new TADownloadBitmapHandler(
-                this, DensityUtils.dipTopx(this, 128),
-                DensityUtils.dipTopx(this, 128));
-        TABitmapCallBackHanlder taBitmapCallBackHanlder = new TABitmapCallBackHanlder();
-        taBitmapCallBackHanlder.setLoadingImage(this, R.drawable.empty_photo);
-        mImageFetcher = new TABitmapCacheWork(this);
-        mImageFetcher.setProcessDataHandler(downloadBitmapFetcher);
-        mImageFetcher.setCallBackHandler(taBitmapCallBackHanlder);
-        mImageFetcher.setFileCache(mApp.getFileCache());
         
         //设置drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
