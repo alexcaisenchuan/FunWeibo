@@ -152,6 +152,9 @@ public class AppControl extends Application{
     /**图片缓存加载器*/
     private TABitmapCacheWork mImageFetcher = null;
 
+    /**新微博的临时编号*/
+    private int mNewWeiboTempId = 0;
+    
     /*--------------------------
      * public方法
      *-------------------------*/
@@ -285,6 +288,16 @@ public class AppControl extends Application{
     public TABitmapCacheWork getImageFetcher() {
         return mImageFetcher;
     }
+    
+    /**
+     * 获取下一个新微博的临时编号
+     * @return
+     */
+    public int getNextNewWeiboTempId() {
+        mNewWeiboTempId++;
+        return mNewWeiboTempId;
+    }
+    
     /*--------------------------
      * protected、packet方法
      *-------------------------*/

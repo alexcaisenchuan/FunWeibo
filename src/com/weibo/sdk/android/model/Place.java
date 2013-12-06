@@ -46,6 +46,13 @@ public class Place implements java.io.Serializable{
      * public方法
      *-------------------------*/
     /**
+     * annotations中的place
+     */
+    public Place() {
+        //...
+    }
+    
+    /**
      * 使用Json对象构造Place
      */
     public Place(JSONObject json) throws JSONException{

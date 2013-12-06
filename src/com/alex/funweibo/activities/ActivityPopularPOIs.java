@@ -28,9 +28,12 @@ import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Poi;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.WeiboException;
+import com.weibo.sdk.android.model.Status.TypeSpecial;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Message;
@@ -63,6 +66,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     ///////////////mBaseHandler msg what//////////////
     /**刷新列表内容*/
     public static final int MSG_REFRESH_LIST = MSG_POI_ACTIVITY_BASE + 1;
+    /**将微博添加到列表头*/
+    public static final int MSG_ADD_STATUS_TO_FIRST = MSG_POI_ACTIVITY_BASE + 2;
     
     /*--------------------------
      * 自定义类型
@@ -84,6 +89,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             public ImageView mPic;
             /**赞的个数*/
             public TextView mLikeNum;
+            /**发送提示*/
+            public TextView mSendingHint;
         }
         
         /**
@@ -141,6 +148,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 holder.mContent = (TextView)convertView.findViewById(R.id.waterfall_content);
                 holder.mLikeNum = (TextView)convertView.findViewById(R.id.waterfall_like_num);
                 holder.mPic = (ImageView)convertView.findViewById(R.id.waterfall_pic);
+                holder.mSendingHint = (TextView)convertView.findViewById(R.id.waterfall_sending_hint);
                 convertView.setTag(holder);
             } else {
                 holder = (ListItemViewHolder)convertView.getTag();
@@ -155,12 +163,24 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             }
             //其他信息
             if(status != null) {
+                //标题
                 Place place = status.getPlace();
                 if(place != null) {
                     holder.mTitle.setText(place.title);
                 }
+                
+                //正文
                 holder.mContent.setText(StringUtils.getStripContent(status.getText()));
-                holder.mLikeNum.setText(String.valueOf(status.getAttitudesCount()));
+                
+                //底部提示
+                if(status.getExtraParams().getType() == TypeSpecial.NEW_WEIBO_TEMP) {
+                    holder.mSendingHint.setVisibility(View.VISIBLE);
+                    holder.mLikeNum.setVisibility(View.GONE);
+                } else {
+                    holder.mSendingHint.setVisibility(View.GONE);
+                    holder.mLikeNum.setText(String.valueOf(status.getAttitudesCount()));
+                    holder.mLikeNum.setVisibility(View.VISIBLE);
+                }
             }
             
             return convertView;
@@ -212,9 +232,38 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             KLog.d(TAG, "onItemClick : %d", position);
             Status status = getPosItem(position);
             if(status != null) {
-                openDetailWeiboActivity(status);
+                if(status.getExtraParams().getType() != TypeSpecial.NEW_WEIBO_TEMP) {
+                    openDetailWeiboActivity(status);
+                }
             }
         }
+    }
+    
+    /**
+     * 广播监听
+     */
+    private class MyBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String act = intent.getAction();
+            KLog.d(TAG, "onReceive , %s", act);
+            
+            if(act.equals(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SEND)) {
+                //发布新微博，将其添加到列表顶端
+                Object obj = intent.getSerializableExtra(ActivityNewWeibo.INTENT_EXTRA_WEIBO_STATUS_OBJ);
+                if(obj instanceof Status) {
+                    sendMessageToBaseHandler(MSG_ADD_STATUS_TO_FIRST, 0, 0, obj);
+                }
+            } else if(act.equals(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SUCCESS)) {
+                //发布成功，替换对应的临时微博
+            } else if(act.equals(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_FAILD)) {
+                //发布失败
+            } else {
+                //其他
+            }
+        }
+        
     }
     
     /*--------------------------
@@ -237,6 +286,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     ///////////////////////////标志位及计数//////////////////
     
     /////////////////////////其他///////////////////////////
+    /**广播监听器*/
+    private MyBroadcastReceiver mReceiver = new MyBroadcastReceiver();
     
     /*--------------------------
      * public方法
@@ -334,6 +385,13 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         mListContent.setOnScrollListener(this);
         //监听点击
         mListContent.setOnItemClickListener(new MyOnItemClickListener());
+        
+        //注册广播
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SEND);
+        filter.addAction(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SUCCESS);
+        filter.addAction(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_FAILD);
+        registerReceiver(mReceiver, filter);
     }
     
     @Override
@@ -346,6 +404,16 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     protected void onStop() {
         KLog.d(TAG, "onStop");
         super.onStop();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        KLog.d(TAG, "onDestroy");
+        
+        //取消广播监听
+        unregisterReceiver(mReceiver);
+        
+        super.onDestroy();
     }
     
     /**
@@ -387,11 +455,26 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         switch(msg.what) {
             case MSG_REFRESH_LIST: {
                 Object obj = msg.obj;
-                List<Status> list = (List<Status>)obj;
-                mStatus.addAll(list);
-                mCount = mStatus.size();
-                if(mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
+                if(obj instanceof List<?>) {
+                    List<Status> list = (List<Status>)obj;
+                    mStatus.addAll(list);
+                    mCount = mStatus.size();
+                    if(mAdapter != null) {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+                break;
+            }
+            
+            case MSG_ADD_STATUS_TO_FIRST: {
+                Object obj = msg.obj;
+                if(obj instanceof Status) {
+                    Status s = (Status)obj;
+                    mStatus.add(0, s);
+                    mCount = mStatus.size();
+                    if(mAdapter != null) {
+                        mAdapter.notifyDataSetChanged();
+                    }
                 }
                 break;
             }

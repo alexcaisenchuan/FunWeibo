@@ -22,8 +22,7 @@ import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.model.Status;
-import com.weibo.sdk.android.model.WeiboException;
-import com.weibo.sdk.android.org.json.JSONException;
+import com.weibo.sdk.android.model.Status.ExtraParams;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -55,8 +54,13 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
      */
     private class AddWeiboListener extends OnHttpRequestReturnListener {
 
-        public AddWeiboListener(BaseActivity base) {
+        /**发送时使用的临时微博*/
+        private Status mTempStatus;
+        
+        public AddWeiboListener(BaseActivity base, Status tempStatus) {
             super(base);
+            this.mTempStatus = tempStatus;
+            KLog.d(TAG, "tempId : %s", tempStatus.getExtraParams().getTempId());
         }
 
         @Override
@@ -66,19 +70,22 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
                 
                 //读取微博
                 Status status = new Status(arg0);
+                ExtraParams p = status.getExtraParams();
+                p.setTempId(mTempStatus.getExtraParams().getTempId());       //设置对应的临时微博id
                 
                 if(status != null) {
                     showToastOnUIThread(getString(R.string.hint_checkin_success));
                     
+                    //发出广播
+                    sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_SUCCESS, status);
+                    
                     //删除照片
                     deletePhoto();
                 }
-            } catch (WeiboException e) {
-                KLog.w(TAG, "WeiboException while build status", e);
+            } catch (Exception e) {
+                KLog.w(TAG, "Exception while build status", e);
                 showToastOnUIThread(getString(R.string.hint_add_weibo_faild) + e.toString());
-            } catch (JSONException e) {
-                KLog.w(TAG, "JSONException while build status", e);
-                showToastOnUIThread(getString(R.string.hint_json_parse_faild));
+                sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_FAILD, mTempStatus);      //发出广播
             }
         }
         
@@ -95,13 +102,23 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     /**选择签到地点*/
     public static final int REQUEST_CODE_SELECT_POI = 2;
     
-    ////////////////Activity启动参数///////////////////
+    ////////////////Intent 参数///////////////////
     /**启动时是否要启动拍照*/
-    public static final String INTENT_EXTRA_TAKE_PHOTO = "take_photo";
+    public static final String INTENT_EXTRA_TAKE_PHOTO  = "take_photo";
     /**poi id*/
     public static final String INTENT_EXTRA_POI_ID      = "poi_id";
     /**poi名字*/
     public static final String INTENT_EXTRA_POI_TITLE   = "poi_title";
+    /**序列化方式传递一条微博的信息*/
+    public static final String INTENT_EXTRA_WEIBO_STATUS_OBJ = "weibo_status_obj";
+    
+    ////////////////Broadcast参数///////////////////
+    /**发布新微博*/
+    public static final String BROADCAST_ACTION_NEW_WEIBO_SEND     = "com.alex.funweibo.action.new_weibo_send";
+    /**发布新微博成功*/
+    public static final String BROADCAST_ACTION_NEW_WEIBO_SUCCESS  = "com.alex.funweibo.action.new_weibo_success";
+    /**发布新微博失败*/
+    public static final String BROADCAST_ACTION_NEW_WEIBO_FAILD    = "com.alex.funweibo.action.new_weibo_faild";
     
     /*--------------------------
      * 成员变量
@@ -110,6 +127,8 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     private String mLastPicPath = "";
     /**poi id*/
     private String mPoiid = "";
+    /**poi 名字*/
+    private String mPoiTitle = "";
     
     /////////////////Views///////////////////////
     private EditText mEditNewWeiboContent = null;
@@ -248,12 +267,18 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
                 longtitude = String.valueOf(mApp.getCurrentLocation().longtitude);
             }*/
             
+            int tempId = mApp.getNextNewWeiboTempId();
+            Status tempStatus = Status.getNewWeiboTempStatus(tempId, mPoiTitle, content, mLastPicPath);
+            
             place.poisAddCheckin(mPoiid,
                                  content,
                                  mLastPicPath,
                                  true,
-                                 new AddWeiboListener(this));
+                                 new AddWeiboListener(this, tempStatus));
 
+            //发出广播，让主界面显示临时微博
+            sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_SEND, tempStatus);
+            
             //关闭此Activity
             finish();
         }
@@ -329,8 +354,22 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
             if(!TextUtils.isEmpty(poiid)) {
                 KLog.d(TAG, "poiid : %s", poiid);
                 mPoiid = poiid;
+                mPoiTitle = poi_title;
                 mTextLocation.setText(poi_title);
             }
         }
+    }
+    
+    /**
+     * 发出广播
+     * @param action
+     * @param status
+     */
+    private void sendBroadCast(String action, Status status) {
+        KLog.d(TAG, "sendBroadCast , %s", action);
+        Intent it = new Intent();
+        it.setAction(action);
+        it.putExtra(INTENT_EXTRA_WEIBO_STATUS_OBJ, status);
+        sendBroadcast(it);
     }
 }

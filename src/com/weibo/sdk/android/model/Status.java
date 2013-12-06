@@ -52,12 +52,81 @@ public class Status extends WeiboResponse implements java.io.Serializable {
     
     private static final String TAG = "Status";
     
+    /**
+     * 特殊类型定义
+     * @author caisenchuan
+     */
+    public enum TypeSpecial {
+        /**普通微博*/
+        NORMAL,
+        /**新微博发送中的临时微博*/
+        NEW_WEIBO_TEMP
+    }
+    
+    /**
+     * 我们自己定义的一些额外参数，并不存在实际微博数据中
+     * @author caisenchuan
+     */
+    public class ExtraParams implements java.io.Serializable{
+        /*--------------------------
+         * 常量
+         *-------------------------*/
+        /**
+         * 序列化编号
+         */
+        private static final long serialVersionUID = -7621953453209633274L;
+        
+        /*--------------------------
+         * 成员
+         *-------------------------*/
+        /**微博的类型*/
+        private TypeSpecial mType = TypeSpecial.NORMAL;
+        /**发送微博的编号*/
+        private int mTempId = -1;
+        
+        /*--------------------------
+         * 方法
+         *-------------------------*/
+        /**
+         * @return the mType
+         */
+        public TypeSpecial getType() {
+            return mType;
+        }
+        /**
+         * @param mType the mType to set
+         */
+        public void setType(TypeSpecial mType) {
+            this.mType = mType;
+        }
+        /**
+         * @return the mTempId
+         */
+        public int getTempId() {
+            return mTempId;
+        }
+        /**
+         * @param mTempId the mTempId to set
+         */
+        public void setTempId(int mTempId) {
+            this.mTempId = mTempId;
+        }
+    }
+    
 	/**
-	 * 
+	 * 序列化编号
 	 */
 	private static final long serialVersionUID = -8795691786466526420L;
 
-	private User user = null;
+	/**
+	 * 我们自己定义的一些额外参数，并不存在实际微博数据中
+	 * @author caisenchuan
+	 * */
+	private ExtraParams extraParams = new ExtraParams();
+	
+	////////////////////////////微博数据//////////////////////////////
+
+    private User user = null;
 	private Place place = null;         //微博对应地点，可以没有
 	
 	private Date createdAt;             //status创建时间
@@ -77,8 +146,15 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	private Status retweeted_status;    //转发的微博内容
 	private String mid;                 //mid
 	private long attitudes_count;       //赞的个数
-
-
+	
+	///////////////////////////////////////////////////////////////////////
+	/**
+	 * 无参构造函数
+	 */
+	private Status() {
+	    //...
+	}
+	
 	/*package*/Status(Response res, Weibo weibo) throws WeiboException {
 		super(res);
 		Element elem = res.asDocument().getDocumentElement();
@@ -366,6 +442,24 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	public long getAttitudesCount() {
 	    return attitudes_count;
 	}
+	
+	   
+    /**
+     * 读取扩展参数
+     * @return the mExtraParams
+     */
+    public ExtraParams getExtraParams() {
+        return extraParams;
+    }
+
+    /**
+     * 设置扩展参数
+     * @param extraParams the mExtraParams to set
+     */
+    public void setExtraParams(ExtraParams extraParams) {
+        this.extraParams = extraParams;
+    }
+    
 	/**
 	 * 使用返回的json字符串构建微博列表
 	 * @param jsonStr json字符串，"statuses"列表
@@ -391,6 +485,26 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	            ret.add(s);
 	        }
 	    }
+	    
+	    return ret;
+	}
+	
+	public static Status getNewWeiboTempStatus(int tempId, String poiTitle, String statusContent, String picPath) {
+	    Status ret = new Status();
+	    
+	    //微博数据
+	    ret.place = new Place();
+	    ret.place.title = poiTitle;
+	    
+	    ret.text = statusContent;
+	    
+	    ret.thumbnail_pic = picPath;
+	    ret.bmiddle_pic = picPath;
+	    ret.original_pic = picPath;
+	    
+	    //额外参数
+	    ret.extraParams.mType = TypeSpecial.NEW_WEIBO_TEMP;
+	    ret.extraParams.mTempId = tempId;
 	    
 	    return ret;
 	}

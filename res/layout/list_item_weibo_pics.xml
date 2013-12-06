@@ -39,4 +39,15 @@
         android:drawableLeft="@drawable/like"
         android:drawablePadding="4dp"
         android:layout_marginRight="5dp"/>
+    
+    <TextView
+        android:id="@+id/waterfall_sending_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:textSize="16sp"
+        android:textColor="@color/content"
+        android:text="@string/text_sending_hint"
+        android:layout_marginRight="5dp"
+        android:visibility="gone"/>
 </LinearLayout>

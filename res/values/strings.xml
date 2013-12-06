@@ -54,6 +54,7 @@
     <string name="text_checkin_num">签到次数: %s</string>
     <string name="text_distance">距离: %s米</string>
     <string name="text_hot_place">热门地点</string>
+    <string name="text_sending_hint">发送中...</string>
     
     <!-- 微博提示 -->
     <string name="weibo_error_not_exist">原微博已删除！</string>
