@@ -10,26 +10,30 @@
 package com.alex.common.utils;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 
 /**
- * 关于照片的一些基本操作
+ * 关于图片的一些基本操作
  * @author caisenchuan
  *
  */
-public class PhotoTake {
+public class ImageUtils {
     /*--------------------------
      * 自定义类型
      *-------------------------*/
@@ -37,7 +41,7 @@ public class PhotoTake {
     /*--------------------------
      * 常量
      *-------------------------*/
-    private static final String TAG = "Photo";
+    private static final String TAG = ImageUtils.class.getSimpleName();
     
     /**应用的基础文件在SD卡上的路径*/
     public static final String APP_DIR = "/wemap/";
@@ -169,6 +173,71 @@ public class PhotoTake {
         return filename;
     }
     
+    /**
+     * 读取图片文件，进行一些压缩
+     * @param filePath 图片路径
+     * @param width 最大宽度
+     * @param height 最大高度
+     * @return
+     */
+    public static Bitmap createNewBitmapAndCompressByFile(String filePath, int width, int height) {
+        int offset = 100;
+        File file = new File(filePath);
+        long fileSize = file.length();
+        if (200 * 1024 < fileSize && fileSize <= 1024 * 1024) {
+            offset = 90;
+        } else if (1024 * 1024 < fileSize) {
+            offset = 85;
+        }
+
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true; // 为true里只读图片的信息，如果长宽，返回的bitmap为null
+        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+        options.inDither = false;
+        /**
+         * 计算图片尺寸
+         * TODO 按比例缩放尺寸
+         */
+        BitmapFactory.decodeFile(filePath, options);
+
+        int bmpheight = options.outHeight;
+        int bmpWidth = options.outWidth;
+        int inSampleSize = bmpheight / height > bmpWidth / width ? 
+                           bmpheight / height : bmpWidth / width;
+        //if(bmpheight / wh[1] < bmpWidth / wh[0]) 
+        //    inSampleSize = inSampleSize * 2 / 3;
+        //TODO 如果图片太宽而高度太小，则压缩比例太大。所以乘以2/3
+        if (inSampleSize > 1) {
+            options.inSampleSize = inSampleSize;// 设置缩放比例
+        }
+        options.inJustDecodeBounds = false;
+
+        InputStream is = null;
+        try {
+            is = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            return null;
+        }
+        Bitmap bitmap = null;
+        try {
+            bitmap = BitmapFactory.decodeStream(is, null, options);
+        } catch (OutOfMemoryError e) {
+            System.gc();
+            bitmap = null;
+        }
+        if (offset == 100) {
+            return bitmap;// 缩小质量
+        }
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, offset, baos);
+        byte[] buffer = baos.toByteArray();
+        options = null;
+        if (buffer.length >= fileSize) {
+            return bitmap;
+        }
+        
+        return BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/

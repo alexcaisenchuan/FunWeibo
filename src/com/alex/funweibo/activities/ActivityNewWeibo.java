@@ -9,17 +9,20 @@
  */
 package com.alex.funweibo.activities;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
 
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
 import com.alex.common.utils.OnHttpRequestReturnListener;
-import com.alex.common.utils.PhotoTake;
+import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.WeiboDefines;
+import com.weibo.sdk.android.WeiboException;
 import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.Status.ExtraParams;
@@ -89,6 +92,32 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
             }
         }
         
+        @Override
+        public void onComplete4binary(ByteArrayOutputStream arg0) {
+            try {
+                super.onComplete4binary(arg0);
+            } finally {
+                sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_FAILD, mTempStatus);      //发出广播
+            }
+        }
+        
+        @Override
+        public void onError(WeiboException e) {
+            try {
+                super.onError(e);
+            } finally {
+                sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_FAILD, mTempStatus);      //发出广播
+            }
+        }
+        
+        @Override
+        public void onIOException(IOException e) {
+            try {
+                super.onIOException(e);
+            } finally {
+                sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_FAILD, mTempStatus);      //发出广播
+            }
+        }
     }
     
     /*--------------------------
@@ -268,7 +297,11 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
             }*/
             
             int tempId = mApp.getNextNewWeiboTempId();
-            Status tempStatus = Status.getNewWeiboTempStatus(tempId, mPoiTitle, content, mLastPicPath);
+            Status tempStatus = Status.getNewWeiboTempStatus(tempId,
+                                                             mPoiid,
+                                                             mPoiTitle,
+                                                             content,
+                                                             mLastPicPath);
             
             place.poisAddCheckin(mPoiid,
                                  content,
@@ -326,7 +359,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
      * @author caisenchuan
      */
     private void takePhoto() {
-        mLastPicPath = PhotoTake.takePhoto(this, REQUEST_CODE_TAKE_PHOTO);
+        mLastPicPath = ImageUtils.takePhoto(this, REQUEST_CODE_TAKE_PHOTO);
     }
     
     /**

@@ -26,6 +26,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 package com.weibo.sdk.android.model;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +35,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import android.net.Uri;
 import android.text.TextUtils;
 
 import com.alex.common.utils.KLog;
@@ -53,14 +55,16 @@ public class Status extends WeiboResponse implements java.io.Serializable {
     private static final String TAG = "Status";
     
     /**
-     * 特殊类型定义
+     * 类型定义
      * @author caisenchuan
      */
-    public enum TypeSpecial {
+    public enum TypeSpec {
         /**普通微博*/
         NORMAL,
-        /**新微博发送中的临时微博*/
-        NEW_WEIBO_TEMP
+        /**发送中的新微博*/
+        NEW_WEIBO_SENDING,
+        /**发送失败的新微博*/
+        NEW_WEIBO_FAILD
     }
     
     /**
@@ -80,7 +84,7 @@ public class Status extends WeiboResponse implements java.io.Serializable {
          * 成员
          *-------------------------*/
         /**微博的类型*/
-        private TypeSpecial mType = TypeSpecial.NORMAL;
+        private TypeSpec mType = TypeSpec.NORMAL;
         /**发送微博的编号*/
         private int mTempId = -1;
         
@@ -90,13 +94,13 @@ public class Status extends WeiboResponse implements java.io.Serializable {
         /**
          * @return the mType
          */
-        public TypeSpecial getType() {
+        public TypeSpec getType() {
             return mType;
         }
         /**
          * @param mType the mType to set
          */
-        public void setType(TypeSpecial mType) {
+        public void setType(TypeSpec mType) {
             this.mType = mType;
         }
         /**
@@ -281,13 +285,35 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 		}
 	}
 
+	public void update(Status status) {
+	    if(status != null) {
+	        this.user = status.user;
+	        this.place = status.place;
+	        this.createdAt = status.createdAt;
+	        this.id = status.id;
+	        this.text = status.text;
+	        this.source = status.source;
+	        this.isTruncated = status.isTruncated;
+	        this.inReplyToStatusId = status.inReplyToStatusId;
+	        this.inReplyToUserId = status.inReplyToUserId;
+	        this.isFavorited = status.isFavorited;
+	        this.inReplyToScreenName = status.inReplyToScreenName;
+	        this.latitude = status.latitude;
+	        this.longitude = status.longitude;
+	        this.thumbnail_pic = status.thumbnail_pic;
+	        this.bmiddle_pic = status.bmiddle_pic;
+	        this.original_pic = status.original_pic;
+	        this.retweeted_status = status.retweeted_status;
+	        this.mid = status.mid;
+	        this.attitudes_count = status.attitudes_count;
+	    }
+	}
 	/**
 	 * Return the created_at
 	 *
 	 * @return created_at
 	 * @since Weibo4J 1.1.0
 	 */
-
 	public Date getCreatedAt() {
 		return this.createdAt;
 	}
@@ -489,29 +515,42 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	    return ret;
 	}
 	
-	public static Status getNewWeiboTempStatus(int tempId, String poiTitle, String statusContent, String picPath) {
+	/**
+	 * 创建发布过程中的临时微博对象
+	 * @param tempId
+	 * @param poiid
+	 * @param poiTitle
+	 * @param statusContent
+	 * @param picPath
+	 * @return
+	 * @author caisenchuan
+	 */
+	public static Status getNewWeiboTempStatus(int tempId, String poiid, String poiTitle, String statusContent, String picPath) {
 	    Status ret = new Status();
+	    //File f = new File(picPath);
+	    //String imgUri = Uri.fromFile(f).toString();
+	    //KLog.d(TAG, "imgUri : %s", imgUri);
+	    String imgUri = picPath;
 	    
 	    //微博数据
 	    ret.place = new Place();
 	    ret.place.title = poiTitle;
+	    ret.place.poiid = poiid;
 	    
 	    ret.text = statusContent;
 	    
-	    ret.thumbnail_pic = picPath;
-	    ret.bmiddle_pic = picPath;
-	    ret.original_pic = picPath;
+	    ret.thumbnail_pic = imgUri;
+	    ret.bmiddle_pic = imgUri;
+	    ret.original_pic = imgUri;
 	    
 	    //额外参数
-	    ret.extraParams.mType = TypeSpecial.NEW_WEIBO_TEMP;
+	    ret.extraParams.mType = TypeSpec.NEW_WEIBO_SENDING;
 	    ret.extraParams.mTempId = tempId;
 	    
 	    return ret;
 	}
 	
-	/*package*/
-	static List<Status> constructStatuses(Response res,
-			Weibo weibo) throws WeiboException {
+	public static List<Status> constructStatuses(Response res, Weibo weibo) throws WeiboException {
 
 		Document doc = res.asDocument();
 		if (isRootNodeNilClasses(doc)) {
@@ -537,8 +576,7 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	}
 
 	/*modify by sycheng add json call method*/
-	/*package*/
-	static List<Status> constructStatuses(Response res) throws WeiboException {
+	public static List<Status> constructStatuses(Response res) throws WeiboException {
 		try {
 			JSONArray list = res.asJSONArray();
 			int size = list.length();

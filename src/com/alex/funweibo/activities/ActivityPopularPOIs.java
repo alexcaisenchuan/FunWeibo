@@ -14,6 +14,7 @@ import java.util.List;
 
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
+import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.StringUtils;
@@ -28,13 +29,16 @@ import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Poi;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.WeiboException;
-import com.weibo.sdk.android.model.Status.TypeSpecial;
+import com.weibo.sdk.android.model.Status.TypeSpec;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -68,6 +72,10 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     public static final int MSG_REFRESH_LIST = MSG_POI_ACTIVITY_BASE + 1;
     /**将微博添加到列表头*/
     public static final int MSG_ADD_STATUS_TO_FIRST = MSG_POI_ACTIVITY_BASE + 2;
+    /**将添加的微博替换成发布成功的微博*/
+    public static final int MSG_REPLACE_SENDING_STATUS = MSG_POI_ACTIVITY_BASE + 3;
+    /**发布微博失败*/
+    public static final int MSG_SENDING_STATUS_FAILD = MSG_POI_ACTIVITY_BASE + 4;
     
     /*--------------------------
      * 自定义类型
@@ -155,11 +163,16 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             }
             
             //设置条目内容
-            Status status = getPosItem(position);
+            final Status status = getPosItem(position);
             //图片
             String url = WeiboUtils.getStatusPicUrlByNetworkStatus(ActivityPopularPOIs.this, status, mApp.getFileCache());
             if(!TextUtils.isEmpty(url)) {
-                mApp.getImageFetcher().loadFormCache(url, holder.mPic);
+                if(StringUtils.isLocalUri(url)) {
+                    Bitmap bm = ImageUtils.createNewBitmapAndCompressByFile(url, 300, 300);
+                    holder.mPic.setImageBitmap(bm);
+                } else {
+                    mApp.getImageFetcher().loadFormCache(url, holder.mPic);
+                }
             }
             //其他信息
             if(status != null) {
@@ -173,11 +186,32 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 holder.mContent.setText(StringUtils.getStripContent(status.getText()));
                 
                 //底部提示
-                if(status.getExtraParams().getType() == TypeSpecial.NEW_WEIBO_TEMP) {
+                TypeSpec type = status.getExtraParams().getType();
+                if(type == TypeSpec.NEW_WEIBO_SENDING) {
+                    //发送中
                     holder.mSendingHint.setVisibility(View.VISIBLE);
+                    holder.mSendingHint.setText(R.string.text_sending_hint);
+                    holder.mSendingHint.setClickable(false);
+                    
+                    holder.mLikeNum.setVisibility(View.GONE);
+                } else if(type == TypeSpec.NEW_WEIBO_FAILD) {
+                    //发送失败
+                    holder.mSendingHint.setVisibility(View.VISIBLE);
+                    holder.mSendingHint.setText(R.string.text_send_faild_hint);
+                    holder.mSendingHint.setClickable(true);
+                    holder.mSendingHint.setOnClickListener(new OnClickListener() {
+                        
+                        @Override
+                        public void onClick(View v) {
+                            showToastOnUIThread("Resend : " + status.getPlace().poiid);
+                        }
+                    });
+                    
                     holder.mLikeNum.setVisibility(View.GONE);
                 } else {
+                    //普通微博
                     holder.mSendingHint.setVisibility(View.GONE);
+                    
                     holder.mLikeNum.setText(String.valueOf(status.getAttitudesCount()));
                     holder.mLikeNum.setVisibility(View.VISIBLE);
                 }
@@ -232,7 +266,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             KLog.d(TAG, "onItemClick : %d", position);
             Status status = getPosItem(position);
             if(status != null) {
-                if(status.getExtraParams().getType() != TypeSpecial.NEW_WEIBO_TEMP) {
+                if(status.getExtraParams().getType() == TypeSpec.NORMAL) {
                     openDetailWeiboActivity(status);
                 }
             }
@@ -257,8 +291,16 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 }
             } else if(act.equals(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SUCCESS)) {
                 //发布成功，替换对应的临时微博
+                Object obj = intent.getSerializableExtra(ActivityNewWeibo.INTENT_EXTRA_WEIBO_STATUS_OBJ);
+                if(obj instanceof Status) {
+                    sendMessageToBaseHandler(MSG_REPLACE_SENDING_STATUS, 0, 0, obj);
+                }
             } else if(act.equals(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_FAILD)) {
                 //发布失败
+                Object obj = intent.getSerializableExtra(ActivityNewWeibo.INTENT_EXTRA_WEIBO_STATUS_OBJ);
+                if(obj instanceof Status) {
+                    sendMessageToBaseHandler(MSG_SENDING_STATUS_FAILD, 0, 0, obj);
+                }
             } else {
                 //其他
             }
@@ -472,6 +514,45 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                     Status s = (Status)obj;
                     mStatus.add(0, s);
                     mCount = mStatus.size();
+                    if(mAdapter != null) {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+                break;
+            }
+            
+            case MSG_REPLACE_SENDING_STATUS: {
+                Object obj = msg.obj;
+                if(obj instanceof Status) {
+                    Status status = (Status)obj;
+                    int temp = status.getExtraParams().getTempId();
+                    for(Status s : mStatus) {
+                        if(s.getExtraParams().getTempId() == temp) {
+                            KLog.d(TAG, "find temp id : %s", temp);
+                            s.getExtraParams().setType(TypeSpec.NORMAL);
+                            s.update(status);
+                            break;
+                        }
+                    }
+                    if(mAdapter != null) {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+                break;
+            }
+            
+            case MSG_SENDING_STATUS_FAILD: {
+                Object obj = msg.obj;
+                if(obj instanceof Status) {
+                    Status status = (Status)obj;
+                    int temp = status.getExtraParams().getTempId();
+                    for(Status s : mStatus) {
+                        if(s.getExtraParams().getTempId() == temp) {
+                            KLog.d(TAG, "find temp id : %s", temp);
+                            s.getExtraParams().setType(TypeSpec.NEW_WEIBO_FAILD);
+                            break;
+                        }
+                    }
                     if(mAdapter != null) {
                         mAdapter.notifyDataSetChanged();
                     }

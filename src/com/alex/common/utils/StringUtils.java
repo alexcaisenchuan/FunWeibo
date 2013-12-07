@@ -100,6 +100,22 @@ public class StringUtils {
         
         return ret;
     }
+    
+    /**
+     * 判断是否是本地文件
+     * @param url
+     * @return
+     */
+    public static boolean isLocalUri(String url) {
+        boolean ret = false;
+        
+        if(url != null && 
+           (url.startsWith("file://") || url.startsWith("/"))) {
+            ret = true;
+        }
+        
+        return ret;
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/

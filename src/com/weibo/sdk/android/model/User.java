@@ -77,7 +77,6 @@ public class User extends WeiboResponse implements java.io.Serializable {
 
 	private Status status = null;
 
-
 	/*package*/User(Response res, Weibo weibo) throws WeiboException {
 		super(res);
 		Element elem = res.asDocument().getDocumentElement();

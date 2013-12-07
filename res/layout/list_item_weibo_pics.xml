@@ -47,7 +47,6 @@
         android:layout_gravity="right"
         android:textSize="16sp"
         android:textColor="@color/content"
-        android:text="@string/text_sending_hint"
         android:layout_marginRight="5dp"
         android:visibility="gone"/>
 </LinearLayout>
