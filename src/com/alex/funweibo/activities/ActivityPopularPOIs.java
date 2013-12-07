@@ -37,8 +37,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.support.v4.app.ActionBarDrawerToggle;
@@ -204,6 +202,10 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                         @Override
                         public void onClick(View v) {
                             showToastOnUIThread("Resend : " + status.getPlace().poiid);
+                            WeiboUtils.postNewWeibo(ActivityPopularPOIs.this,
+                                                    status);
+                            status.getExtraParams().setType(TypeSpec.NEW_WEIBO_SENDING);
+                            mAdapter.notifyDataSetChanged();
                         }
                     });
                     
@@ -283,21 +285,21 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             String act = intent.getAction();
             KLog.d(TAG, "onReceive , %s", act);
             
-            if(act.equals(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SEND)) {
+            if(act.equals(WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_SEND)) {
                 //发布新微博，将其添加到列表顶端
-                Object obj = intent.getSerializableExtra(ActivityNewWeibo.INTENT_EXTRA_WEIBO_STATUS_OBJ);
+                Object obj = intent.getSerializableExtra(WeiboUtils.INTENT_EXTRA_WEIBO_STATUS_OBJ);
                 if(obj instanceof Status) {
                     sendMessageToBaseHandler(MSG_ADD_STATUS_TO_FIRST, 0, 0, obj);
                 }
-            } else if(act.equals(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SUCCESS)) {
+            } else if(act.equals(WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_SUCCESS)) {
                 //发布成功，替换对应的临时微博
-                Object obj = intent.getSerializableExtra(ActivityNewWeibo.INTENT_EXTRA_WEIBO_STATUS_OBJ);
+                Object obj = intent.getSerializableExtra(WeiboUtils.INTENT_EXTRA_WEIBO_STATUS_OBJ);
                 if(obj instanceof Status) {
                     sendMessageToBaseHandler(MSG_REPLACE_SENDING_STATUS, 0, 0, obj);
                 }
-            } else if(act.equals(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_FAILD)) {
+            } else if(act.equals(WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_FAILD)) {
                 //发布失败
-                Object obj = intent.getSerializableExtra(ActivityNewWeibo.INTENT_EXTRA_WEIBO_STATUS_OBJ);
+                Object obj = intent.getSerializableExtra(WeiboUtils.INTENT_EXTRA_WEIBO_STATUS_OBJ);
                 if(obj instanceof Status) {
                     sendMessageToBaseHandler(MSG_SENDING_STATUS_FAILD, 0, 0, obj);
                 }
@@ -430,9 +432,9 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         
         //注册广播
         IntentFilter filter = new IntentFilter();
-        filter.addAction(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SEND);
-        filter.addAction(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_SUCCESS);
-        filter.addAction(ActivityNewWeibo.BROADCAST_ACTION_NEW_WEIBO_FAILD);
+        filter.addAction(WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_SEND);
+        filter.addAction(WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_SUCCESS);
+        filter.addAction(WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_FAILD);
         registerReceiver(mReceiver, filter);
     }
     

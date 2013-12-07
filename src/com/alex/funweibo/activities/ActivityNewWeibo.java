@@ -9,23 +9,18 @@
  */
 package com.alex.funweibo.activities;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
-import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
+import com.alex.common.utils.WeiboUtils;
 import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.WeiboDefines;
-import com.weibo.sdk.android.WeiboException;
-import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.model.Status;
-import com.weibo.sdk.android.model.Status.ExtraParams;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -50,75 +45,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     /*--------------------------
      * 自定义类型
      *-------------------------*/
-    /**
-     * 发送微博的回调函数
-     * @author caisenchuan
-     *
-     */
-    private class AddWeiboListener extends OnHttpRequestReturnListener {
-
-        /**发送时使用的临时微博*/
-        private Status mTempStatus;
-        
-        public AddWeiboListener(BaseActivity base, Status tempStatus) {
-            super(base);
-            this.mTempStatus = tempStatus;
-            KLog.d(TAG, "tempId : %s", tempStatus.getExtraParams().getTempId());
-        }
-
-        @Override
-        public void onComplete(String arg0) {
-            try {
-                //KLog.d(TAG, arg0);
-                
-                //读取微博
-                Status status = new Status(arg0);
-                ExtraParams p = status.getExtraParams();
-                p.setTempId(mTempStatus.getExtraParams().getTempId());       //设置对应的临时微博id
-                
-                if(status != null) {
-                    showToastOnUIThread(getString(R.string.hint_checkin_success));
-                    
-                    //发出广播
-                    sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_SUCCESS, status);
-                    
-                    //删除照片
-                    deletePhoto();
-                }
-            } catch (Exception e) {
-                KLog.w(TAG, "Exception while build status", e);
-                showToastOnUIThread(getString(R.string.hint_add_weibo_faild) + e.toString());
-                sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_FAILD, mTempStatus);      //发出广播
-            }
-        }
-        
-        @Override
-        public void onComplete4binary(ByteArrayOutputStream arg0) {
-            try {
-                super.onComplete4binary(arg0);
-            } finally {
-                sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_FAILD, mTempStatus);      //发出广播
-            }
-        }
-        
-        @Override
-        public void onError(WeiboException e) {
-            try {
-                super.onError(e);
-            } finally {
-                sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_FAILD, mTempStatus);      //发出广播
-            }
-        }
-        
-        @Override
-        public void onIOException(IOException e) {
-            try {
-                super.onIOException(e);
-            } finally {
-                sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_FAILD, mTempStatus);      //发出广播
-            }
-        }
-    }
+    
     
     /*--------------------------
      * 常量
@@ -138,16 +65,6 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     public static final String INTENT_EXTRA_POI_ID      = "poi_id";
     /**poi名字*/
     public static final String INTENT_EXTRA_POI_TITLE   = "poi_title";
-    /**序列化方式传递一条微博的信息*/
-    public static final String INTENT_EXTRA_WEIBO_STATUS_OBJ = "weibo_status_obj";
-    
-    ////////////////Broadcast参数///////////////////
-    /**发布新微博*/
-    public static final String BROADCAST_ACTION_NEW_WEIBO_SEND     = "com.alex.funweibo.action.new_weibo_send";
-    /**发布新微博成功*/
-    public static final String BROADCAST_ACTION_NEW_WEIBO_SUCCESS  = "com.alex.funweibo.action.new_weibo_success";
-    /**发布新微博失败*/
-    public static final String BROADCAST_ACTION_NEW_WEIBO_FAILD    = "com.alex.funweibo.action.new_weibo_faild";
     
     /*--------------------------
      * 成员变量
@@ -288,7 +205,6 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
             //授权信息无效
             SmartToast.showLongToast(this, R.string.hint_auth_invalid, true);
         } else {
-            PlaceAPI place = new PlaceAPI(token);
             /*String latitude = "0.0";
             String longtitude = "0.0";
             if(mApp.getCurrentLocation().isValid()) {
@@ -302,15 +218,13 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
                                                              mPoiTitle,
                                                              content,
                                                              mLastPicPath);
-            
-            place.poisAddCheckin(mPoiid,
-                                 content,
-                                 mLastPicPath,
-                                 true,
-                                 new AddWeiboListener(this, tempStatus));
+
+            WeiboUtils.postNewWeibo(this, tempStatus);
 
             //发出广播，让主界面显示临时微博
-            sendBroadCast(BROADCAST_ACTION_NEW_WEIBO_SEND, tempStatus);
+            WeiboUtils.sendBroadCast(this,
+                                     WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_SEND,
+                                     tempStatus);
             
             //关闭此Activity
             finish();
@@ -363,20 +277,6 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     }
     
     /**
-     * 删除本地照片
-     * @author caisenchuan
-     */
-    private void deletePhoto() {
-        if(mLastPicPath != null) {
-            File file = new File(mLastPicPath);
-            if(file != null && file.exists()) {
-                file.delete();
-            }
-            mLastPicPath = null;
-        }
-    }
-    
-    /**
      * 使用Intent中的数据设置poi信息
      * @param data
      */
@@ -393,16 +293,4 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         }
     }
     
-    /**
-     * 发出广播
-     * @param action
-     * @param status
-     */
-    private void sendBroadCast(String action, Status status) {
-        KLog.d(TAG, "sendBroadCast , %s", action);
-        Intent it = new Intent();
-        it.setAction(action);
-        it.putExtra(INTENT_EXTRA_WEIBO_STATUS_OBJ, status);
-        sendBroadcast(it);
-    }
 }

@@ -25,6 +25,11 @@ public class AppConfig {
     /**图片缓存文件报名*/
     public static final String SYSTEMCACHE = "thinkandroid";
     
+    /**应用的基础文件在SD卡上的路径*/
+    public static final String APP_DIR = "/funweibo/";
+    /**图片存储路径*/
+    public static final String PIC_DIR = APP_DIR + "pic/";
+    
     /*--------------------------
      * 自定义类型
      *-------------------------*/

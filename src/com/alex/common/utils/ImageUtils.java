@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import com.alex.common.AppConfig;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -43,10 +45,6 @@ public class ImageUtils {
      *-------------------------*/
     private static final String TAG = ImageUtils.class.getSimpleName();
     
-    /**应用的基础文件在SD卡上的路径*/
-    public static final String APP_DIR = "/wemap/";
-    /**图片存储路径*/
-    public static final String PIC_DIR = APP_DIR + "pic/";
     /**图片后缀名*/
     public static final String PIC_FILE_EXT = ".jpeg";
     
@@ -136,7 +134,7 @@ public class ImageUtils {
      * */
     public static String getDir() {
         File sd = Environment.getExternalStorageDirectory();
-        String dir = sd.getPath() + PIC_DIR;
+        String dir = sd.getPath() + AppConfig.PIC_DIR;
         File file = new File(dir);
         if (!file.exists()) {
             file.mkdirs();
@@ -237,6 +235,20 @@ public class ImageUtils {
         }
         
         return BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
+    }
+    
+    /**
+     * 删除本地照片
+     * @author caisenchuan
+     */
+    public static void deletePhoto(String picPath) {
+        if(picPath != null) {
+            File file = new File(picPath);
+            if(file != null && file.exists()) {
+                file.delete();
+            }
+            picPath = null;
+        }
     }
     /*--------------------------
      * protected、packet方法

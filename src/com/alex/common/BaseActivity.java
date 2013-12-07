@@ -30,11 +30,11 @@ public abstract class BaseActivity extends FragmentActivity {
     /*--------------------------
      * 自定义类型
      *-------------------------*/
-    private static final String TAG_BASE = "BaseActivity";
     
     /*--------------------------
      * 常量
      *-------------------------*/
+    private static final String TAG_BASE = "BaseActivity";
     ///////////////////mHandler msg.what//////////////
     /**显示Toast，内容在obj里*/
     protected static final int MSG_SHOW_TOAST = 100;
