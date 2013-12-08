@@ -349,7 +349,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         // Inflate the menu; this adds items to the action bar if it is present.  
         super.onCreateOptionsMenu(menu);  
         //添加菜单项  
-        MenuItem add=menu.add(0,0,0,"创建");
+        MenuItem add = menu.add(0, 0, 0, getString(R.string.menu_checkin));
         //绑定到ActionBar    
         add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         //绑定点击事件
@@ -395,11 +395,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         // set up the drawer's list view with items and click listener
         mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
-        // enable ActionBar app icon to behave as action to toggle nav drawer
-        if(mActionBar != null) {
-            mActionBar.setDisplayHomeAsUpEnabled(true);
-        }
-        //getActionBar().setHomeButtonEnabled(true);
         // ActionBarDrawerToggle ties together the the proper interactions
         // between the sliding drawer and the action bar app icon
         mDrawerToggle = new ActionBarDrawerToggle(

@@ -71,6 +71,8 @@ public abstract class BasePOIActivity extends BaseActivity {
     private static final int MSG_SHOW_LOADING_HINT    = MSG_EXTEND_BASE + 1;
     /**关闭加载提示框*/
     private static final int MSG_DISMISS_LOADING_HINT = MSG_EXTEND_BASE + 2;
+    /**得到poi信息时的回调*/
+    private static final int MSG_ON_GET_POIS          = MSG_EXTEND_BASE + 3;
     
     /////////////////其他/////////////////
     private static final int SCROLL_STATE_IDLE = 0;
@@ -105,14 +107,9 @@ public abstract class BasePOIActivity extends BaseActivity {
                 List<Poi> list = new ArrayList<Poi>();
                 if(!TextUtils.isEmpty(str) && 
                    !str.startsWith(WeiboDefines.RET_EMPTY_ARRAY)) {
-                    //微博返回有效数组才解析
-                    if(mPoiList == null) {
-                        mPoiList = new PoiList(str);
-                        list = mPoiList.getList();
-                    } else {
-                        list = mPoiList.appendList(str);
-                    }
-                    mCurrPoiPage++;
+                    int total = PoiList.getTotalByJsonStr(str);
+                    list = PoiList.getPoiList(str);
+                    sendMessageToBaseHandler(MSG_ON_GET_POIS, total, 0, list);
                 }
                 onGetPoiList(list);
             } catch (Exception e) {
@@ -329,6 +326,9 @@ public abstract class BasePOIActivity extends BaseActivity {
         //底部加载提示
         mLoadView = getLayoutInflater().inflate(R.layout.footer_load, null);
         
+        //设置actionbar
+        mActionBar.setDisplayShowTitleEnabled(false);
+        
         //设置下拉菜单数据
         ArrayAdapter<String> arrAdapter = new ArrayAdapter<String>(this, R.layout.list_spinner_poi_category);
         for(PoiCategory c : PoiCategory.mCategorys) {
@@ -494,6 +494,26 @@ public abstract class BasePOIActivity extends BaseActivity {
             
             case MSG_DISMISS_LOADING_HINT: {
                 setLoadView(false);
+                break;
+            }
+            
+            case MSG_ON_GET_POIS: {
+                Object obj = msg.obj;
+                if(obj instanceof List<?>) {
+                    List<Poi> list = (List<Poi>)obj;
+                    //微博返回有效数组才解析
+                    if(mPoiList == null) {
+                        mPoiList = new PoiList();
+                    }
+                    mPoiList.addAll(list);
+
+                    int total = msg.arg1;
+                    if(total > 0) {
+                        mPoiList.setTotal(total);
+                    }
+                    
+                    mCurrPoiPage++;
+                }
                 break;
             }
             

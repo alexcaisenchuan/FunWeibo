@@ -52,6 +52,13 @@ public class PoiList {
      * public方法
      *-------------------------*/
     /**
+     * Poi列表
+     */
+    public PoiList() {
+        //...
+    }
+    
+    /**
      * 根据服务器返回的json字符串构造PoiList对象
      */
     public PoiList(String jsonStr) throws JSONException {
@@ -115,6 +122,14 @@ public class PoiList {
      */
     public int getTotal() {
         return mTotal;
+    }
+    
+    /**
+     * 设置poi列表的总长度
+     * @param total
+     */
+    public void setTotal(int total) {
+        mTotal = total;
     }
 
     /**
@@ -191,6 +206,17 @@ public class PoiList {
         return ret;
     }
     
+    /**
+     * 通过json字符串读取出其中的total字段
+     * @param jsonStr
+     * @return
+     * @throws JSONException
+     */
+    public static int getTotalByJsonStr(String jsonStr) throws JSONException {
+        JSONObject json = new JSONObject(jsonStr);
+        int total = json.getInt(TAG_TOTAL_NUM);
+        return total;
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/

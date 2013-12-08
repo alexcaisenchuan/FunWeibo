@@ -3,6 +3,10 @@ package com.alex.common.utils;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.alex.funweibo.R;
+import com.weibo.sdk.android.WeiboDefines;
+
+import android.content.Context;
 import android.text.TextUtils;
 
 /**
@@ -101,6 +105,29 @@ public class StringUtils {
         return ret;
     }
     
+    /**
+     * 添加“我在这里”的提示信息
+     * @param context 上下文
+     * @param content 微博正文
+     * @param locationTitle 地点标题
+     * @return
+     */
+    public static String addLocationString(Context context, String content, String locationTitle) {
+        String ret = content;
+        
+        //满足以下条件：
+        //1、输入参数有效；
+        //2、地点标题有效；
+        //3、正文长度预留出添加的字符串长度
+        if(context != null &&
+           content != null && 
+           !TextUtils.isEmpty(locationTitle) &&
+           content.length() < (WeiboDefines.MAX_STATUS_CONTENT_LENGTH - locationTitle.length() - 10)) {
+            ret = String.format("%s %s%s", content, context.getString(R.string.text_i_m_here), locationTitle);
+        }
+        
+        return ret;
+    }
     /**
      * 判断是否是本地文件
      * @param url

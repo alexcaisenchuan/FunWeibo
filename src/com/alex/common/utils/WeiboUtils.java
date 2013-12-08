@@ -156,7 +156,8 @@ public class WeiboUtils {
         
         PlaceAPI place = new PlaceAPI(token);
         String poiid = tempStatus.getPlace().poiid;
-        String content = tempStatus.getText();
+        String poiTitle = tempStatus.getPlace().title;
+        String content = StringUtils.addLocationString(activity, tempStatus.getText(), poiTitle);
         String picPath = tempStatus.getBmiddle_pic();
         
         place.poisAddCheckin(poiid,

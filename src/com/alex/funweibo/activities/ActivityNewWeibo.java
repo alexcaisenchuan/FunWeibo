@@ -46,7 +46,6 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
      * 自定义类型
      *-------------------------*/
     
-    
     /*--------------------------
      * 常量
      *-------------------------*/
@@ -111,7 +110,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         // Inflate the menu; this adds items to the action bar if it is present.  
         super.onCreateOptionsMenu(menu);  
         //添加菜单项  
-        MenuItem add=menu.add(0,0,0,"发送");
+        MenuItem add = menu.add(0, 0, 0, R.string.menu_send);
         //绑定到ActionBar    
         add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         //绑定点击事件
@@ -131,6 +130,9 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_weibo);
+        
+        //设置ActionBar
+        mActionBar.setTitle(R.string.title_new_weibo);
         
         //若调用者指定，则启动拍照
         Intent it = getIntent();

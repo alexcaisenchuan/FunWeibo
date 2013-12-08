@@ -42,6 +42,9 @@
     <string name="button_nearby">周边美食</string>
     <string name="button_select_place">选择地点</string>
     
+    <!-- title -->
+    <string name="title_new_weibo">签到</string>
+    
     <!-- Text -->
     <string name="text_weibo_num">条微博</string>
     <string name="text_detail_weibo">微博正文</string>
@@ -56,6 +59,8 @@
     <string name="text_hot_place">热门地点</string>
     <string name="text_sending_hint">发送中...</string>
     <string name="text_send_faild_hint">发送失败，点击重试</string>
+    <string name="text_i_m_here">我在这里:</string>
+    <string name="text_m">米</string>
     
     <!-- 微博提示 -->
     <string name="weibo_error_not_exist">原微博已删除！</string>
@@ -71,4 +76,6 @@
     <string name="menu_refresh">刷新</string>
     <string name="menu_query_all">全部</string>
     <string name="menu_query_item">部分</string>
+    <string name="menu_checkin">签到</string>
+    <string name="menu_send">发布</string>
 </resources>

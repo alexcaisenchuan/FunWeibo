@@ -13,6 +13,8 @@ import java.util.List;
 
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
+import com.alex.funweibo.model.Position;
+import com.alex.common.utils.Misc;
 import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
@@ -202,8 +204,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         @Override
         public void onComplete(String arg0) {
             try {
-                mStatus = new Status(arg0);     //使用返回的json字符串构建微博对象
-                sendMessageToBaseHandler(MSG_REFRESH_STATUS);
+                Status status = new Status(arg0);     //使用返回的json字符串构建微博对象
+                sendMessageToBaseHandler(MSG_REFRESH_STATUS, 0, 0, status);
             } catch (WeiboException e) {
                 KLog.w(TAG, "WeiboException while build status", e);
                 showToastOnUIThread(getString(R.string.hint_ret_error) + e.toString());
@@ -234,8 +236,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         @Override
         public void onComplete(String arg0) {
             try {
-                mCommentList = Comment.constructComments(arg0);     //使用返回的json字符串构建评论列表
-                sendMessageToBaseHandler(MSG_REFRESH_COMMENTS);
+                List<Comment> commentList = Comment.constructComments(arg0);     //使用返回的json字符串构建评论列表
+                sendMessageToBaseHandler(MSG_REFRESH_COMMENTS, 0, 0, commentList);
             } catch (WeiboException e) {
                 KLog.w(TAG, "WeiboException while build comment list", e);
                 showToastOnUIThread(getString(R.string.hint_ret_error) + e.toString());
@@ -255,6 +257,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     private Status mStatus = null;
     /**全局评论列表*/
     private List<Comment> mCommentList = null;
+    /**当前位置*/
+    private Position mCurrentPosition = new Position();
     
     //////////////界面元素/////////////////
     //listview总体
@@ -296,7 +300,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         // Inflate the menu; this adds items to the action bar if it is present.  
         super.onCreateOptionsMenu(menu);  
         //添加菜单项  
-        MenuItem add=menu.add(0,0,0,"签到");
+        MenuItem add=menu.add(0, 0, 0, R.string.menu_checkin);
         //绑定到ActionBar    
         add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
         //绑定点击事件
@@ -304,7 +308,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
             
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                //拍照并创建新微博
+                //创建新微博
                 checkinWithCurrentPoi();
                 return false;
             }
@@ -321,6 +325,9 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_weibo);
+        
+        //读取当前位置
+        mCurrentPosition = mApp.getCurrentLocation();
         
         //设置ActionBar
         mActionBar.setTitle(R.string.text_hot_place);
@@ -381,7 +388,13 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     @Override
     protected void handleBaseMessage(Message msg) {
         switch(msg.what) {
-            case MSG_REFRESH_STATUS:
+            case MSG_REFRESH_STATUS: {
+                KLog.d(TAG, "MSG_REFRESH_STATUS , %s", msg.obj);
+                Object obj = msg.obj;
+                if(obj instanceof Status) {
+                    //若传递Status过来，则使用其重置全局变量的数据
+                    mStatus = (Status)obj;
+                }
                 if(mStatus != null) {
                     //设置用户信息
                     User user = mStatus.getUser();
@@ -395,7 +408,16 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                     mWeiboTime.setText(StringUtils.getDateString(mStatus.getCreatedAt()));
                     Place p = mStatus.getPlace();
                     if(p != null) {
-                        mWeiboSource.setText(p.title);
+                        if(mCurrentPosition.isValid()) {
+                            int d = (int)Misc.getDistance(p.latitude,
+                                                          p.longtitude, 
+                                                          mCurrentPosition.latitude,
+                                                          mCurrentPosition.longtitude);
+                            String distance = String.format("%s%s", d, getString(R.string.text_m));
+                            mWeiboSource.setText(distance);
+                        } else {
+                            mWeiboSource.setText("");
+                        }
                         mActionBar.setTitle(p.title);
                     }
                     mWeiboContent.setText(mStatus.getText());
@@ -411,17 +433,25 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                     }
                 }
                 break;
+            }
                 
-            case MSG_REFRESH_COMMENTS:
-                if(mCommentAdapter != null) {
-                    mCommentAdapter.notifyDataSetChanged();
+            case MSG_REFRESH_COMMENTS: {
+                KLog.d(TAG, "MSG_REFRESH_COMMENTS");
+                Object obj = msg.obj;
+                if(obj instanceof List<?>) {
+                    mCommentList = (List<Comment>)obj;
+                    if(mCommentAdapter != null) {
+                        mCommentAdapter.notifyDataSetChanged();
+                    }
                 }
                 break;
+            }
             
-            default:
+            default: {
                 KLog.w(TAG, "Unknown msg : " + msg.what);
                 super.handleBaseMessage(msg);
                 break;
+            }
         }
     };
     
