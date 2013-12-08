@@ -150,6 +150,8 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	private Status retweeted_status;    //转发的微博内容
 	private String mid;                 //mid
 	private long attitudes_count;       //赞的个数
+	private long comments_count;        //评论个数
+	private long reposts_count;         //转发个数
 	
 	///////////////////////////////////////////////////////////////////////
 	/**
@@ -197,7 +199,11 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 			}
 			
 			mid=json.getString("mid");
+			
 			attitudes_count=json.getLong("attitudes_count");
+			comments_count=json.getLong("comments_count");
+			reposts_count=json.getLong("reposts_count");
+			
 			String geo= json.getString("geo");
 			if(geo!=null &&!"".equals(geo) &&!"null".equals(geo)){
 				getGeoInfo(geo);
@@ -306,6 +312,8 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	        this.retweeted_status = status.retweeted_status;
 	        this.mid = status.mid;
 	        this.attitudes_count = status.attitudes_count;
+	        this.comments_count = status.comments_count;
+	        this.reposts_count = status.reposts_count;
 	    }
 	}
 	/**
@@ -469,6 +477,21 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	    return attitudes_count;
 	}
 	
+	/**
+	 * 读取评论条数
+	 * @return
+	 */
+	public long getCommentsCount() {
+	    return comments_count;
+	}
+	
+	/**
+	 * 读取转发条数
+	 * @return
+	 */
+	public long getRepostsCount() {
+	    return reposts_count;
+	}
 	   
     /**
      * 读取扩展参数

@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="horizontal"
+    android:paddingLeft="6dp"
+    android:paddingRight="6dp" >
     
     <!-- 用户头像 -->
     <ImageView 
@@ -22,6 +24,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center_vertical"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
         >
         
         <!-- 用户名 -->
@@ -37,7 +41,7 @@
             android:id="@+id/text_comment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="12sp"
+            android:textSize="13sp"
             />
         
     </LinearLayout>

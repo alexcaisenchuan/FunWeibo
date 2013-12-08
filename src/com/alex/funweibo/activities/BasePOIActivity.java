@@ -30,7 +30,6 @@ import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
-import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.model.Poi;
@@ -346,11 +345,10 @@ public abstract class BasePOIActivity extends BaseActivity {
         }
         
         //微博相关
-        Oauth2AccessToken token = mApp.getAccessToken();
-        if(token != null) {
-            mPlaceApi = new PlaceAPI(token);
+        if(mToken != null) {
+            mPlaceApi = new PlaceAPI(mToken);
         } else {
-            if(token == null) {
+            if(mToken == null) {
                 SmartToast.showShortToast(this, R.string.hint_auth_invalid, false);
             }
         }

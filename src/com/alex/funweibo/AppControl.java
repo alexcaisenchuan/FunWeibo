@@ -9,6 +9,9 @@
  */
 package com.alex.funweibo;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import com.alex.funweibo.model.Position;
 import com.alex.common.AppConfig;
 import com.alex.common.utils.SmartToast;
@@ -24,8 +27,13 @@ import com.ta.util.cache.TAFileCache;
 import com.ta.util.cache.TAFileCache.TACacheParams;
 import com.ta.util.extend.draw.DensityUtils;
 import com.weibo.sdk.android.Oauth2AccessToken;
+import com.weibo.sdk.android.WeiboException;
+import com.weibo.sdk.android.api.UsersAPI;
 import com.weibo.sdk.android.keep.AccessTokenKeeper;
 import com.weibo.sdk.android.keep.UserInfoKeeper;
+import com.weibo.sdk.android.model.User;
+import com.weibo.sdk.android.net.RequestListener;
+import com.weibo.sdk.android.org.json.JSONException;
 
 import android.app.Application;
 import android.text.TextUtils;
@@ -123,6 +131,42 @@ public class AppControl extends Application{
             KLog.d(TAG, sb.toString());
         }
     }
+    
+    /**
+     * 用户信息读取监听函数
+     */
+    private class GetUserInfoListener implements RequestListener {
+
+        @Override
+        public void onComplete(String arg0) {
+            try {
+                if(!TextUtils.isEmpty(arg0)) {
+                    mCurrentUser = new User(arg0);
+                    KLog.d(TAG, "current user : %s", mCurrentUser.toString());
+                }
+            } catch (com.weibo.sdk.android.model.WeiboException e) {
+                KLog.w(TAG, "WeiboException", e);
+            } catch (JSONException e) {
+                KLog.w(TAG, "JSONException", e);
+            }
+        }
+
+        @Override
+        public void onComplete4binary(ByteArrayOutputStream arg0) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onError(WeiboException arg0) {
+            // TODO Auto-generated method stub
+        }
+
+        @Override
+        public void onIOException(IOException arg0) {
+            // TODO Auto-generated method stub
+        }
+        
+    }
     /*--------------------------
      * 常量
      *-------------------------*/
@@ -133,8 +177,10 @@ public class AppControl extends Application{
      *-------------------------*/
     /**微博的access_token*/
     private Oauth2AccessToken mAccessToken = null;
+    /**当前用户*/
+    private User mCurrentUser = null;
     /**微博的用户id*/
-    private String mWeiboUserid = "";
+    private long mWeiboUserid = 0L;
     /**网站的session id*/
     private String mSessionID = "";
 
@@ -211,6 +257,12 @@ public class AppControl extends Application{
         
         //设置其他
         SmartToast.initSingletonToast(getApplicationContext());
+        
+        //读取当前登录的用户信息
+        if(mAccessToken != null) {
+            UsersAPI users = new UsersAPI(mAccessToken);
+            users.show(mWeiboUserid, new GetUserInfoListener());
+        }
     }
 
     public void setAccessToken(Oauth2AccessToken token) {
@@ -218,7 +270,11 @@ public class AppControl extends Application{
     }
     
     public void setWeiboUserid(String uid) {
-        this.mWeiboUserid = uid;
+        try {
+            this.mWeiboUserid = Long.valueOf(uid);
+        } catch(Exception e) {
+            KLog.w(TAG, "Exception", e);
+        }
     }
     
     public void setSessionID(String session) {
@@ -229,7 +285,7 @@ public class AppControl extends Application{
         return this.mAccessToken;
     }
     
-    public String getWeiboUserid() {
+    public long getWeiboUserid() {
         return this.mWeiboUserid;
     }
     
@@ -245,16 +301,9 @@ public class AppControl extends Application{
         boolean ret = false;
         
         //如果token、userid有效，且没有过期，则认为有效
-        if(mAccessToken != null && !TextUtils.isEmpty(mWeiboUserid)) {
+        if(mAccessToken != null) {
             if(mAccessToken.isSessionValid()) {
-                long uid = 0;
-                try {
-                    uid = Long.valueOf(mWeiboUserid);
-                } catch (Exception e) {
-                    KLog.w(TAG, "weiboUserid is not valid long type", e);
-                }
-                
-                if(uid > 0L) {
+                if(mWeiboUserid > 0L) {
                     ret = true;
                 } else {
                     ret = false;

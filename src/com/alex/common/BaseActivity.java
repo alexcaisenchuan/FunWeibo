@@ -12,6 +12,7 @@ package com.alex.common;
 import com.alex.funweibo.AppControl;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
+import com.weibo.sdk.android.Oauth2AccessToken;
 
 import android.app.ActionBar;
 import android.content.res.Configuration;
@@ -46,6 +47,8 @@ public abstract class BaseActivity extends FragmentActivity {
      *-------------------------*/
     /**应用信息对象*/
     protected AppControl mApp = null;
+    /**token*/
+    protected Oauth2AccessToken mToken = null;
     /**Handler对象*/
     protected Handler mBaseHandler = null;
     /**ActionBar*/
@@ -97,6 +100,10 @@ public abstract class BaseActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mApp = (AppControl)getApplication();
+        
+        mToken = mApp.getAccessToken();
+        
         mActionBar = getActionBar();
         
         //默认打开ActionBar的返回键
@@ -104,8 +111,6 @@ public abstract class BaseActivity extends FragmentActivity {
             mActionBar.setDisplayHomeAsUpEnabled(true);
         }
         
-        //读取应用信息
-        mApp = (AppControl)getApplication();
         //创建通用Handler
         mBaseHandler = new Handler() {
             public void handleMessage(Message msg) {

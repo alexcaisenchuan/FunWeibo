@@ -94,6 +94,12 @@
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
         
+        <activity
+            android:name="com.alex.funweibo.activities.ActivityComment"
+            android:label="@string/app_name"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+        
         <!-- Think Android -->
         <receiver android:name="com.ta.util.netstate.TANetworkStateReceiver" >
             <intent-filter>

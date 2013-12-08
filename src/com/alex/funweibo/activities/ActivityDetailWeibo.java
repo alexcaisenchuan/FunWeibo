@@ -16,11 +16,11 @@ import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
 import com.alex.common.utils.Misc;
 import com.alex.common.utils.OnHttpRequestReturnListener;
+import com.alex.common.utils.ShareUtils;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.StringUtils;
 import com.alex.common.utils.WeiboUtils;
-import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.api.CommentsAPI;
 import com.weibo.sdk.android.api.StatusesAPI;
 import com.weibo.sdk.android.api.WeiboAPI.AUTHOR_FILTER;
@@ -44,6 +44,7 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -59,12 +60,16 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
      *-------------------------*/
     private static final String TAG = "ActivityDetailWeibo";
     
+    ////////////////request code//////////////////////
+    public static final int REQUEST_CODE_SEND_COMMENT = 1;
     ////////////////Activity启动参数///////////////////
     public static final String INTENT_EXTRA_WEIBO_MID = "weibo_mid";
     public static final String INTENT_EXTRA_WEIBO_TEXT = "weibo_text";
     public static final String INTENT_EXTRA_WEIBO_NICKNAME = "weibo_nickname";
     /**序列化方式传递一条微博的信息*/
     public static final String INTENT_EXTRA_WEIBO_STATUS_OBJ = "weibo_status_obj";
+    /**评论内容*/
+    public static final String INTENT_EXTRA_COMMENT_TEXT = null;
     
     ///////////////mBaseHandler msg what//////////////
     /**刷新微博内容*/
@@ -246,9 +251,28 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         
     }
     
+    /**
+     * 发送微博的回调函数
+     * @author caisenchuan
+     */
+    private class SendCommentListener extends OnHttpRequestReturnListener {
+
+        public SendCommentListener(BaseActivity base) {
+            super(base);
+        }
+
+        @Override
+        public void onComplete(String arg0) {
+            getComment();       //读取评论
+            showToastOnUIThread(R.string.hint_add_comment_success);
+        }
+        
+    }
     /*--------------------------
      * 成员变量
      *-------------------------*/
+    /**评论API*/
+    private CommentsAPI mCommentAPI = null;
     /**评论列表的Adapter*/
     private CommentListAdapter mCommentAdapter = null;
     /**本条微博的mid*/
@@ -274,7 +298,11 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     private View mHeaderWeiboContent = null;
     private TextView mWeiboContent = null;
     private ImageView mWeiboPic = null;
+    private TextView mWeiboMore = null;
     private LinearLayout mWeiboPicBorder = null;
+    //底部控制栏
+    private Button mButtonComment = null;
+    private Button mButtonShare = null;
     
     /*--------------------------
      * public方法
@@ -285,6 +313,25 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
+            case R.id.button_comment: {
+                //评论
+                Intent it = new Intent(ActivityDetailWeibo.this, ActivityComment.class);
+                startActivityForResult(it, REQUEST_CODE_SEND_COMMENT);
+                break;
+            }
+            
+            case R.id.button_share: {
+                //分享
+                String title = "";
+                String text = "";
+                if(mStatus != null) {
+                    title = mStatus.getPlace().title;
+                    text = mStatus.getText();
+                }
+                ShareUtils.share(ActivityDetailWeibo.this, title, text, null);
+                break;
+            }
+        
             case R.id.img_map: {
                 //打开地图
                 break;
@@ -330,10 +377,14 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         mCurrentPosition = mApp.getCurrentLocation();
         
         //设置ActionBar
-        mActionBar.setTitle(R.string.text_hot_place);
+        mActionBar.setTitle(R.string.title_hot_place);
         
         //绑定界面元素
         mListWeiboContent = (ListView)findViewById(R.id.list_weibo_content);
+        mButtonComment = (Button)findViewById(R.id.button_comment);
+        mButtonComment.setOnClickListener(this);
+        mButtonShare = (Button)findViewById(R.id.button_share);
+        mButtonShare.setOnClickListener(this);
         
         mHeaderWeiboUserInfo = View.inflate(this, R.layout.header_weibo_userinfo, null);
         mUserName = (TextView)mHeaderWeiboUserInfo.findViewById(R.id.text_username);
@@ -347,6 +398,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         mWeiboContent = (TextView)mHeaderWeiboContent.findViewById(R.id.text_weibo_content);
         mWeiboPic = (ImageView)mHeaderWeiboContent.findViewById(R.id.img_weibo_pic);
         mWeiboPicBorder = (LinearLayout)mHeaderWeiboContent.findViewById(R.id.img_weibo_pic_border);
+        mWeiboMore = (TextView)mHeaderWeiboContent.findViewById(R.id.text_more_info);
         
         //设置listview
         mListWeiboContent.addHeaderView(mHeaderWeiboUserInfo);
@@ -359,12 +411,11 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         Intent intent = getIntent();
         handleIntentExtra(intent);
         
-        Oauth2AccessToken token = mApp.getAccessToken();
-        if(token != null) {
+        if(mToken != null) {
             if(mStatus == null) {
                 //若微博内容为空，则读取微博信息
                 if(mWeiboMid > 0L) {
-                    StatusesAPI status = new StatusesAPI(token);
+                    StatusesAPI status = new StatusesAPI(mToken);
                     status.show(mWeiboMid, new GetStatusListener(this));
                 }
             } else {
@@ -373,18 +424,42 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
             }
             
             //读取评论信息
-            CommentsAPI comment = new CommentsAPI(token);
-            comment.show(mWeiboMid, 0L, 0L, 50, 1, AUTHOR_FILTER.ALL, new GetCommentsListener(this));
+            mCommentAPI = new CommentsAPI(mToken);
+            if(mStatus != null && mStatus.getCommentsCount() > 0) {
+                getComment();
+            }
         } else {
-            if(token == null) {
-                SmartToast.showShortToast(this, R.string.hint_auth_invalid, false);
-            }
-            if(mWeiboMid <= 0L) {
-                SmartToast.showShortToast(this, R.string.hint_weibo_param_invalid, false);
-            }
+            SmartToast.showShortToast(this, R.string.hint_auth_invalid, false);
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        switch(requestCode) {
+            case REQUEST_CODE_SEND_COMMENT: {
+                if(resultCode == RESULT_OK && data != null) {
+                    String comment = data.getStringExtra(INTENT_EXTRA_COMMENT_TEXT);
+                    if(!TextUtils.isEmpty(comment)) {
+                        //启动网络发出评论
+                        if(mCommentAPI != null) {
+                            mCommentAPI.create(comment,
+                                               mWeiboMid,
+                                               false,
+                                               new SendCommentListener(ActivityDetailWeibo.this));
+                        }
+                    }
+                }
+                break;
+            }
+            
+            default: {
+                break;
+            }
+        }
+    }
+    
     @Override
     protected void handleBaseMessage(Message msg) {
         switch(msg.what) {
@@ -420,7 +495,13 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                         }
                         mActionBar.setTitle(p.title);
                     }
+                    //设置微博文字
                     mWeiboContent.setText(mStatus.getText());
+                    //设置微博转发等信息
+                    String more_info = String.format(getString(R.string.text_comment_like_num),
+                                                               mStatus.getAttitudesCount(),
+                                                               mStatus.getCommentsCount());
+                    mWeiboMore.setText(more_info);
                     //微博配图
                     String pic_url = WeiboUtils.getStatusPicUrlByNetworkStatus(this, mStatus, mApp.getFileCache());
                     if(!TextUtils.isEmpty(pic_url)) {
@@ -499,5 +580,14 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
             }
         }
         startActivity(it);
+    }
+    
+    /**
+     * 读取评论
+     */
+    private void getComment() {
+        if(mCommentAPI != null) {
+            mCommentAPI.show(mWeiboMid, 0L, 0L, 50, 1, AUTHOR_FILTER.ALL, new GetCommentsListener(this));
+        }
     }
 }

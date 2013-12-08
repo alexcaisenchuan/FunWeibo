@@ -18,7 +18,6 @@ import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.WeiboUtils;
-import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.model.Status;
 
@@ -190,7 +189,6 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
      */
     private void checkAndPost() {
         String weiboContent = mEditNewWeiboContent.getText().toString();
-        Oauth2AccessToken token = mApp.getAccessToken();
         boolean fileValid = photoValid();
         String content = TextUtils.isEmpty(weiboContent) ? getString(R.string.text_share_photo) : weiboContent;
         
@@ -203,7 +201,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         } else if(content.length() > WeiboDefines.MAX_STATUS_CONTENT_LENGTH) {
             //字数太多
             SmartToast.showLongToast(this, R.string.hint_word_cnt_exceed_limit, true);
-        } else if(token == null){
+        } else if(mToken == null){
             //授权信息无效
             SmartToast.showLongToast(this, R.string.hint_auth_invalid, true);
         } else {

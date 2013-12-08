@@ -15,7 +15,7 @@
     <string name="hint_deactivate">DeActivate!</string>
     <string name="hint_error">错误：</string>
     <string name="hint_network_error">网络错误：</string>
-    <string name="hint_logining">登录中...</string>
+    <string name="hint_logining">登录中&#8230;</string>
     <string name="hint_ret_error">操作失败：</string>
     <string name="hint_json_parse_faild">JSON解析失败！</string>
     <string name="hint_auth_invalid">授权信息无效！</string>
@@ -27,7 +27,7 @@
     <string name="hint_add_weibo_success">添加微博成功！</string>
     <string name="hint_add_weibo_faild">添加微博失败！</string>
     <string name="hint_location_invalid">位置信息无效！</string>
-    <string name="hint_loading_in_progress">加载中...</string>
+    <string name="hint_loading_in_progress">加载中&#8230;</string>
     <string name="hint_no_more">没有更多了哦~</string>
     <string name="hint_read_weibo_error">读取微博错误</string>
     <string name="hint_pls_attach_photo">请添加个图片吧，亲 ^_^</string>
@@ -35,32 +35,36 @@
     <string name="hint_word_cnt_exceed_limit">亲，不能超过140个字哦</string>
     <string name="hint_checkin_success">签到成功！</string>
     <string name="hint_poi_read_faild">Poi读取失败！</string>
+    <string name="hint_add_comment_success">评论成功！</string>
     
     <!-- Buttons -->
     <string name="button_weibo_login">登录新浪微博</string>
     <string name="button_refresh">刷新</string>
     <string name="button_nearby">周边美食</string>
     <string name="button_select_place">选择地点</string>
+    <string name="button_comment">评论</string>
+    <string name="button_share">分享</string>
     
     <!-- title -->
     <string name="title_new_weibo">签到</string>
+    <string name="title_hot_place">热门地点</string>
+    <string name="title_comment">评论</string>
+    <string name="title_share">分享</string>
     
     <!-- Text -->
     <string name="text_weibo_num">条微博</string>
     <string name="text_detail_weibo">微博正文</string>
     <string name="text_new_weibo">新微博</string>
-    <string name="text_back">返回   |</string>
-    <string name="text_post">|  发布</string>
     <string name="text_new_weibo_text_hint">说点什么。。。</string>
     <string name="text_get_location">获取位置</string>
     <string name="text_share_photo">分享图片</string>
-    <string name="text_checkin_num">签到次数: %s</string>
-    <string name="text_distance">距离: %s米</string>
-    <string name="text_hot_place">热门地点</string>
-    <string name="text_sending_hint">发送中...</string>
+    <string name="text_checkin_num">签到次数: %1$s</string>
+    <string name="text_distance">距离: %1$s米</string>
+    <string name="text_sending_hint">发送中&#8230;</string>
     <string name="text_send_faild_hint">发送失败，点击重试</string>
     <string name="text_i_m_here">我在这里:</string>
     <string name="text_m">米</string>
+    <string name="text_comment_like_num">%1$s 赞  /  %2$s 评论</string>
     
     <!-- 微博提示 -->
     <string name="weibo_error_not_exist">原微博已删除！</string>

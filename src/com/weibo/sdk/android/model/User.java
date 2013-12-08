@@ -87,7 +87,21 @@ public class User extends WeiboResponse implements java.io.Serializable {
 		super(res);
 		init(res, elem, weibo);
 	}
-	/*package*/User(JSONObject json) throws WeiboException {
+	
+	/**
+	 * 使用json字符串初始化用户对象
+	 * @param jsonStr
+	 * @throws WeiboException
+	 * @throws JSONException
+	 * @author caisenchuan
+	 */
+	public User(String jsonStr) throws WeiboException, JSONException {
+	    super();
+	    JSONObject json = new JSONObject(jsonStr);
+	    init(json);
+	}
+	
+	public User(JSONObject json) throws WeiboException {
 		super();
 		init(json);
 	}
