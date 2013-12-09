@@ -23,10 +23,11 @@ public class CommentsAPI extends WeiboAPI {
 	 * @param count 单页返回的记录条数，默认为50
 	 * @param page 返回结果的页码，默认为1。
 	 * @param filter_by_author 作者筛选类型，0：全部、1：我关注的人、2：陌生人，默认为0。
+	 * @param base_app 查看范围，0 ：全部、1：本应用发出的评论。
 	 * @param listener
 	 */
 	public void show(long id, long since_id, long max_id, int count, int page,
-			AUTHOR_FILTER filter_by_author,RequestListener listener) {
+			AUTHOR_FILTER filter_by_author, int base_app, RequestListener listener) {
 		WeiboParameters params = new WeiboParameters();
 		params.add("id", id);
 		params.add("since_id", since_id);
@@ -34,6 +35,7 @@ public class CommentsAPI extends WeiboAPI {
 		params.add("count", count);
 		params.add("page", page);
 		params.add("filter_by_author", filter_by_author.ordinal());
+		params.add("base_app", base_app);
 		request( SERVER_URL_PRIX + "/show.json", params, HTTPMETHOD_GET,listener);
 	}
 

@@ -56,6 +56,9 @@ import java.util.TimeZone;
  * @author Yusuke Yamamoto - yusuke at mac.com
  */
 public class WeiboResponse implements java.io.Serializable {
+    /**总数*/
+    private static final String TAG_TOTAL_NUM = "total_number";
+    
     private static Map<String,SimpleDateFormat> formatMap = new HashMap<String,SimpleDateFormat>();
     private static final long serialVersionUID = 3519962197957449562L;
     private transient int rateLimitLimit = -1;
@@ -231,5 +234,18 @@ public class WeiboResponse implements java.io.Serializable {
 
     public long getRateLimitReset() {
         return rateLimitReset;
+    }
+    
+    /**
+     * 通过json字符串读取出其中的total字段
+     * @param jsonStr
+     * @return
+     * @throws JSONException
+     * @author caisenchuan
+     */
+    public static int getTotalNum(String jsonStr) throws JSONException {
+        JSONObject json = new JSONObject(jsonStr);
+        int total = json.getInt(TAG_TOTAL_NUM);
+        return total;
     }
 }

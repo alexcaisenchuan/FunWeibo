@@ -29,6 +29,7 @@ import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.User;
 import com.weibo.sdk.android.model.WeiboException;
+import com.weibo.sdk.android.model.WeiboResponse;
 import com.weibo.sdk.android.org.json.JSONException;
 
 import android.content.Context;
@@ -242,9 +243,13 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         public void onComplete(String arg0) {
             try {
                 List<Comment> commentList = Comment.constructComments(arg0);     //使用返回的json字符串构建评论列表
-                sendMessageToBaseHandler(MSG_REFRESH_COMMENTS, 0, 0, commentList);
+                int total = WeiboResponse.getTotalNum(arg0);
+                sendMessageToBaseHandler(MSG_REFRESH_COMMENTS, total, 0, commentList);
             } catch (WeiboException e) {
                 KLog.w(TAG, "WeiboException while build comment list", e);
+                showToastOnUIThread(getString(R.string.hint_ret_error) + e.toString());
+            } catch (JSONException e) {
+                KLog.w(TAG, "JSONException while build comment list", e);
                 showToastOnUIThread(getString(R.string.hint_ret_error) + e.toString());
             }
         }
@@ -281,6 +286,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     private Status mStatus = null;
     /**全局评论列表*/
     private List<Comment> mCommentList = null;
+    /**评论总数，我们不使用status中的数据，因为我们只看本应用的评论*/
+    private int mCommentCount = 0;
     /**当前位置*/
     private Position mCurrentPosition = new Position();
     
@@ -498,10 +505,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                     //设置微博文字
                     mWeiboContent.setText(mStatus.getText());
                     //设置微博转发等信息
-                    String more_info = String.format(getString(R.string.text_comment_like_num),
-                                                               mStatus.getAttitudesCount(),
-                                                               mStatus.getCommentsCount());
-                    mWeiboMore.setText(more_info);
+                    setMoreInfoDisplay();
                     //微博配图
                     String pic_url = WeiboUtils.getStatusPicUrlByNetworkStatus(this, mStatus, mApp.getFileCache());
                     if(!TextUtils.isEmpty(pic_url)) {
@@ -518,6 +522,12 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                 
             case MSG_REFRESH_COMMENTS: {
                 KLog.d(TAG, "MSG_REFRESH_COMMENTS");
+                //评论数
+                if(msg.arg1 >= 0) {
+                    mCommentCount = msg.arg1;
+                }
+                setMoreInfoDisplay();
+                //评论列表
                 Object obj = msg.obj;
                 if(obj instanceof List<?>) {
                     mCommentList = (List<Comment>)obj;
@@ -587,7 +597,28 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
      */
     private void getComment() {
         if(mCommentAPI != null) {
-            mCommentAPI.show(mWeiboMid, 0L, 0L, 50, 1, AUTHOR_FILTER.ALL, new GetCommentsListener(this));
+            mCommentAPI.show(mWeiboMid,
+                             0L,
+                             0L,
+                             100,
+                             1,
+                             AUTHOR_FILTER.ALL,
+                             1,
+                             new GetCommentsListener(this));
         }
+    }
+    
+    /**
+     * 设置转发数及赞的个数的显示
+     */
+    private void setMoreInfoDisplay() {
+        long like_num = 0;
+        if(mStatus != null) {
+            like_num = mStatus.getAttitudesCount();
+        }
+        String more_info = String.format(getString(R.string.text_comment_like_num),
+                                         like_num,
+                                         mCommentCount);
+        mWeiboMore.setText(more_info);
     }
 }

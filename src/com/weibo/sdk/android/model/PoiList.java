@@ -205,18 +205,6 @@ public class PoiList {
         }
         return ret;
     }
-    
-    /**
-     * 通过json字符串读取出其中的total字段
-     * @param jsonStr
-     * @return
-     * @throws JSONException
-     */
-    public static int getTotalByJsonStr(String jsonStr) throws JSONException {
-        JSONObject json = new JSONObject(jsonStr);
-        int total = json.getInt(TAG_TOTAL_NUM);
-        return total;
-    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/

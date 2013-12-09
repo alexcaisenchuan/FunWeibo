@@ -35,6 +35,7 @@ import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.model.Poi;
 import com.weibo.sdk.android.model.PoiCategory;
 import com.weibo.sdk.android.model.PoiList;
+import com.weibo.sdk.android.model.WeiboResponse;
 
 /**
  * poi界面的基类，提供了一些基础功能，包括：<br />
@@ -106,7 +107,7 @@ public abstract class BasePOIActivity extends BaseActivity {
                 List<Poi> list = new ArrayList<Poi>();
                 if(!TextUtils.isEmpty(str) && 
                    !str.startsWith(WeiboDefines.RET_EMPTY_ARRAY)) {
-                    int total = PoiList.getTotalByJsonStr(str);
+                    int total = WeiboResponse.getTotalNum(str);
                     list = PoiList.getPoiList(str);
                     sendMessageToBaseHandler(MSG_ON_GET_POIS, total, 0, list);
                 }
