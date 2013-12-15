@@ -168,6 +168,7 @@ public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListen
         //设置ListView
         mPoiListView = (ListView)findViewById(R.id.list_poi);
         mPoiListView.addFooterView(mLoadView);
+        mPoiListView.addFooterView(mReloadView);
         mAdapter = new ListAdapter(this);
         mPoiListView.setAdapter(mAdapter);
         
@@ -214,7 +215,7 @@ public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListen
     @Override
     protected void onGetPoiList(List<Poi> list) {
         sendMessageToBaseHandler(MSG_REFRESH_LIST);
-        onLoadFinish();
+        onLoadFinish(true);
     }
 
     @Override

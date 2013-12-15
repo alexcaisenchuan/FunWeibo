@@ -16,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MenuItem.OnActionExpandListener;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.SearchView;
 import android.widget.SearchView.OnCloseListener;
@@ -73,9 +74,12 @@ public abstract class BasePOIActivity extends BaseActivity {
     private static final int MSG_DISMISS_LOADING_HINT = MSG_EXTEND_BASE + 2;
     /**得到poi信息时的回调*/
     private static final int MSG_ON_GET_POIS          = MSG_EXTEND_BASE + 3;
+    /**显示/隐藏重新加载提示框*/
+    private static final int MSG_SET_RELOAD_HINT      = MSG_EXTEND_BASE + 4;
     
     /////////////////其他/////////////////
     private static final int SCROLL_STATE_IDLE = 0;
+
     
     /*--------------------------
      * 自定义类型
@@ -115,7 +119,7 @@ public abstract class BasePOIActivity extends BaseActivity {
             } catch (Exception e) {
                 KLog.w(TAG, "JSONException while build status", e);
                 showToastOnUIThread(getString(R.string.hint_poi_read_faild) + e.toString());
-                onLoadFinish();
+                onLoadFinish(false);
             } finally {
                 mGettingPoiList = false;
             }
@@ -129,7 +133,7 @@ public abstract class BasePOIActivity extends BaseActivity {
             try {
                 super.onComplete4binary(arg0);
             } finally {
-                onLoadFinish();
+                onLoadFinish(false);
             }
         }
         
@@ -141,7 +145,7 @@ public abstract class BasePOIActivity extends BaseActivity {
             try {
                 super.onError(e);
             } finally {
-                onLoadFinish();
+                onLoadFinish(false);
             }
         }
         
@@ -153,7 +157,7 @@ public abstract class BasePOIActivity extends BaseActivity {
             try {
                 super.onIOException(e);
             } finally {
-                onLoadFinish();
+                onLoadFinish(false);
             }
         }
     }
@@ -206,6 +210,16 @@ public abstract class BasePOIActivity extends BaseActivity {
         
     }
     
+    /**
+     * 重新加载按钮被点击时调用的事件
+     */
+    private class OnReloadClickListener implements OnClickListener {
+        @Override
+        public void onClick(View v) {
+            getNextNearbyPois();
+        }
+    }
+    
     /*--------------------------
      * 成员变量
      *-------------------------*/
@@ -213,11 +227,13 @@ public abstract class BasePOIActivity extends BaseActivity {
     ////////////////////////////Views/////////////////////////
     /**底部加载提示*/
     protected View mLoadView = null;
+    /**底部重新加载提示*/
+    protected View mReloadView = null;
     ////////////////////////////数据/////////////////////////
     /**Poi列表*/
     protected PoiList mPoiList = null;
     /**默认选择的分类*/
-    String mDefaultCategory = "";
+    protected String mDefaultCategory = "";
     ///////////////////////////标志位及计数//////////////////
     /**列表中项目的总个数*/
     protected int mCount = 0;
@@ -332,6 +348,9 @@ public abstract class BasePOIActivity extends BaseActivity {
         
         //底部加载提示
         mLoadView = getLayoutInflater().inflate(R.layout.footer_load, null);
+        mReloadView = getLayoutInflater().inflate(R.layout.footer_reload, null);
+        mReloadView.setOnClickListener(new OnReloadClickListener());
+        mReloadView.setVisibility(View.GONE);       //一开始隐藏此提示框
         
         //设置actionbar
         mActionBar.setDisplayShowTitleEnabled(false);
@@ -390,7 +409,7 @@ public abstract class BasePOIActivity extends BaseActivity {
     protected void scrollStateChanged(int scrollState) {
         //KLog.d(TAG, "scrollState = " + scrollState);
         //下拉到空闲是，且最后一个item的数等于数据的总数时，进行更新
-        if(mLastItem == mCount  && scrollState == SCROLL_STATE_IDLE) {
+        if(mLastItem >= mCount  && scrollState == SCROLL_STATE_IDLE) {
             if(mPoiList == null || mPoiList.hasMore()) {
                 getNextNearbyPois();
             } else {
@@ -410,7 +429,7 @@ public abstract class BasePOIActivity extends BaseActivity {
         //KLog.d(TAG, "firstVisibleItem = %d , visibleItemCount = %d , totalItemCount = %d",
         //             firstVisibleItem, visibleItemCount, totalItemCount);
         
-        mLastItem = firstVisibleItem + visibleItemCount - 1;  //减1是因为上面加了个addFooterView
+        mLastItem = firstVisibleItem + visibleItemCount - 2;  //减2是因为上面加了FooterView
     }
     
     /**
@@ -495,11 +514,25 @@ public abstract class BasePOIActivity extends BaseActivity {
         switch(msg.what) {
             case MSG_SHOW_LOADING_HINT: {
                 setLoadView(true);
+                //显示加载的时候隐藏重新加载提示
+                setReloadView(false);
                 break;
             }
             
             case MSG_DISMISS_LOADING_HINT: {
                 setLoadView(false);
+                break;
+            }
+            
+            case MSG_SET_RELOAD_HINT: {
+                int value = msg.arg1;
+                if(value == 1) {
+                    setReloadView(true);
+                    //显示重新加载提示的时候隐藏加载提示
+                    setLoadView(false);
+                } else {
+                    setReloadView(false);
+                }
                 break;
             }
             
@@ -533,9 +566,13 @@ public abstract class BasePOIActivity extends BaseActivity {
     /**
      * 加载完成时关闭加载提示以及设置变量（无论加载成功或失败都这么做）
      */
-    protected void onLoadFinish() {
+    protected void onLoadFinish(boolean success) {
         sendMessageToBaseHandler(MSG_DISMISS_LOADING_HINT);
         mGettingPoiList = false;
+        if(!success) {
+            //失败的话则展示重新加载提示
+            sendMessageToBaseHandler(MSG_SET_RELOAD_HINT, 1, 0, null);
+        }
     }
     
     /**
@@ -592,6 +629,21 @@ public abstract class BasePOIActivity extends BaseActivity {
                 mLoadView.setVisibility(View.VISIBLE);
             } else {
                 mLoadView.setVisibility(View.GONE);
+            }
+        }
+    }
+    
+    /**
+     * 设置重新加载提示的显示
+     * @param enable
+     * @author caisenchuan
+     */
+    private void setReloadView(boolean enable) {
+        if(mLoadView != null) {
+            if(enable) {
+                mReloadView.setVisibility(View.VISIBLE);
+            } else {
+                mReloadView.setVisibility(View.GONE);
             }
         }
     }

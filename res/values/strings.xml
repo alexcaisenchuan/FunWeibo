@@ -28,6 +28,7 @@
     <string name="hint_add_weibo_faild">添加微博失败！</string>
     <string name="hint_location_invalid">位置信息无效！</string>
     <string name="hint_loading_in_progress">加载中&#8230;</string>
+    <string name="hint_error_and_reload">失败,点击重新加载</string>
     <string name="hint_no_more">没有更多了哦~</string>
     <string name="hint_read_weibo_error">读取微博错误</string>
     <string name="hint_pls_attach_photo">请添加个图片吧，亲 ^_^</string>

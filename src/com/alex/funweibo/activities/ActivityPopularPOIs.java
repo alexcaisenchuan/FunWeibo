@@ -183,6 +183,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             final Status status = getPosItem(position);
             //图片
             String url = WeiboUtils.getStatusPicUrlByNetworkStatus(ActivityPopularPOIs.this, status, mApp.getFileCache());
+            holder.mPic.setImageResource(R.drawable.empty_photo);
             if(!TextUtils.isEmpty(url)) {
                 if(StringUtils.isLocalUri(url)) {
                     Bitmap bm = ImageUtils.createNewBitmapAndCompressByFile(url, 300, 300);
@@ -283,7 +284,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 KLog.w(TAG, "Exception", e);
                 showToastOnUIThread(R.string.hint_read_weibo_error);
             } finally {
-                onLoadFinish();
+                onLoadFinish(true);
             }
         }
     }
@@ -512,6 +513,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         //设置listview
         mListContent = (MultiColumnListView)findViewById(R.id.list_weibo_content);
         mListContent.addFooterView(mLoadView);
+        mListContent.addFooterView(mReloadView);
         //设置adapter
         mAdapter = new ListAdapter(this);
         mListContent.setAdapter(mAdapter);
@@ -705,8 +707,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     }
     
     @Override
-    protected void onLoadFinish() {
-        super.onLoadFinish();
+    protected void onLoadFinish(boolean success) {
+        super.onLoadFinish(success);
 
         //关闭加载提示
         sendMessageToBaseHandler(MSG_SET_LOADING_HINT, 0, 0, null);
