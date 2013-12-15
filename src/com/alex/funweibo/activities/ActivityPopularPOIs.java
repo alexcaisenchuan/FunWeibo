@@ -15,6 +15,7 @@ import java.util.List;
 import com.alex.common.AppConfig;
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
+import com.alex.common.keep.SettingKeeper;
 import com.alex.common.keep.StatusArrayKeeper;
 import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.OnHttpRequestReturnListener;
@@ -467,6 +468,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mDefaultCategory = SettingKeeper.readCategorySelect(this);
+        
         super.onCreate(savedInstanceState);
 
         KLog.d(TAG, "onCreate");
@@ -695,6 +698,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         sendMessageToBaseHandler(MSG_SET_LOADING_HINT, 1, 0, null);
         //设置标志位，用于等会重置保存的JSON字符串
         mStatusJsonArrCleanFlag = true;
+        //保存设置值
+        SettingKeeper.keepCategorySelect(this, category_id);
         
         mAdapter.notifyDataSetChanged();
     }

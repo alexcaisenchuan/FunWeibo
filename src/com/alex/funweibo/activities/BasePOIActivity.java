@@ -216,6 +216,8 @@ public abstract class BasePOIActivity extends BaseActivity {
     ////////////////////////////数据/////////////////////////
     /**Poi列表*/
     protected PoiList mPoiList = null;
+    /**默认选择的分类*/
+    String mDefaultCategory = "";
     ///////////////////////////标志位及计数//////////////////
     /**列表中项目的总个数*/
     protected int mCount = 0;
@@ -318,9 +320,14 @@ public abstract class BasePOIActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         //处理Intent信息
         Intent it = getIntent();
+        //若启动时指定分类，则使用指定的分类
         String defaultCategory = it.getStringExtra(INTENT_EXTRA_DEFAULT_CATEGORY);
-        if(TextUtils.isEmpty(defaultCategory)) {
-            defaultCategory = PoiCategory.DEFAULT_POI_CATEGORY;
+        if(!TextUtils.isEmpty(defaultCategory)) {
+            mDefaultCategory = defaultCategory;
+        }
+        //若没有设置默认分类，则使用固定值
+        if(TextUtils.isEmpty(mDefaultCategory)) {
+            mDefaultCategory = PoiCategory.DEFAULT_POI_CATEGORY;
         }
         
         //底部加载提示
@@ -340,7 +347,7 @@ public abstract class BasePOIActivity extends BaseActivity {
         // 为ActionBar设置下拉菜单和监听器
         mActionBar.setListNavigationCallbacks(adapter, new SpinnerSelectListener());
         //选择默认选中的项目
-        int pos = PoiCategory.getPositionById(defaultCategory);
+        int pos = PoiCategory.getPositionById(mDefaultCategory);
         if(pos >= 0) {
             mActionBar.setSelectedNavigationItem(pos);
         }
@@ -567,7 +574,7 @@ public abstract class BasePOIActivity extends BaseActivity {
     protected abstract void onGetPoiList(List<Poi> list);
     /**
      * 当某个分类被选择后，会回调此函数
-     * @param category 被选择的分类的id
+     * @param category_id 被选择的分类的id
      */
     protected abstract void onCategorySelected(String category_id);
     
