@@ -14,4 +14,6 @@
 	<color name="content">#7f7f7f</color>
 
 	<color name="content2">#9f9f9f</color>
+	
+	<color name="hint_top">#E5CBC8E3</color>
 </resources>

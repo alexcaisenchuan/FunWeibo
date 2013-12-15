@@ -36,6 +36,7 @@
     <string name="hint_checkin_success">签到成功！</string>
     <string name="hint_poi_read_faild">Poi读取失败！</string>
     <string name="hint_add_comment_success">评论成功！</string>
+    <string name="hint_loading_status">正在加载有趣信息&#8230;</string>
     
     <!-- Buttons -->
     <string name="button_weibo_login">登录新浪微博</string>

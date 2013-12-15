@@ -18,6 +18,16 @@ public class WeiboDefines {
     ////////////////////////返回值定义//////////////////////
     /**返回空数组*/
     public static final String RET_EMPTY_ARRAY = "[]";
+    /**微博列表*/
+    public static final String RET_TAG_STATUSES = "statuses";
+    /**hasvisible，不知道作用，boolean型*/
+    public static final String RET_TAG_HAS_VISIBLE = "hasvisible";
+    /**上一个位置，分页获取时使用，long型*/
+    public static final String RET_TAG_PREV_CURSOR = "previous_cursor";
+    /**下一个位置，分页获取时使用，long型*/
+    public static final String RET_TAG_NEXT_CURSOR = "next_cursor";
+    /**总数，long型*/
+    public static final String RET_TAG_TOTAL_NUMBER = "total_number";
     
     ////////////////////////各个最大值//////////////////////
     /**Poi搜索的最大半径，单位：米*/

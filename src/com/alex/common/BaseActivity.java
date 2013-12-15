@@ -15,11 +15,11 @@ import com.alex.common.utils.KLog;
 import com.weibo.sdk.android.Oauth2AccessToken;
 
 import android.app.ActionBar;
+import android.app.Activity;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 
 /**
@@ -27,7 +27,7 @@ import android.view.MenuItem;
  * @author caisenchuan
  *
  */
-public abstract class BaseActivity extends FragmentActivity {
+public abstract class BaseActivity extends Activity {
     /*--------------------------
      * 自定义类型
      *-------------------------*/

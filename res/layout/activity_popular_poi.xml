@@ -8,20 +8,29 @@
 
     <!-- As the main content view, the view below consumes the entire
          space available using match_parent in both dimensions. -->
-    <RelativeLayout
+    <FrameLayout
 	    xmlns:android="http://schemas.android.com/apk/res/android"
 	    xmlns:tools="http://schemas.android.com/tools"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent">
-	
+        
 	    <com.huewu.pla.lib.MultiColumnListView
 	        android:id="@+id/list_weibo_content"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent"
 	       />
 	    
-	    
-	</RelativeLayout>
+	    <TextView 
+            android:id="@+id/text_hint_top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:background="@color/hint_top"
+            android:gravity="center"
+            android:visibility="gone"
+            />
+        
+	</FrameLayout>
 
     <!-- android:layout_gravity="start" tells DrawerLayout to treat
          this as a sliding drawer on the left side for left-to-right

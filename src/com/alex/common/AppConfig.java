@@ -8,10 +8,11 @@ public class AppConfig {
     /*--------------------------
      * 常量
      *-------------------------*/
+    ///////////////////////////////百度相关///////////////////////////////////
     /**百度 API KEY*/
     public static final String BAIDU_API_KEY = "nAdzTUW1sKlw6EW6naalhQD2";
     
-    //微博相关
+    ///////////////////////////////微博相关///////////////////////////////////
     /**应用的key 请到官方申请正式的appkey替换APP_KEY*/
     public static final String WEIBO_APP_KEY="3708502202";
     /**替换为开发者REDIRECT_URL*/
@@ -22,6 +23,7 @@ public class AppConfig {
     		                                 "friendships_groups_write,statuses_to_me_read," +
     		                                 "follow_app_official_microblog";
 
+    ////////////////////////////////路径配置////////////////////////////////////
     /**图片缓存文件报名*/
     public static final String SYSTEMCACHE = "thinkandroid";
     
@@ -29,6 +31,10 @@ public class AppConfig {
     public static final String APP_DIR = "/funweibo/";
     /**图片存储路径*/
     public static final String PIC_DIR = APP_DIR + "pic/";
+    
+    //////////////////////////各种最大最小值////////////////////////
+    /**存储的最大微博条数*/
+    public static final int MAX_STORE_STATUS_NUM = 30;
     
     /*--------------------------
      * 自定义类型

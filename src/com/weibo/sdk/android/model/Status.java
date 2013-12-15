@@ -526,7 +526,7 @@ public class Status extends WeiboResponse implements java.io.Serializable {
 	    }
 	    
 	    JSONObject json = new JSONObject(jsonStr);
-	    JSONArray arr = json.getJSONArray("statuses");
+	    JSONArray arr = json.getJSONArray(WeiboDefines.RET_TAG_STATUSES);
 	    if(arr != null) {
 	        for(int i = 0; i < arr.length(); i++) {
 	            JSONObject obj = arr.getJSONObject(i);

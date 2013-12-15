@@ -12,8 +12,10 @@ package com.alex.funweibo.activities;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alex.common.AppConfig;
 import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
+import com.alex.common.keep.StatusArrayKeeper;
 import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.KLog;
@@ -24,12 +26,16 @@ import com.huewu.pla.lib.internal.PLA_AbsListView;
 import com.huewu.pla.lib.internal.PLA_AbsListView.OnScrollListener;
 import com.huewu.pla.lib.internal.PLA_AdapterView;
 import com.huewu.pla.lib.internal.PLA_AdapterView.OnItemClickListener;
+import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.api.WeiboAPI.SORT2;
 import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Poi;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.WeiboException;
 import com.weibo.sdk.android.model.Status.TypeSpec;
+import com.weibo.sdk.android.org.json.JSONArray;
+import com.weibo.sdk.android.org.json.JSONException;
+import com.weibo.sdk.android.org.json.JSONObject;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -65,6 +71,9 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
      *-------------------------*/
     private static final String TAG = "ActivityPopularPOIs";
     
+    //测试SaveInstance用
+    private static final String TEST_KEY = "TestKey";
+    
     ///////////////mBaseHandler msg what//////////////
     /**刷新列表内容*/
     public static final int MSG_REFRESH_LIST = MSG_POI_ACTIVITY_BASE + 1;
@@ -74,6 +83,15 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     public static final int MSG_REPLACE_SENDING_STATUS = MSG_POI_ACTIVITY_BASE + 3;
     /**发布微博失败*/
     public static final int MSG_SENDING_STATUS_FAILD = MSG_POI_ACTIVITY_BASE + 4;
+    /**显示加载的提示，用msg.arg1表示，0代表隐藏，1代表显示*/
+    public static final int MSG_SET_LOADING_HINT = MSG_POI_ACTIVITY_BASE + 5;
+    
+    //////////////mBaseHandler msg value//////////////
+    //MSG_REFRESH_LIST发出时，指定是否是第一次的列表更新
+    /**不是第一次的列表更新*/
+    public static final int VALUE_REFRESH_LIST_ARG1_DEFAULT    = 0;
+    /**是第一次的列表更新*/
+    public static final int VALUE_REFRESH_LIST_ARG1_FIRST_TIME = 1;
     
     /*--------------------------
      * 自定义类型
@@ -243,9 +261,20 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         @Override
         public void onComplete(String arg0) {
             try {
-                KLog.d(TAG, "ret : " + arg0);
+                //KLog.d(TAG, "ret : " + arg0);
+                KLog.d(TAG, "get poi status return");
+                
                 List<Status> list = Status.constructStatuses(arg0);
-                sendMessageToBaseHandler(MSG_REFRESH_LIST, 0, 0, list);
+                if(list != null && list.size() > 0) {
+                    //若本次获取的列表的分类与上次不一样，则要把之前的给清空
+                    cleanStatusJsonArrIfNeeded();
+                    //保存查询到的微博json，用于下次启动应用恢复
+                    saveStatusToJsonArr(arg0);
+                }
+                sendMessageToBaseHandler(MSG_REFRESH_LIST,
+                                         VALUE_REFRESH_LIST_ARG1_DEFAULT,
+                                         0,
+                                         list);
             } catch (com.weibo.sdk.android.org.json.JSONException e) {
                 KLog.w(TAG, "Exception", e);
                 showToastOnUIThread(R.string.hint_read_weibo_error);
@@ -322,12 +351,32 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
+    /**顶端提示框*/
+    private TextView mTextHintTop;
     
     ////////////////////////////数据/////////////////////////
     /**微博列表*/
     private List<Status> mStatus = new ArrayList<Status>();
+    /**用于暂存微博列表的JSON Array*/
+    private JSONArray mStatusJsonArr = new JSONArray();
+    
+    private String[] mPlanetTitles = {"A"};
     
     ///////////////////////////标志位及计数//////////////////
+    /**
+     * 首次选择分类的标志位
+     * */
+    private boolean mFirstSelectCategory = true;
+    /**
+     * 重新选择POI后，清空Status列表，
+     * 但是暂存的Status JSON Array不能清空，
+     * 要等获取到新的Status才暂存
+     * */
+    private boolean mStatusJsonArrCleanFlag = false;
+    /**
+     * 若为true，表示当前的status列表是恢复出来的而不是来源于网络返回
+     * */
+    private boolean mStatusRestoreFlag = false;
     
     /////////////////////////其他///////////////////////////
     /**广播监听器*/
@@ -378,7 +427,38 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         scroll(firstVisibleItem, visibleItemCount, totalItemCount);
     }
     
-    private String[] mPlanetTitles = {"A"};
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();        //默认的onBackPressed()是退出应用，这里我们希望应用只是后台
+        Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.addCategory(Intent.CATEGORY_HOME);
+        startActivity(intent);
+    }
+    
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Pass any configuration change to the drawer toggls
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+    
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // The action bar home/up action should open or close the drawer.
+        // ActionBarDrawerToggle will take care of this.
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+        
+        // Handle action buttons
+        switch(item.getItemId()) {
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -388,6 +468,15 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        KLog.d(TAG, "onCreate");
+        
+        //测试用
+        if(savedInstanceState != null) {
+            int test = savedInstanceState.getInt(TEST_KEY);
+            KLog.d(TAG, "TestKey : %s", test);
+        }
+        
         setContentView(R.layout.activity_popular_poi);
         
         //设置drawer
@@ -414,6 +503,9 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         
+        //顶端提示框
+        mTextHintTop = (TextView)findViewById(R.id.text_hint_top);
+        
         //设置listview
         mListContent = (MultiColumnListView)findViewById(R.id.list_weibo_content);
         mListContent.addFooterView(mLoadView);
@@ -431,6 +523,9 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         filter.addAction(WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_SUCCESS);
         filter.addAction(WeiboUtils.BROADCAST_ACTION_NEW_WEIBO_FAILD);
         registerReceiver(mReceiver, filter);
+        
+        //尝试从SharePref中恢复数据
+        tryRestoreStatusFromSharePref();
     }
     
     @Override
@@ -454,6 +549,19 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         
         super.onDestroy();
     }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //此方法在Activity退到后台之前被调用，因为Activity后台后有可能会被系统回收
+        
+        //测试用
+        KLog.d(TAG, "onSaveInstanceState");
+        outState.putInt(TEST_KEY, 1);
+        super.onSaveInstanceState(outState);
+        
+        //将微博列表保存到SharePref中
+        saveJsonArrToSharePref();
+    }
     
     /**
      * When using the ActionBarDrawerToggle, you must call it during
@@ -466,28 +574,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         // Sync the toggle state after onRestoreInstanceState has occurred.
         mDrawerToggle.syncState();
     }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        // Pass any configuration change to the drawer toggls
-        mDrawerToggle.onConfigurationChanged(newConfig);
-    }
-    
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // The action bar home/up action should open or close the drawer.
-        // ActionBarDrawerToggle will take care of this.
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-        
-        // Handle action buttons
-        switch(item.getItemId()) {
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
     
     @Override
     protected void handleBaseMessage(Message msg) {
@@ -495,11 +581,18 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             case MSG_REFRESH_LIST: {
                 Object obj = msg.obj;
                 if(obj instanceof List<?>) {
+                    if(mStatusRestoreFlag) {
+                        mStatus.clear();
+                        mStatusRestoreFlag = false;
+                    }
                     List<Status> list = (List<Status>)obj;
                     mStatus.addAll(list);
                     mCount = mStatus.size();
                     if(mAdapter != null) {
                         mAdapter.notifyDataSetChanged();
+                    }
+                    if(msg.arg1 == VALUE_REFRESH_LIST_ARG1_FIRST_TIME) {
+                        mStatusRestoreFlag = true;
                     }
                 }
                 break;
@@ -557,6 +650,19 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 break;
             }
             
+            case MSG_SET_LOADING_HINT: {
+                int show = msg.arg1;
+                if(mTextHintTop != null) {
+                    if(show == 1) {
+                        mTextHintTop.setText(R.string.hint_loading_status);
+                        mTextHintTop.setVisibility(View.VISIBLE);
+                    } else {
+                        mTextHintTop.setVisibility(View.GONE);
+                    }
+                }
+                break;
+            }
+            
             default: {
                 super.handleBaseMessage(msg);
                 break;
@@ -579,8 +685,26 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
 
     @Override
     protected void onCategorySelected(String category_id) {
-        mStatus.clear();
+        if(!mFirstSelectCategory) {
+            mStatus.clear();
+        } else {
+            //首次加载不能清空微博列表，因为要显示之前的
+        }
+        mFirstSelectCategory = false;
+        //显示加载提示
+        sendMessageToBaseHandler(MSG_SET_LOADING_HINT, 1, 0, null);
+        //设置标志位，用于等会重置保存的JSON字符串
+        mStatusJsonArrCleanFlag = true;
+        
         mAdapter.notifyDataSetChanged();
+    }
+    
+    @Override
+    protected void onLoadFinish() {
+        super.onLoadFinish();
+
+        //关闭加载提示
+        sendMessageToBaseHandler(MSG_SET_LOADING_HINT, 0, 0, null);
     }
     /*--------------------------
      * private方法
@@ -643,6 +767,89 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             Intent intent = new Intent(ActivityPopularPOIs.this, ActivityDetailWeibo.class);
             intent.putExtra(ActivityDetailWeibo.INTENT_EXTRA_WEIBO_STATUS_OBJ, s);
             startActivity(intent);
+        }
+    }
+
+    /**
+     * 若所选择的的分类已经改变，则重置JSON Array
+     */
+    private void cleanStatusJsonArrIfNeeded() {
+        synchronized (mStatusJsonArr) {
+            if(mStatusJsonArrCleanFlag) {
+                mStatusJsonArr = new JSONArray();
+                mStatusJsonArrCleanFlag = false;
+            }
+        }
+    }
+    
+    /**
+     * 将返回的微博列表暂存到JSON Array里
+     * @param jsonStr
+     */
+    private void saveStatusToJsonArr(String jsonStr) {
+        if (TextUtils.isEmpty(jsonStr) || jsonStr.equals(WeiboDefines.RET_EMPTY_ARRAY)) {
+            // 返回[]则代表没有数据
+            return;
+        }
+
+        synchronized (mStatusJsonArr) {
+            JSONObject json;
+            try {
+                if(mStatusJsonArr.length() < AppConfig.MAX_STORE_STATUS_NUM) {      //不用存所有微博，只存一部分就可以了，要不然打开应用的时候会很慢
+                    json = new JSONObject(jsonStr);
+                    JSONArray arr = json.getJSONArray(WeiboDefines.RET_TAG_STATUSES);
+                    for(int i = 0; i < arr.length(); i++) {
+                        JSONObject obj = arr.getJSONObject(i);
+                        if(obj != null) {
+                            mStatusJsonArr.put(obj);
+                        }
+                    }
+                }
+            } catch (JSONException e) {
+                KLog.w(TAG, "JSONException", e);
+            }
+        }
+
+        return;
+    }
+    
+    /**
+     * 将微博列表保存到SharePref中
+     */
+    private void saveJsonArrToSharePref() {
+        synchronized (mStatusJsonArr) {
+            JSONObject json = new JSONObject();
+            try {
+                if(mStatusJsonArr.length() > 0) {
+                    json.put(WeiboDefines.RET_TAG_STATUSES, mStatusJsonArr);
+                    json.put(WeiboDefines.RET_TAG_TOTAL_NUMBER, mStatusJsonArr.length());
+                    String str = json.toString();
+                    //KLog.d(TAG, "saveJsonArrToSharePref, json : %s", str);
+                    KLog.d(TAG, "saveJsonArrToSharePref");
+                    StatusArrayKeeper.keep(this, str);
+                }
+            } catch (JSONException e) {
+                KLog.w(TAG, "JSONException", e);
+            }
+        }
+    }
+    
+    /**
+     * 尝试从SharePref中恢复上一次看的微博列表
+     */
+    private void tryRestoreStatusFromSharePref() {
+        String str = StatusArrayKeeper.read(this);
+        try {
+            KLog.d(TAG, "tryRestoreStatusFromSharePref, str : %s", str);
+            List<Status> list = Status.constructStatuses(str);
+            sendMessageToBaseHandler(MSG_REFRESH_LIST,
+                                     VALUE_REFRESH_LIST_ARG1_FIRST_TIME,
+                                     0,
+                                     list);
+        } catch (JSONException e) {
+            KLog.w(TAG, "JSONException", e);
+        } catch (WeiboException e) {
+            KLog.w(TAG, "WeiboException", e);
         }
     }
 }
