@@ -40,6 +40,7 @@
     <string name="hint_loading_status">正在加载有趣信息&#8230;</string>
     <string name="hint_new_weibo_back">退出后无法保存，确定？</string>
     <string name="hint_loading_img_faild">图片加载失败！</string>
+    <string name="hint_loading_img_not_finish">图片未加载完成</string>
     
     <!-- Buttons -->
     <string name="button_ok">确定</string>
@@ -59,6 +60,7 @@
     <string name="title_comment">评论</string>
     <string name="title_share">分享</string>
     <string name="title_select_operation">选择操作</string>
+    <string name="title_full_image">查看图片</string>
     
     <!-- Text -->
     <string name="text_weibo_num">条微博</string>
@@ -91,4 +93,5 @@
     <string name="menu_query_item">部分</string>
     <string name="menu_checkin">签到</string>
     <string name="menu_send">发布</string>
+    <string name="menu_save">保存</string>
 </resources>
