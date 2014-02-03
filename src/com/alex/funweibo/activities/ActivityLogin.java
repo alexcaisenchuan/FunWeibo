@@ -12,8 +12,8 @@ package com.alex.funweibo.activities;
 import java.text.SimpleDateFormat;
 
 import com.alex.common.AppConfig;
-import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
+import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.weibo.sdk.android.Oauth2AccessToken;

@@ -23,7 +23,7 @@ import android.widget.SearchView.OnCloseListener;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.SpinnerAdapter;
 
-import com.alex.common.BaseActivity;
+import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.SmartToast;
@@ -114,6 +114,8 @@ public abstract class BasePOIActivity extends BaseActivity {
                     int total = WeiboResponse.getTotalNum(str);
                     list = PoiList.getPoiList(str);
                     sendMessageToBaseHandler(MSG_ON_GET_POIS, total, 0, list);
+                } else {
+                    onLoadFinish(false);
                 }
                 onGetPoiList(list);
             } catch (Exception e) {
@@ -565,6 +567,7 @@ public abstract class BasePOIActivity extends BaseActivity {
 
     /**
      * 加载完成时关闭加载提示以及设置变量（无论加载成功或失败都这么做）
+     * @param success 是否成功
      */
     protected void onLoadFinish(boolean success) {
         sendMessageToBaseHandler(MSG_DISMISS_LOADING_HINT);

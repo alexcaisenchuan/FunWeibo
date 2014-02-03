@@ -11,9 +11,9 @@ package com.alex.funweibo.activities;
 
 import java.io.File;
 
-import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
+import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
@@ -22,6 +22,9 @@ import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.model.Status;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -92,11 +95,8 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
                 break;
                 
             case R.id.img_weibo_pic:
-                //微博图片
-                if(!photoValid()) {
-                    //没有图片时启动拍照
-                    takePhoto();
-                }
+                //微博图片，启动拍照
+                showAddPhoto();
                 break;
             
             default:
@@ -122,6 +122,32 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         });
         return true; 
     }
+    
+    @Override
+    public void onBackPressed() {
+        if(checkModify()) {
+            AlertDialog dlg = new AlertDialog.Builder(this).create();
+            dlg.setTitle(R.string.hint_new_weibo_back);
+            dlg.setButton(Dialog.BUTTON_POSITIVE, getString(R.string.button_ok), new AlertDialog.OnClickListener() {
+                
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    delPhoto();
+                    ActivityNewWeibo.super.onBackPressed();
+                }
+            });
+            dlg.setButton(Dialog.BUTTON_NEGATIVE, getString(R.string.button_cancel), new AlertDialog.OnClickListener() {
+                
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    //...
+                }
+            });
+            dlg.show();
+        } else {
+            super.onBackPressed();
+        }
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -137,7 +163,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         Intent it = getIntent();
         boolean shouldTakePhoto = it.getBooleanExtra(INTENT_EXTRA_TAKE_PHOTO, false);
         if(shouldTakePhoto) {
-            takePhoto();
+            showAddPhoto();
         }
         
         //设置界面元素
@@ -267,13 +293,48 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         
         return ret;
     }
+
+    /**
+     * 展示添加照片界面
+     */
+    private void showAddPhoto() {
+        final Dialog dlg = new Dialog(this);
+        dlg.setTitle(R.string.title_select_operation);
+        dlg.setContentView(R.layout.dlg_add_photo);
+        dlg.findViewById(R.id.button_albums).setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                SmartToast.showLongToast(ActivityNewWeibo.this, "Albums clicked", false);
+                dlg.dismiss();
+            }
+        });
+        dlg.findViewById(R.id.button_take_photo).setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                delPhoto();
+                takePhoto();
+                dlg.dismiss();
+            }
+        });
+        dlg.show();
+    }
     
     /**
      * 启动拍照
-     * @author caisenchuan
      */
     private void takePhoto() {
         mLastPicPath = ImageUtils.takePhoto(this, REQUEST_CODE_TAKE_PHOTO);
+    }
+    
+    /**
+     * 删掉原来的照片
+     */
+    private void delPhoto() {
+        if(!TextUtils.isEmpty(mLastPicPath)) {
+            ImageUtils.deletePhoto(mLastPicPath);
+        }
     }
     
     /**
@@ -293,4 +354,29 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         }
     }
     
+    /**
+     * 检查是否输入了内容
+     * @return
+     */
+    private boolean checkModify() {
+        boolean ret = false;
+        
+        String weiboContent = mEditNewWeiboContent.getText().toString();
+        boolean fileValid = photoValid();
+        
+        if(!TextUtils.isEmpty(mPoiid)) {
+            //选择位置
+            ret = true;
+        } else if(fileValid) {
+            //放图片
+            ret = true;
+        } else if(weiboContent.length() > 0) {
+            //添加了内容
+            ret = true;
+        } else {
+            //...
+        }
+        
+        return ret;
+    }
 }

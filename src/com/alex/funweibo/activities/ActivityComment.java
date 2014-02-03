@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 
-import com.alex.common.BaseActivity;
+import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.SmartToast;
 import com.alex.funweibo.R;
 

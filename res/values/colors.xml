@@ -3,6 +3,8 @@
     
     <color name="white">#FFFFFFFF</color>
     
+    <color name="black">#FF000000</color>
+    
     <color name="sepline">#E5879DB2</color>
     
 	<color name="suggest_list_background">#E5FFDB5E</color>

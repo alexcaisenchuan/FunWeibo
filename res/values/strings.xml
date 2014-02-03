@@ -38,20 +38,27 @@
     <string name="hint_poi_read_faild">Poi读取失败！</string>
     <string name="hint_add_comment_success">评论成功！</string>
     <string name="hint_loading_status">正在加载有趣信息&#8230;</string>
+    <string name="hint_new_weibo_back">退出后无法保存，确定？</string>
+    <string name="hint_loading_img_faild">图片加载失败！</string>
     
     <!-- Buttons -->
+    <string name="button_ok">确定</string>
+    <string name="button_cancel">取消</string>
     <string name="button_weibo_login">登录新浪微博</string>
     <string name="button_refresh">刷新</string>
     <string name="button_nearby">周边美食</string>
     <string name="button_select_place">选择地点</string>
     <string name="button_comment">评论</string>
     <string name="button_share">分享</string>
+    <string name="button_albums">打开手机相册</string>
+    <string name="button_take_photo">拍照</string>
     
     <!-- title -->
     <string name="title_new_weibo">签到</string>
     <string name="title_hot_place">热门地点</string>
     <string name="title_comment">评论</string>
     <string name="title_share">分享</string>
+    <string name="title_select_operation">选择操作</string>
     
     <!-- Text -->
     <string name="text_weibo_num">条微博</string>

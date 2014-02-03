@@ -7,7 +7,7 @@
  * @date 2013-9-8
  * @version 1.0
  */
-package com.alex.common;
+package com.alex.common.activities;
 
 import com.alex.funweibo.AppControl;
 import com.alex.common.utils.SmartToast;

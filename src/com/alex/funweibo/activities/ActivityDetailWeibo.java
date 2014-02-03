@@ -11,9 +11,10 @@ package com.alex.funweibo.activities;
 
 import java.util.List;
 
-import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
+import com.alex.common.activities.BaseActivity;
+import com.alex.common.activities.ImageLoadActivity;
 import com.alex.common.utils.Misc;
 import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.ShareUtils;
@@ -343,6 +344,17 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                 //打开地图
                 break;
             }
+            
+            case R.id.img_weibo_pic: {
+                //查看微博大图
+                if(mStatus != null) {
+                    String url = mStatus.getOriginal_pic();
+                    if(!TextUtils.isEmpty(url)) {
+                        ImageLoadActivity.loadImage(this, url);
+                    }
+                }
+                break;
+            }
                 
             default:
                 break;
@@ -404,6 +416,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         mHeaderWeiboContent = View.inflate(this, R.layout.header_weibo_content, null);
         mWeiboContent = (TextView)mHeaderWeiboContent.findViewById(R.id.text_weibo_content);
         mWeiboPic = (ImageView)mHeaderWeiboContent.findViewById(R.id.img_weibo_pic);
+        mWeiboPic.setOnClickListener(this);
         mWeiboPicBorder = (LinearLayout)mHeaderWeiboContent.findViewById(R.id.img_weibo_pic_border);
         mWeiboMore = (TextView)mHeaderWeiboContent.findViewById(R.id.text_more_info);
         

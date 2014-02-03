@@ -13,7 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.alex.funweibo.R;
-import com.alex.common.BaseActivity;
+import com.alex.common.activities.BaseActivity;
 import com.weibo.sdk.android.WeiboError;
 import com.weibo.sdk.android.WeiboException;
 import com.weibo.sdk.android.net.RequestListener;

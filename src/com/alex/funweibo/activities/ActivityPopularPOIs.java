@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alex.common.AppConfig;
-import com.alex.common.BaseActivity;
 import com.alex.funweibo.R;
+import com.alex.common.activities.BaseActivity;
 import com.alex.common.keep.SettingKeeper;
 import com.alex.common.keep.StatusArrayKeeper;
 import com.alex.common.utils.ImageUtils;
