@@ -12,6 +12,7 @@ package com.alex.common.activities;
 import com.alex.funweibo.AppControl;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
+import com.umeng.analytics.MobclickAgent;
 import com.weibo.sdk.android.Oauth2AccessToken;
 
 import android.app.ActionBar;
@@ -128,7 +129,7 @@ public abstract class BaseActivity extends Activity {
             };
         };
     }
-    
+        
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         KLog.d(TAG_BASE, "onOptionsItemSelected , %s , %s", 

@@ -23,9 +23,9 @@ import android.widget.SearchView.OnCloseListener;
 import android.widget.SearchView.OnQueryTextListener;
 import android.widget.SpinnerAdapter;
 
+import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.KLog;
-import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.SmartToast;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;

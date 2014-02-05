@@ -15,6 +15,7 @@
     <string name="hint_deactivate">DeActivate!</string>
     <string name="hint_error">错误：</string>
     <string name="hint_network_error">网络错误：</string>
+    <string name="hint_check_network">请检查您的网络！</string>
     <string name="hint_logining">登录中&#8230;</string>
     <string name="hint_ret_error">操作失败：</string>
     <string name="hint_json_parse_faild">JSON解析失败！</string>

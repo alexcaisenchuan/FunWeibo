@@ -13,14 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.alex.common.AppConfig;
+import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.funweibo.R;
 import com.alex.common.activities.BaseActivity;
 import com.alex.common.keep.SettingKeeper;
-import com.alex.common.keep.WeiboAuthInfoKeeper;
 import com.alex.common.keep.WeiboDataKeeper;
 import com.alex.common.utils.DialogUtils;
 import com.alex.common.utils.ImageUtils;
-import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.StringUtils;
 import com.alex.common.utils.WeiboUtils;
@@ -29,6 +28,9 @@ import com.huewu.pla.lib.internal.PLA_AbsListView;
 import com.huewu.pla.lib.internal.PLA_AbsListView.OnScrollListener;
 import com.huewu.pla.lib.internal.PLA_AdapterView;
 import com.huewu.pla.lib.internal.PLA_AdapterView.OnItemClickListener;
+import com.umeng.analytics.MobclickAgent;
+import com.umeng.fb.FeedbackAgent;
+import com.umeng.update.UmengUpdateAgent;
 import com.weibo.sdk.android.WeiboDefines;
 import com.weibo.sdk.android.api.WeiboAPI.SORT2;
 import com.weibo.sdk.android.model.Place;
@@ -411,6 +413,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     public void onClick(View v) {
         switch(v.getId()) {
             case R.id.button_feedback:
+                FeedbackAgent agent = new FeedbackAgent(this);
+                agent.startFeedbackActivity();
                 break;
                 
             case R.id.button_logout:
@@ -573,12 +577,27 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         //尝试从SharePref中恢复数据
         restoreStatusFromSharePref();
         restoreCurrUserFromSharePref();
+        
+        //检测升级，使用友盟
+        UmengUpdateAgent.update(this);
     }
     
     @Override
     protected void onStart() {
         KLog.d(TAG, "onStart");
         super.onStart();
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);       //友盟统计使用
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);        //友盟统计使用
     }
     
     @Override

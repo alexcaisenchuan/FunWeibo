@@ -6,6 +6,7 @@ import java.io.IOException;
 import android.content.Context;
 import android.content.Intent;
 
+import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.common.activities.BaseActivity;
 import com.alex.common.keep.SettingKeeper;
 import com.alex.common.utils.NetworkUtils.NetworkType;

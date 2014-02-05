@@ -7,13 +7,14 @@
  * @date 2013-9-19
  * @version 1.0
  */
-package com.alex.common.utils;
+package com.alex.common;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.alex.funweibo.R;
 import com.alex.common.activities.BaseActivity;
+import com.alex.common.utils.KLog;
 import com.weibo.sdk.android.WeiboError;
 import com.weibo.sdk.android.WeiboException;
 import com.weibo.sdk.android.net.RequestListener;
@@ -67,6 +68,8 @@ public abstract class OnHttpRequestReturnListener implements RequestListener{
     public void onError(WeiboException e) {
         KLog.w(TAG, "onError", e);
         String msg = e.getMessage();
+        Throwable cause = e.getCause();
+        
         WeiboError error = null;
         try {
             error = new WeiboError(msg);
@@ -90,7 +93,11 @@ public abstract class OnHttpRequestReturnListener implements RequestListener{
                     break;
             }
         } else {
-            str = mBaseActivity.getString(R.string.hint_error) + e.toString();
+            if(cause instanceof IOException) {
+                str = mBaseActivity.getString(R.string.hint_check_network);
+            } else {
+                str = mBaseActivity.getString(R.string.hint_error) + e.toString();
+            }
         }
         
         mBaseActivity.showToastOnUIThread(str);
