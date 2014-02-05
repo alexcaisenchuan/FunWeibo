@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.alex.common.activities.BaseActivity;
+import com.alex.common.keep.SettingKeeper;
 import com.alex.common.utils.NetworkUtils.NetworkType;
 import com.alex.funweibo.AppControl;
 import com.alex.funweibo.R;
@@ -118,12 +119,13 @@ public class WeiboUtils {
     /**
      * 根据当前网络状态获取对应的微博图片的url
      */
-    public static String getStatusPicUrlByNetworkStatus(Context c, Status status, TAFileCache cache) {
+    public static String getStatusPicUrlByNetworkStatus(Context context, Status status, TAFileCache cache) {
         String url = "";
         
-        if(c != null && status != null) {
+        if(context != null && status != null) {
             url = status.getBmiddle_pic();      //默认返回middle
-            if(NetworkUtils.getCurrentNetworkType(c) == NetworkType.NETWORK_MOBILE) {
+            if(NetworkUtils.getCurrentNetworkType(context) == NetworkType.NETWORK_MOBILE &&
+               SettingKeeper.readPicLowQualityUnderMobile(context)) {
                 byte[] buffer = null;
                 if(cache != null) {
                     buffer = cache.getBufferFromMemCache(url);

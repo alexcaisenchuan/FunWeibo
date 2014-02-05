@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android" >
+    <!-- android:layout_gravity="start" tells DrawerLayout to treat
+         this as a sliding drawer on the left side for left-to-right
+         languages and on the right side for right-to-left languages. -->
+	<RelativeLayout
+        android:id="@+id/left_drawer_1"
+        android:layout_gravity="start"
+	    android:layout_width="240dp"
+	    android:layout_height="match_parent"
+	    android:background="@color/drawer_main"
+	    android:orientation="vertical">
+	    
+	    <!-- 顶端用户信息 -->
+	    <LinearLayout 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal"
+	        >
+	        
+	        <!-- 用户头像 -->
+	        <ImageView 
+	            android:id="@+id/img_userface"
+	            android:layout_width="40dp"
+	            android:layout_height="40dp"
+	            android:scaleType="fitXY"
+	            android:src="@drawable/ic_launcher"
+	            android:layout_marginRight="5sp"
+	            />
+	            
+	        <!-- 用户名 -->
+	        <TextView 
+	            android:id="@+id/text_username"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:textSize="18sp"
+	            android:textColor="@color/white"
+	            />
+	    </LinearLayout>
+	    
+	    <!-- 底部操作按钮 -->
+	    <LinearLayout 
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="vertical"
+	        android:layout_alignParentBottom="true"
+	        >
+	        
+	        <Switch
+	            android:id="@+id/switch_2g_pic"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="@string/switch_2g_pic"
+	            android:textColor="@color/white"/>
+	        
+	        <Button
+	            android:id="@+id/button_feedback"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="@string/button_feedback"
+	            android:textColor="@color/white"
+	            />
+	        
+	        <Button
+	            android:id="@+id/button_logout"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content"
+	            android:text="@string/button_logout"
+	            android:textColor="@color/white"
+	            />
+	    </LinearLayout>
+	</RelativeLayout>
+</merge>

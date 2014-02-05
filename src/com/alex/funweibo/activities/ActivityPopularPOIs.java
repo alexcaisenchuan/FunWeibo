@@ -16,7 +16,9 @@ import com.alex.common.AppConfig;
 import com.alex.funweibo.R;
 import com.alex.common.activities.BaseActivity;
 import com.alex.common.keep.SettingKeeper;
-import com.alex.common.keep.StatusArrayKeeper;
+import com.alex.common.keep.WeiboAuthInfoKeeper;
+import com.alex.common.keep.WeiboDataKeeper;
+import com.alex.common.utils.DialogUtils;
 import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.OnHttpRequestReturnListener;
 import com.alex.common.utils.KLog;
@@ -32,14 +34,17 @@ import com.weibo.sdk.android.api.WeiboAPI.SORT2;
 import com.weibo.sdk.android.model.Place;
 import com.weibo.sdk.android.model.Poi;
 import com.weibo.sdk.android.model.Status;
+import com.weibo.sdk.android.model.User;
 import com.weibo.sdk.android.model.WeiboException;
 import com.weibo.sdk.android.model.Status.TypeSpec;
 import com.weibo.sdk.android.org.json.JSONArray;
 import com.weibo.sdk.android.org.json.JSONException;
 import com.weibo.sdk.android.org.json.JSONObject;
 
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
@@ -56,10 +61,12 @@ import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 
 /**
@@ -341,6 +348,17 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         
     }
     
+    /**
+     * 2/3G下低清图片开关
+     * @author caisenchuan
+     */
+    private class Switch2GPicCheckListener implements OnCheckedChangeListener {
+        
+        @Override
+        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            SettingKeeper.keepPicLowQualityUnderMobile(ActivityPopularPOIs.this, isChecked);
+        }
+    }
     /*--------------------------
      * 成员变量
      *-------------------------*/
@@ -351,8 +369,12 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     private ListAdapter mAdapter = null;
     //侧边栏相关
     private DrawerLayout mDrawerLayout;
-    private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
+    private ImageView mImageUserface;
+    private TextView mTextUsername;
+    private Switch mSwitch2GPic;
+    private Button mButtonFeedback;
+    private Button mButtonLogout;
     /**顶端提示框*/
     private TextView mTextHintTop;
     
@@ -361,8 +383,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     private List<Status> mStatus = new ArrayList<Status>();
     /**用于暂存微博列表的JSON Array*/
     private JSONArray mStatusJsonArr = new JSONArray();
-    
-    private String[] mPlanetTitles = {"A"};
     
     ///////////////////////////标志位及计数//////////////////
     /**
@@ -390,11 +410,23 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
+            case R.id.button_feedback:
+                break;
+                
+            case R.id.button_logout:
+                DialogUtils.showOKCancelButtonDialog(this, getString(R.string.hint_logout_confirm), new AlertDialog.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        logout();
+                    }
+                });
+                break;
+            
             default:
                 break;
         }
     }
-    
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.  
@@ -485,10 +517,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         
         //设置drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        // set up the drawer's list view with items and click listener
-        mDrawerList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mPlanetTitles));
-        // ActionBarDrawerToggle ties together the the proper interactions
+        // ActionBarDrawerToggle ties together the the proper interactions 
         // between the sliding drawer and the action bar app icon
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
@@ -498,14 +527,26 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 R.string.drawer_close  /* "close drawer" description for accessibility */
                 ) {
             public void onDrawerClosed(View view) {
+                KLog.d(TAG, "onDrawerClosed");
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             public void onDrawerOpened(View drawerView) {
+                KLog.d(TAG, "onDrawerOpened");
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                restoreCurrUserFromSharePref();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mImageUserface = (ImageView)findViewById(R.id.img_userface);
+        mTextUsername = (TextView)findViewById(R.id.text_username);
+        mSwitch2GPic = (Switch)findViewById(R.id.switch_2g_pic);
+        mSwitch2GPic.setChecked(SettingKeeper.readPicLowQualityUnderMobile(this));
+        mSwitch2GPic.setOnCheckedChangeListener(new Switch2GPicCheckListener());
+        mButtonFeedback = (Button)findViewById(R.id.button_feedback);
+        mButtonFeedback.setOnClickListener(this);
+        mButtonLogout = (Button)findViewById(R.id.button_logout);
+        mButtonLogout.setOnClickListener(this);
         
         //顶端提示框
         mTextHintTop = (TextView)findViewById(R.id.text_hint_top);
@@ -530,7 +571,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         registerReceiver(mReceiver, filter);
         
         //尝试从SharePref中恢复数据
-        tryRestoreStatusFromSharePref();
+        restoreStatusFromSharePref();
+        restoreCurrUserFromSharePref();
     }
     
     @Override
@@ -833,7 +875,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                     String str = json.toString();
                     //KLog.d(TAG, "saveJsonArrToSharePref, json : %s", str);
                     KLog.d(TAG, "saveJsonArrToSharePref");
-                    StatusArrayKeeper.keep(this, str);
+                    WeiboDataKeeper.keepStatus(this, str);
                 }
             } catch (JSONException e) {
                 KLog.w(TAG, "JSONException", e);
@@ -844,8 +886,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     /**
      * 尝试从SharePref中恢复上一次看的微博列表
      */
-    private void tryRestoreStatusFromSharePref() {
-        String str = StatusArrayKeeper.read(this);
+    private void restoreStatusFromSharePref() {
+        String str = WeiboDataKeeper.readStatus(this);
         try {
             KLog.d(TAG, "tryRestoreStatusFromSharePref, str : %s", str);
             List<Status> list = Status.constructStatuses(str);
@@ -858,5 +900,32 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         } catch (WeiboException e) {
             KLog.w(TAG, "WeiboException", e);
         }
+    }
+    
+    /**
+     * 尝试从SharePref中恢复用户信息
+     */
+    private void restoreCurrUserFromSharePref() {
+        User user = mApp.getCurrUser();
+        if(user != null) {
+            String userface_url = user.getProfileImageURL().toString();
+            String username = user.getName();
+            
+            mApp.getImageFetcher().loadFormCache(userface_url, mImageUserface);
+            mTextUsername.setText(username);
+        }
+    }
+    
+    /**
+     * 注销授权数据，回到登录界面
+     */
+    private void logout() {
+        //注销数据
+        mApp.logout();
+        
+        //回到登录界面
+        Intent it = new Intent(this, ActivityLogin.class);
+        startActivity(it);
+        finish();
     }
 }

@@ -1,8 +1,8 @@
 package com.alex.common.keep;
 
+import com.alex.common.utils.PrefUtils;
+
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 
 /**
  * 各个设置项的保存类
@@ -12,9 +12,13 @@ public class SettingKeeper {
     /*--------------------------
      * 常量
      *-------------------------*/
-    private static final String PREFERENCES_NAME = "com_alex_funweibo_setting";
+    /**pref的名字*/
+    private static final String PREFERENCES_NAME    = "pref_settings";
     
+    /**选择的分类*/
     private static final String TAG_CATEGORY_SELECT = "category_select";
+    /**移动网络下使用低清图片质量*/
+    private static final String TAG_PIC_LOW_QUALITY_UNDER_MOBILE  = "pic_quality_under_mobile";
     
     /*--------------------------
      * 自定义类型
@@ -29,37 +33,40 @@ public class SettingKeeper {
      *-------------------------*/
     /**
      * 保存分类选择的设置
-     * @param context Activity 上下文环境
-     * @param setting 微博列表
+     * @param context
+     * @param setting
      */
     public static void keepCategorySelect(Context context, String setting) {
-        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
-        Editor editor = pref.edit();
-        editor.putString(TAG_CATEGORY_SELECT, setting);
-        editor.commit();
+        PrefUtils.keep(context, PREFERENCES_NAME, TAG_CATEGORY_SELECT, setting);
     }
 
     /**
-     * 从SharedPreferences读取微博列表字符串
+     * 读取分类选择的设置
      * @param context
      * @return 设置值
      */
     public static String readCategorySelect(Context context) {
-        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
-        String setting = pref.getString(TAG_CATEGORY_SELECT, "");
-        return setting;
+        return PrefUtils.readString(context, PREFERENCES_NAME, TAG_CATEGORY_SELECT);
     }
     
     /**
-     * 清空所有设置的SharePref
+     * 保存分类选择的设置
      * @param context
+     * @param setting
      */
-    public static void clearAll(Context context) {
-        SharedPreferences pref = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_APPEND);
-        Editor editor = pref.edit();
-        editor.clear();
-        editor.commit();
+    public static void keepPicLowQualityUnderMobile(Context context, boolean setting) {
+        PrefUtils.keep(context, PREFERENCES_NAME, TAG_PIC_LOW_QUALITY_UNDER_MOBILE, setting);
     }
+
+    /**
+     * 读取分类选择的设置
+     * @param context
+     * @return 设置值
+     */
+    public static boolean readPicLowQualityUnderMobile(Context context) {
+        return PrefUtils.readBoolean(context, PREFERENCES_NAME, TAG_PIC_LOW_QUALITY_UNDER_MOBILE);
+    }
+    
     /*--------------------------
      * protected、packet方法
      *-------------------------*/

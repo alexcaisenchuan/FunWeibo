@@ -14,6 +14,7 @@ import java.io.File;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
 import com.alex.common.activities.BaseActivity;
+import com.alex.common.utils.DialogUtils;
 import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
@@ -126,24 +127,13 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     @Override
     public void onBackPressed() {
         if(checkModify()) {
-            AlertDialog dlg = new AlertDialog.Builder(this).create();
-            dlg.setTitle(R.string.hint_new_weibo_back);
-            dlg.setButton(Dialog.BUTTON_POSITIVE, getString(R.string.button_ok), new AlertDialog.OnClickListener() {
-                
+            DialogUtils.showOKCancelButtonDialog(this, getString(R.string.hint_new_weibo_back), new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     delPhoto();
                     ActivityNewWeibo.super.onBackPressed();
                 }
             });
-            dlg.setButton(Dialog.BUTTON_NEGATIVE, getString(R.string.button_cancel), new AlertDialog.OnClickListener() {
-                
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    //...
-                }
-            });
-            dlg.show();
         } else {
             super.onBackPressed();
         }

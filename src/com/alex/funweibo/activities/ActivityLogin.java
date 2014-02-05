@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import com.alex.common.AppConfig;
 import com.alex.funweibo.R;
 import com.alex.common.activities.BaseActivity;
+import com.alex.common.keep.WeiboAuthInfoKeeper;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.weibo.sdk.android.Oauth2AccessToken;
@@ -21,8 +22,6 @@ import com.weibo.sdk.android.Weibo;
 import com.weibo.sdk.android.WeiboAuthListener;
 import com.weibo.sdk.android.WeiboDialogError;
 import com.weibo.sdk.android.WeiboException;
-import com.weibo.sdk.android.keep.AccessTokenKeeper;
-import com.weibo.sdk.android.keep.UserInfoKeeper;
 import com.weibo.sdk.android.sso.SsoHandler;
 
 import android.content.Intent;
@@ -57,13 +56,14 @@ public class ActivityLogin extends BaseActivity implements OnClickListener{
             String weibo_userid = values.getString("uid");
             
             Oauth2AccessToken accessToken = new Oauth2AccessToken(token, expires_in);
-            ActivityLogin.this.mApp.setAccessToken(accessToken);
-            ActivityLogin.this.mApp.setWeiboUserid(weibo_userid);
+            mApp.setAccessToken(accessToken);
+            mApp.setWeiboUserid(weibo_userid);
+            mApp.getCurrentUserInfo();
             
             if (accessToken.isSessionValid()) {
                 //保存信息
-                AccessTokenKeeper.keepAccessToken(ActivityLogin.this, accessToken);
-                UserInfoKeeper.keep(ActivityLogin.this, weibo_userid);
+                WeiboAuthInfoKeeper.keepAccessToken(ActivityLogin.this, accessToken);
+                WeiboAuthInfoKeeper.keepUid(ActivityLogin.this, weibo_userid);
                 
                 String date = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss")
                         .format(new java.util.Date(accessToken.getExpiresTime()));

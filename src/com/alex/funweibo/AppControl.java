@@ -14,6 +14,8 @@ import java.io.IOException;
 
 import com.alex.funweibo.model.Position;
 import com.alex.common.AppConfig;
+import com.alex.common.keep.WeiboAuthInfoKeeper;
+import com.alex.common.keep.WeiboDataKeeper;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.baidu.location.BDLocation;
@@ -29,8 +31,6 @@ import com.ta.util.extend.draw.DensityUtils;
 import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.WeiboException;
 import com.weibo.sdk.android.api.UsersAPI;
-import com.weibo.sdk.android.keep.AccessTokenKeeper;
-import com.weibo.sdk.android.keep.UserInfoKeeper;
 import com.weibo.sdk.android.model.User;
 import com.weibo.sdk.android.net.RequestListener;
 import com.weibo.sdk.android.org.json.JSONException;
@@ -142,6 +142,7 @@ public class AppControl extends Application{
             try {
                 if(!TextUtils.isEmpty(arg0)) {
                     mCurrentUser = new User(arg0);
+                    WeiboDataKeeper.keepCurrUser(getApplicationContext(), arg0);
                     KLog.d(TAG, "current user : %s", mCurrentUser.toString());
                 }
             } catch (com.weibo.sdk.android.model.WeiboException e) {
@@ -153,17 +154,17 @@ public class AppControl extends Application{
 
         @Override
         public void onComplete4binary(ByteArrayOutputStream arg0) {
-            // TODO Auto-generated method stub
+            //...
         }
 
         @Override
         public void onError(WeiboException arg0) {
-            // TODO Auto-generated method stub
+            //...
         }
 
         @Override
         public void onIOException(IOException arg0) {
-            // TODO Auto-generated method stub
+            //...
         }
         
     }
@@ -181,8 +182,6 @@ public class AppControl extends Application{
     private User mCurrentUser = null;
     /**微博的用户id*/
     private long mWeiboUserid = 0L;
-    /**网站的session id*/
-    private String mSessionID = "";
 
     /**百度定位对象 */
     private LocationClient mLocationClient = null;
@@ -219,7 +218,7 @@ public class AppControl extends Application{
         super.onCreate();
         KLog.d(TAG, "onCreate");
 
-        //授权相关
+        //加载保存信息
         restoreAppInfo();
         
         //设置定位相关参数
@@ -259,16 +258,21 @@ public class AppControl extends Application{
         SmartToast.initSingletonToast(getApplicationContext());
         
         //读取当前登录的用户信息
-        if(mAccessToken != null) {
-            UsersAPI users = new UsersAPI(mAccessToken);
-            users.show(mWeiboUserid, new GetUserInfoListener());
-        }
+        getCurrentUserInfo();
     }
 
+    /**
+     * 设置access token
+     * @param token
+     */
     public void setAccessToken(Oauth2AccessToken token) {
         this.mAccessToken = token;
     }
     
+    /**
+     * 设置用户id
+     * @param uid
+     */
     public void setWeiboUserid(String uid) {
         try {
             this.mWeiboUserid = Long.valueOf(uid);
@@ -277,20 +281,20 @@ public class AppControl extends Application{
         }
     }
     
-    public void setSessionID(String session) {
-        this.mSessionID = session;
-    }
-    
+    /**
+     * 读取access token
+     * @return
+     */
     public Oauth2AccessToken getAccessToken() {
         return this.mAccessToken;
     }
     
+    /**
+     * 读取用户id
+     * @return
+     */
     public long getWeiboUserid() {
         return this.mWeiboUserid;
-    }
-    
-    public String getSessionID() {
-        return this.mSessionID;
     }
     
     /**
@@ -314,10 +318,18 @@ public class AppControl extends Application{
         return ret;
     }
     
+    /**
+     * 获取位置管理器
+     * @return
+     */
     public LocationClient getLocationClient() {
         return this.mLocationClient;
     }
     
+    /**
+     * 获取当前位置
+     * @return
+     */
     public Position getCurrentLocation() {
         return this.mCurrentLocation;
     }
@@ -347,6 +359,26 @@ public class AppControl extends Application{
         return mNewWeiboTempId;
     }
     
+    /**
+     * 获取当前使用用户
+     * @return
+     */
+    public User getCurrUser() {
+        return mCurrentUser;
+    }
+    
+    /**
+     * 注销当前用户信息
+     */
+    public void logout() {
+        mAccessToken = null;
+        mCurrentUser = null;
+        mWeiboUserid = 0L;
+        
+        WeiboAuthInfoKeeper.clear(this);
+        WeiboDataKeeper.clear(this);
+    }
+    
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -354,18 +386,36 @@ public class AppControl extends Application{
     /*--------------------------
      * private方法
      *-------------------------*/
-
     /**
      * 加载应用信息
      */
     private void restoreAppInfo() {
-        //读取保存参数
-        Oauth2AccessToken token = AccessTokenKeeper.readAccessToken(this);
-        String weiboUserid = UserInfoKeeper.read(this);
-        
+        //授权信息
+        Oauth2AccessToken token = WeiboAuthInfoKeeper.readAccessToken(this);
+        String weiboUserid = WeiboAuthInfoKeeper.readUid(this);
         setAccessToken(token);
         setWeiboUserid(weiboUserid);
+
+        //用户信息
+        try {
+            String userStr = WeiboDataKeeper.readCurrUser(this);
+            mCurrentUser = new User(userStr);
+        } catch (com.weibo.sdk.android.model.WeiboException e) {
+            KLog.w(TAG, "WeiboException", e);
+        } catch (JSONException e) {
+            KLog.w(TAG, "JSONException", e);
+        }
         
         return;
+    }
+    
+    /**
+     * 读取当前用户信息
+     */
+    public void getCurrentUserInfo() {
+        if(isWeiboAuthValid()) {
+            UsersAPI users = new UsersAPI(mAccessToken);
+            users.show(mWeiboUserid, new GetUserInfoListener());
+        }
     }
 }
