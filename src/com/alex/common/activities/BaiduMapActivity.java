@@ -149,19 +149,19 @@ public class BaiduMapActivity extends BaseActivity {
     /**
      * 打开地图，默认添加一个标记点，并且把地图中心设为此标记点
      */
-    public static void openMapWithMarker(Context context, double lat, double log, String title) {
+    public static void openMapWithMarker(Context context, double lat, double lon, String title) {
         Intent it = new Intent(context, BaiduMapActivity.class);
         
         //设置中心
         Bundle b = new Bundle();
         b.putDouble(EXTRA_LATITUDE, lat);
-        b.putDouble(EXTRA_LONGTITUDE, log);
+        b.putDouble(EXTRA_LONGTITUDE, lon);
         it.putExtra(INTENT_SET_CENTER, b);
         
         //添加标注点
         b = new Bundle();
         b.putDouble(EXTRA_LATITUDE, lat);
-        b.putDouble(EXTRA_LONGTITUDE, log);
+        b.putDouble(EXTRA_LONGTITUDE, lon);
         b.putString(EXTRA_TITLE, title);
         it.putExtra(INTENT_ADD_MARKER, b);
         
@@ -181,6 +181,8 @@ public class BaiduMapActivity extends BaseActivity {
         initMapManager();
 
         setContentView(R.layout.activity_baidu_map);
+        
+        mActionBar.setTitle(R.string.title_map);
         
         //初始化界面元素
         mPopContent = new Button(this);

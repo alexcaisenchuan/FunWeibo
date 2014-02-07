@@ -69,6 +69,8 @@
     <string name="title_share">分享</string>
     <string name="title_select_operation">选择操作</string>
     <string name="title_full_image">查看图片</string>
+    <string name="title_detail">详情</string>
+    <string name="title_map">查看地图</string>
     
     <!-- Text -->
     <string name="text_weibo_num">条微博</string>
@@ -104,6 +106,7 @@
     <string name="menu_checkin">签到</string>
     <string name="menu_send">发布</string>
     <string name="menu_save">保存</string>
+    <string name="menu_map">地图</string>
     
     <!-- 其他 -->
     <string name="drawer_open">打开侧边栏</string>

@@ -32,6 +32,7 @@
 	            android:layout_height="wrap_content"
 	            android:textSize="18sp"
 	            android:layout_gravity="center_vertical"
+	            android:textIsSelectable="true"
 	            />
 	    </LinearLayout>
 		    
@@ -49,10 +50,10 @@
 	        
 	        <TextView 
 	            android:id="@+id/text_place_address"
-	            android:text="111"
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
-	            android:textSize="18sp"/>
+	            android:textSize="18sp"
+	            android:textIsSelectable="true"/>
 	        
 	    </LinearLayout>
 	    
@@ -70,10 +71,10 @@
 	        
 	        <TextView 
 	            android:id="@+id/text_place_phone"
-	            android:text="111"
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
-	            android:textSize="18sp"/>
+	            android:textSize="18sp"
+	            android:textIsSelectable="true"/>
 	        
 	    </LinearLayout>
 	    
@@ -91,10 +92,10 @@
 	        
 	        <TextView 
 	            android:id="@+id/text_place_category"
-	            android:text="111"
 	            android:layout_width="match_parent"
 	            android:layout_height="wrap_content"
-	            android:textSize="18sp"/>
+	            android:textSize="18sp"
+	            android:textIsSelectable="true"/>
 	        
 	    </LinearLayout>
 	    
@@ -112,10 +113,10 @@
             
             <TextView 
                 android:id="@+id/text_place_url"
-                android:text="111"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"/>
+                android:textSize="18sp"
+                android:textIsSelectable="true"/>
             
         </LinearLayout>
 	</LinearLayout>

@@ -7,10 +7,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.alex.common.OnHttpRequestReturnListener;
+import com.alex.common.activities.BaiduMapActivity;
 import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.SmartToast;
@@ -63,12 +67,17 @@ public class ActivityDetailPoi extends BaseActivity {
     /*--------------------------
      * 成员变量
      *-------------------------*/
+    //Views
     private ImageView mImagePlaceImg = null;
     private TextView mTextPlaceName = null;
     private TextView mTextPlaceAddress = null;
     private TextView mTextPlacePhone = null;
     private TextView mTextPlaceCategory = null;
     private TextView mTextPlaceUrl = null;
+    
+    //数据
+    /**当前Poi*/
+    private Poi mPoi = null;
     
     /*--------------------------
      * public方法
@@ -91,6 +100,29 @@ public class ActivityDetailPoi extends BaseActivity {
         context.startActivity(it);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.  
+        super.onCreateOptionsMenu(menu);  
+        //添加菜单项  
+        MenuItem add = menu.add(0, 0, 0, getString(R.string.menu_map));
+        //绑定到ActionBar    
+        add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        //绑定点击事件
+        add.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if(mPoi != null) {
+                    BaiduMapActivity.openMapWithMarker(ActivityDetailPoi.this, mPoi.latitude, mPoi.longtitude, mPoi.title);
+                } else {
+                    SmartToast.showLongToast(ActivityDetailPoi.this, R.string.hint_location_invalid, false);
+                }
+                return false;
+            }
+        });
+        return true; 
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -98,6 +130,8 @@ public class ActivityDetailPoi extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail_poi);
+        
+        mActionBar.setTitle(R.string.title_detail);
         
         //绑定界面元素
         mImagePlaceImg = (ImageView)findViewById(R.id.img_place_img);
@@ -125,6 +159,7 @@ public class ActivityDetailPoi extends BaseActivity {
                     if(!TextUtils.isEmpty(poi.poi_pic)) {
                         mApp.getImageFetcher().loadFormCache(poi.poi_pic, mImagePlaceImg);
                     }
+                    mPoi = poi;
                 }
                 break;
             
