@@ -303,8 +303,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
      */
     private class MyOnItemClickListener implements OnItemClickListener {
         @Override
-        public void onItemClick(PLA_AdapterView<?> parent, View view,
-                int position, long id) {
+        public void onItemClick(PLA_AdapterView<?> parent, View view, int position, long id) {
             KLog.d(TAG, "onItemClick : %d", position);
             Status status = getPosItem(position);
             if(status != null) {
@@ -824,19 +823,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         
         return ret;
     }
-    
-    /**
-     * 启动某条公共墙微博的Activity
-     * @param sg 要查看的微博对象
-     * @author caisenchuan
-     */
-    private void openDetailWeiboActivity(Status s) {
-        if(s != null) {
-            Intent intent = new Intent(ActivityPopularPOIs.this, ActivityDetailWeibo.class);
-            intent.putExtra(ActivityDetailWeibo.INTENT_EXTRA_WEIBO_STATUS_OBJ, s);
-            startActivity(intent);
-        }
-    }
 
     /**
      * 若所选择的的分类已经改变，则重置JSON Array
@@ -946,5 +932,19 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         Intent it = new Intent(this, ActivityLogin.class);
         startActivity(it);
         finish();
+    }
+    
+    /**
+     * 启动某条公共墙微博的Activity
+     */
+    private void openDetailWeiboActivity(Status status) {
+        Place p = status.getPlace();
+        Poi poi = null;
+        if(p != null && mPoiList != null) {
+            //搜索对应的poi对象
+            poi = mPoiList.get(p.poiid);
+        }
+        //启动Activity
+        ActivityDetailWeibo.openDetailWeiboActivity(this, status, poi);
     }
 }

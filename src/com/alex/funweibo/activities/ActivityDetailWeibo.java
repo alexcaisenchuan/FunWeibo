@@ -28,6 +28,7 @@ import com.weibo.sdk.android.api.StatusesAPI;
 import com.weibo.sdk.android.api.WeiboAPI.AUTHOR_FILTER;
 import com.weibo.sdk.android.model.Comment;
 import com.weibo.sdk.android.model.Place;
+import com.weibo.sdk.android.model.Poi;
 import com.weibo.sdk.android.model.Status;
 import com.weibo.sdk.android.model.User;
 import com.weibo.sdk.android.model.WeiboException;
@@ -54,8 +55,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 /**
+ * 微博详情界面
  * @author caisenchuan
- *
  */
 public class ActivityDetailWeibo extends BaseActivity implements OnClickListener{
     /*--------------------------
@@ -71,6 +72,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     public static final String INTENT_EXTRA_WEIBO_NICKNAME = "weibo_nickname";
     /**序列化方式传递一条微博的信息*/
     public static final String INTENT_EXTRA_WEIBO_STATUS_OBJ = "weibo_status_obj";
+    /**序列化方式传递一条Poi的信息*/
+    public static final String INTENT_EXTRA_WEIBO_POI_OBJ = "weibo_poi_obj";
     /**评论内容*/
     public static final String INTENT_EXTRA_COMMENT_TEXT = null;
     
@@ -286,6 +289,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     private long mWeiboMid = -1L;
     /**全局微博对象*/
     private Status mStatus = null;
+    /**微博对应的poi*/
+    private Poi mPoi = null;
     /**全局评论列表*/
     private List<Comment> mCommentList = null;
     /**评论总数，我们不使用status中的数据，因为我们只看本应用的评论*/
@@ -310,18 +315,52 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     private TextView mWeiboMore = null;
     private LinearLayout mWeiboPicBorder = null;
     //底部控制栏
+    private Button mButtonDetail = null;
     private Button mButtonComment = null;
     private Button mButtonShare = null;
     
     /*--------------------------
      * public方法
      *-------------------------*/
+    /**
+     * 启动某条公共墙微博的Activity
+     * @param sg 要查看的微博对象
+     * @author caisenchuan
+     */
+    public static void openDetailWeiboActivity(Context context, Status s, Poi poi) {
+        if(s != null) {
+            Intent intent = new Intent(context, ActivityDetailWeibo.class);
+            intent.putExtra(INTENT_EXTRA_WEIBO_STATUS_OBJ, s);
+            if(poi != null) {
+                intent.putExtra(INTENT_EXTRA_WEIBO_POI_OBJ, poi);
+            }
+            context.startActivity(intent);
+        }
+    }
+    
     /* (non-Javadoc)
      * @see android.view.View.OnClickListener#onClick(android.view.View)
      */
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
+            case R.id.button_detail: {
+                //详情
+                if(mPoi != null) {
+                    KLog.d(TAG, "open with poi");
+                    ActivityDetailPoi.openDetailPoi(this, mPoi);
+                } else {
+                    KLog.d(TAG, "open with poiid");
+                    if(mStatus != null) {
+                        Place p = mStatus.getPlace();
+                        if(p != null) {
+                            ActivityDetailPoi.openDetailPoi(this, p.poiid);
+                        }
+                    }
+                }
+                break;
+            }
+            
             case R.id.button_comment: {
                 //评论
                 Intent it = new Intent(ActivityDetailWeibo.this, ActivityComment.class);
@@ -343,9 +382,11 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         
             case R.id.img_map: {
                 //打开地图
-                Place p = mStatus.getPlace();
-                if(p != null) {
-                    BaiduMapActivity.openMapWithMarker(this, p.latitude, p.longtitude, p.title);
+                if(mStatus != null) {
+                    Place p = mStatus.getPlace();
+                    if(p != null) {
+                        BaiduMapActivity.openMapWithMarker(this, p.latitude, p.longtitude, p.title);
+                    }
                 }
                 break;
             }
@@ -405,6 +446,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         
         //绑定界面元素
         mListWeiboContent = (ListView)findViewById(R.id.list_weibo_content);
+        mButtonDetail = (Button)findViewById(R.id.button_detail);
+        mButtonDetail.setOnClickListener(this);
         mButtonComment = (Button)findViewById(R.id.button_comment);
         mButtonComment.setOnClickListener(this);
         mButtonShare = (Button)findViewById(R.id.button_share);
@@ -581,6 +624,12 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                 mWeiboMid = Long.valueOf(mStatus.getMid());
             } catch (Exception e) {
                 KLog.w(TAG, "Exception", e);
+            }
+            
+            //设置poi
+            obj = it.getSerializableExtra(INTENT_EXTRA_WEIBO_POI_OBJ);
+            if(obj instanceof Poi) {
+                mPoi = (Poi)obj;
             }
         } else {
             KLog.d(TAG, "handleIntentExtra, request status");

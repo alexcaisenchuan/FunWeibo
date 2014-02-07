@@ -51,6 +51,7 @@
     <string name="button_refresh">刷新</string>
     <string name="button_nearby">周边美食</string>
     <string name="button_select_place">选择地点</string>
+    <string name="button_detail">详情</string>
     <string name="button_comment">评论</string>
     <string name="button_share">分享</string>
     <string name="button_albums">打开手机相册</string>
@@ -83,6 +84,12 @@
     <string name="text_i_m_here">我在这里:</string>
     <string name="text_m">米</string>
     <string name="text_comment_like_num">%1$s 赞  /  %2$s 评论</string>
+    <string name="text_place_name">名字</string>
+    <string name="text_place_address">地址</string>
+    <string name="text_place_phone">电话</string>
+    <string name="text_place_category">分类</string>
+    <string name="text_place_url">网址</string>
+    <string name="text_place_none">暂无</string>
     
     <!-- 微博提示 -->
     <string name="weibo_error_not_exist">原微博已删除！</string>

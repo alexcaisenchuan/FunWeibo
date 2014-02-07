@@ -142,6 +142,26 @@ public class PoiList {
     }
     
     /**
+     * 读取某个poiid对应的poi
+     * @param poiid poiid
+     * @return
+     */
+    public synchronized Poi get(String poiid) {
+        Poi ret = null;
+        
+        if(!TextUtils.isEmpty(poiid)) {
+            for(Poi poi : mList) {
+                if(poiid.equals(poi.poiid)) {
+                    //KLog.d(TAG, "find poi : %s", ret);
+                    ret = poi;
+                    break;
+                }
+            }
+        }
+        return ret;
+    }
+    
+    /**
      * 获取当前poi列表长度
      * @return
      */

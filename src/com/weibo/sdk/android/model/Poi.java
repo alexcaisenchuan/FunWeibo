@@ -9,6 +9,9 @@
  */
 package com.weibo.sdk.android.model;
 
+import java.io.Serializable;
+
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.alex.common.utils.KLog;
@@ -17,7 +20,7 @@ import com.alex.common.utils.KLog;
  * 微博的一个Poi(Place Of Interest)的信息
  * @author caisenchuan
  */
-public class Poi {
+public class Poi implements Serializable{
     /*--------------------------
      * 自定义类型
      *-------------------------*/
@@ -25,6 +28,9 @@ public class Poi {
     /*--------------------------
      * 常量
      *-------------------------*/
+    /**serialVersionUID*/
+    private static final long serialVersionUID = 1011534000477714884L;
+    
     private static final String TAG = "Poi";
 
     /*--------------------------
@@ -60,6 +66,13 @@ public class Poi {
     /*--------------------------
      * public方法
      *-------------------------*/
+    /**
+     * 使用Json字符串构造Poi
+     */
+    public Poi(String str) throws JSONException {
+        this(new JSONObject(str));
+    }
+    
     /**
      * 使用Json对象构造Poi
      */
