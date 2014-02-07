@@ -36,13 +36,14 @@
     
     <!-- 微博文字 -->
     <TextView 
-            android:id="@+id/text_weibo_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="15sp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="5dp"
-            />
+        android:id="@+id/text_weibo_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="5dp"
+        android:autoLink="all"
+        />
     
     <!-- 评论数、赞数等 -->
     <TextView 
