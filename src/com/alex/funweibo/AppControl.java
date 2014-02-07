@@ -61,10 +61,10 @@ public class AppControl extends Application{
             
             //设置全局位置
             if(Position.isValid(location)) {
-                mCurrentLocation.latitude = location.getLatitude();
-                mCurrentLocation.longtitude = location.getLongitude();
+                mCurrentLocation.setLat(location.getLatitude());
+                mCurrentLocation.setLon(location.getLongitude());
                 if(location.getLocType() == BDLocation.TypeNetWorkLocation) {
-                    mCurrentLocation.address = location.getAddrStr();
+                    mCurrentLocation.setAddress(location.getAddrStr());
                 }
             }
             

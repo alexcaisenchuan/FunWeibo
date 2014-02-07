@@ -15,6 +15,7 @@ import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
 import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.common.activities.BaseActivity;
+import com.alex.common.activities.BaiduMapActivity;
 import com.alex.common.activities.ImageLoadActivity;
 import com.alex.common.utils.Misc;
 import com.alex.common.utils.ShareUtils;
@@ -342,6 +343,10 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         
             case R.id.img_map: {
                 //打开地图
+                Place p = mStatus.getPlace();
+                if(p != null) {
+                    BaiduMapActivity.openMapWithMarker(this, p.latitude, p.longtitude, p.title);
+                }
                 break;
             }
             
@@ -506,8 +511,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                         if(mCurrentPosition.isValid()) {
                             int d = (int)Misc.getDistance(p.latitude,
                                                           p.longtitude, 
-                                                          mCurrentPosition.latitude,
-                                                          mCurrentPosition.longtitude);
+                                                          mCurrentPosition.getLat(),
+                                                          mCurrentPosition.getLon());
                             String distance = String.format("%s%s", d, getString(R.string.text_m));
                             mWeiboSource.setText(distance);
                         } else {

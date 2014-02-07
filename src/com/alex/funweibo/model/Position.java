@@ -21,7 +21,7 @@ public class Position {
     /*--------------------------
      * 常量
      *-------------------------*/
-    private static final String TAG = "Position";
+    //private static final String TAG = "Position";
     
     /**默认的无效值*/
     private static final double INVALID_VALUE = -256.0;
@@ -30,11 +30,11 @@ public class Position {
      * 属性
      *-------------------------*/
     /**纬度*/
-    public double latitude = INVALID_VALUE;
+    private double latitude = INVALID_VALUE;
     /**经度*/
-    public double longtitude = INVALID_VALUE;
+    private double longtitude = INVALID_VALUE;
     /**地址*/
-    public String address = "";
+    private String address = "";
     
     /*--------------------------
      * public方法
@@ -52,6 +52,51 @@ public class Position {
     public Position(double latitude, double longtitude) {
         this.latitude = latitude;
         this.longtitude = longtitude;
+    }
+    
+    /**
+     * 获取纬度
+     * @return
+     */
+    public double getLat() {
+        return this.latitude;
+    }
+    
+    /**
+     * 获取经度
+     * @return
+     */
+    public double getLon() {
+        return this.longtitude;
+    }
+    
+    /**
+     * 获取地址
+     * @return
+     */
+    public String getAddress() {
+        return this.address;
+    }
+    
+    /**
+     * 设置纬度
+     */
+    public void setLat(double lat) {
+        this.latitude = lat;
+    }
+    
+    /**
+     * 设置经度
+     */
+    public void setLon(double lon) {
+        this.longtitude = lon;
+    }
+    
+    /**
+     * 设置地址
+     */
+    public void setAddress(String address) {
+        this.address = address;
     }
     
     /**

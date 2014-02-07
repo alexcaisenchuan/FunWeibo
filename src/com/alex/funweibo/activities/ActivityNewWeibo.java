@@ -255,10 +255,10 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
         Position pos = mApp.getCurrentLocation();
         if(pos.isValid()) {
             String loc = "";
-            if(!TextUtils.isEmpty(pos.address)) {
-                loc = pos.address;
+            if(!TextUtils.isEmpty(pos.getAddress())) {
+                loc = pos.getAddress();
             } else {
-                loc = String.format("(%s,%s)", pos.latitude, pos.longtitude);
+                loc = String.format("(%s,%s)", pos.getLat(), pos.getLon());
             }
             mTextLocation.setText(loc);
         } else {
@@ -290,7 +290,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     private void showAddPhoto() {
         final Dialog dlg = new Dialog(this);
         dlg.setTitle(R.string.title_select_operation);
-        dlg.setContentView(R.layout.dlg_add_photo);
+        dlg.setContentView(R.layout.dialog_add_photo);
         dlg.findViewById(R.id.button_albums).setOnClickListener(new OnClickListener() {
             
             @Override

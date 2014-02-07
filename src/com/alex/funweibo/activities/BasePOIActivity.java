@@ -79,6 +79,10 @@ public abstract class BasePOIActivity extends BaseActivity {
     
     /////////////////其他/////////////////
     private static final int SCROLL_STATE_IDLE = 0;
+    /**默认搜索个数*/
+    private static final int DEFAULT_SEARCH_CNT   = 5;
+    /**默认搜索半径，单位：米*/
+    private static final int DEFAULT_SEARCH_RANGE = 2000;
 
     
     /*--------------------------
@@ -258,9 +262,9 @@ public abstract class BasePOIActivity extends BaseActivity {
     /*-------------private-----------------*/
     ////////////////////////////设定值////////////////////////
     /**每次读取Poi的个数，最大50*/
-    private int mPoiCountToGetOneTime = 5;
+    private int mPoiCountToGetOneTime = DEFAULT_SEARCH_CNT;
     /**Poi搜索半径，单位：米，最大10000*/
-    private int mPoiSearchRange = 2000;
+    private int mPoiSearchRange = DEFAULT_SEARCH_RANGE;
     ////////////////////////////其他//////////////////////////
     /**是否已经读取过poi列表的标志位*/
     private boolean mHasGetPoiList = false;
@@ -490,8 +494,8 @@ public abstract class BasePOIActivity extends BaseActivity {
             Position pos = mApp.getCurrentLocation();
             if(mPlaceApi != null && pos.isValid()) {
                 //若位置有效，则查询周边信息，否则等位置有效后再查询
-                String lat = String.valueOf(pos.latitude);
-                String lon = String.valueOf(pos.longtitude);
+                String lat = String.valueOf(pos.getLat());
+                String lon = String.valueOf(pos.getLon());
                 int page = mCurrPoiPage + 1;        //读取下一组
                 KLog.d(TAG, "getNextNearbyPois, lat : %s , lon : %s , page : %s", lat, lon, page);
                 mPlaceApi.nearbyPois(lat,
