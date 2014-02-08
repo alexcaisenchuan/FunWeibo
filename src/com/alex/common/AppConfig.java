@@ -28,9 +28,11 @@ public class AppConfig {
     public static final String SYSTEMCACHE = "thinkandroid";
     
     /**应用的基础文件在SD卡上的路径*/
-    public static final String APP_DIR = "/funweibo/";
+    public static final String DIR_APP = "/funweibo/";
     /**图片存储路径*/
-    public static final String PIC_DIR = APP_DIR + "pic/";
+    public static final String DIR_PHOTO = DIR_APP + "photo/";
+    /**下载文件存储路径*/
+    public static final String DIR_DOWNLOAD = DIR_APP + "download/";
     
     //////////////////////////各种最大最小值////////////////////////
     /**存储的最大微博条数*/

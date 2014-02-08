@@ -17,17 +17,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
-import com.alex.common.AppConfig;
+import com.alex.common.utils.FileUtils.PathType;
+
 
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 
 /**
@@ -46,7 +44,7 @@ public class ImageUtils {
     private static final String TAG = ImageUtils.class.getSimpleName();
     
     /**图片后缀名*/
-    public static final String PIC_FILE_EXT = ".jpeg";
+    private static final String PIC_FILE_EXT = ".jpeg";
     
     /*--------------------------
      * 成员变量
@@ -58,6 +56,7 @@ public class ImageUtils {
     /**
      * 调用系统应用拍照
      * @param activity 拍完照片后接收Result的Activity，您需要在此Activity中实现onActivityResult方法
+     * @param requestCode 启动Activity时附带的requestCode，在onActivityResult需要用此进行判断
      * @return 若成功，返回拍摄完照片的存储路径，若失败则返回null
      * */
     public static String takePhoto(Activity activity, int requestCode) {
@@ -66,7 +65,7 @@ public class ImageUtils {
         if(activity != null) {
             Intent i = new Intent("android.media.action.IMAGE_CAPTURE");
             
-            filename = getPicPath();
+            filename = FileUtils.getUniqPath(PathType.PHOTO, PIC_FILE_EXT);
             File img = new File(filename);
             Uri imgUri = Uri.fromFile(img);
             KLog.d(TAG, "img uri : " + imgUri);
@@ -77,22 +76,38 @@ public class ImageUtils {
         
         return filename;
     }
+    
+    /**
+     * 从相册选择照片
+     * @param activity 拍完照片后接收Result的Activity，您需要在此Activity中实现onActivityResult方法
+     * @param requestCode 启动Activity时附带的requestCode，在onActivityResult需要用此进行判断
+     */
+    public static void selectPhotoFromAlbum(Activity activity, int requestCode) {
+        if(activity != null) {
+            Intent getAlbum = new Intent(Intent.ACTION_GET_CONTENT);
+            getAlbum.setType("image/*");
+            activity.startActivityForResult(getAlbum, requestCode);
+        } else {
+            KLog.w(TAG, "activity == null!");
+        }
+    }
 
     /**
      * 将图片保存到SD卡中
-     * @param bm
+     * @param type 文件路径类型，决定了要把图片存在哪个目录下
+     * @param bm 图片bitmap
      * @return 若成功，返回照片的存储路径，若失败则返回null
      * */
-    public static String savePicToSD(Bitmap bm) {
+    public static String savePicToSD(PathType type, Bitmap bm) {
         String filename = null;
 
         // 基本判断
-        if (!isSDMount()) {
+        if (!FileUtils.isSDMount()) {
             return filename;
         }
 
         // 保存下来
-        filename = getPicPath();
+        filename = FileUtils.getUniqPath(type, PIC_FILE_EXT);
         File mPhoto = new File(filename);
 
         // 保存图片
@@ -117,60 +132,6 @@ public class ImageUtils {
         return filename;
     }
 
-    /**
-     * 判断SD卡是否挂载
-     * */
-    public static boolean isSDMount() {
-        if (Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * 获取基础路径
-     * */
-    public static String getDir() {
-        File sd = Environment.getExternalStorageDirectory();
-        String dir = sd.getPath() + AppConfig.PIC_DIR;
-        File file = new File(dir);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-
-        return dir;
-    }
-
-    /**
-     * 获取图片存储路径
-     * */
-    public static String getPicPath() {
-        String picDir = getDir();
-
-        GregorianCalendar calendar = new GregorianCalendar();
-        String date_s = String.format("%d%02d%02d_%02d%02d%02d",
-                calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, 
-                calendar.get(Calendar.DAY_OF_MONTH), calendar.get(Calendar.HOUR), 
-                calendar.get(Calendar.MINUTE), calendar.get(Calendar.SECOND));
-        
-        String filename = picDir + date_s + PIC_FILE_EXT;
-        File file = new File(filename);
-        int i = 1;
-
-        // 构造不重名的文件名
-        while (file.exists()) {
-            filename = picDir + date_s + "(" + i + ")" + PIC_FILE_EXT;
-            file = new File(filename);
-            i++;
-        }
-
-        KLog.d(TAG, "filename : " + filename);
-
-        return filename;
-    }
-    
     /**
      * 读取图片文件，进行一些压缩
      * @param filePath 图片路径
@@ -236,23 +197,6 @@ public class ImageUtils {
         
         return BitmapFactory.decodeByteArray(buffer, 0, buffer.length);
     }
-    
-    /**
-     * 删除本地照片
-     * @author caisenchuan
-     */
-    public static void deletePhoto(String picPath) {
-        if(picPath != null) {
-            File file = new File(picPath);
-            if(file != null && file.exists()) {
-                file.delete();
-            }
-            picPath = null;
-        }
-    }
-    /*--------------------------
-     * protected、packet方法
-     *-------------------------*/
 
     /*--------------------------
      * private方法

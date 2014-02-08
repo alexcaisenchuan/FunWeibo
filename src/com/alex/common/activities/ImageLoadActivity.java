@@ -2,6 +2,7 @@ package com.alex.common.activities;
 
 import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.SmartToast;
+import com.alex.common.utils.FileUtils.PathType;
 import com.alex.common.views.ZoomImageView;
 import com.alex.funweibo.R;
 import com.ta.util.bitmap.TABitmapCacheWork;
@@ -171,7 +172,7 @@ public class ImageLoadActivity extends BaseActivity{
             showToastOnUIThread(R.string.hint_loading_img_not_finish);
         } else {
             Bitmap bitmap = BitmapFactory.decodeByteArray(mImageBuffer, 0, mImageBuffer.length);
-            String path = ImageUtils.savePicToSD(bitmap);
+            String path = ImageUtils.savePicToSD(PathType.DOWNLOAD, bitmap);
             showToastOnUIThread(String.format("%s%s", getString(R.string.hint_photo_saved), path));
         }
     }

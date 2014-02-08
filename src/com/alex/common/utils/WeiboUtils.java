@@ -72,9 +72,6 @@ public class WeiboUtils {
                     
                     //发出广播
                     sendBroadCast(mBaseActivity, BROADCAST_ACTION_NEW_WEIBO_SUCCESS, status);
-                    
-                    //删除照片
-                    ImageUtils.deletePhoto(mTempStatus.getBmiddle_pic());
                 }
             } catch (Exception e) {
                 KLog.w(TAG, "Exception while build status", e);

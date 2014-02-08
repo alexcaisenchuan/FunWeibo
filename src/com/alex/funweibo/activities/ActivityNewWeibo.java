@@ -27,8 +27,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -56,9 +58,11 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     
     ///////////////startActivityForResult参数/////////////////
     /**拍照*/
-    public static final int REQUEST_CODE_TAKE_PHOTO = 1;
+    public static final int REQUEST_CODE_TAKE_PHOTO               = 1;
+    /**从相册选择照片*/
+    public static final int REQUEST_CODE_SELECT_PHOTO_FROM_ALBUM  = 2;
     /**选择签到地点*/
-    public static final int REQUEST_CODE_SELECT_POI = 2;
+    public static final int REQUEST_CODE_SELECT_POI               = 3;
     
     ////////////////Intent 参数///////////////////
     /**启动时是否要启动拍照*/
@@ -130,7 +134,6 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
             DialogUtils.showOKCancelButtonDialog(this, getString(R.string.hint_new_weibo_back), new AlertDialog.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    delPhoto();
                     ActivityNewWeibo.super.onBackPressed();
                 }
             });
@@ -184,6 +187,40 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
                     SmartToast.showLongToast(this, 
                                              String.format("%s%s", getString(R.string.hint_photo_saved), mLastPicPath),
                                              true);
+                }
+                break;
+            }
+            
+            case REQUEST_CODE_SELECT_PHOTO_FROM_ALBUM: {
+                if(Activity.RESULT_OK == resultCode) {
+                    //获得图片的uri
+                    Uri originalUri = data.getData();
+                    mImageWeiboPic.setImageURI(originalUri);
+                    KLog.d(TAG, "originalUri : %s", originalUri);
+                    
+                    //这里开始的第二部分，获取图片的路径：
+                    Cursor cursor = null;
+                    try {
+                        String[] proj = {MediaStore.Images.Media.DATA};
+                        //好像是android多媒体数据库的封装接口，具体的看Android文档
+                        cursor = managedQuery(originalUri, proj, null, null, null);
+                        if(cursor != null) {
+                            //按我个人理解 这个是获得用户选择的图片的索引值
+                            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                            if(cursor.getCount() > 0 && cursor.moveToFirst()) { //将光标移至开头 ，这个很重要，不小心很容易引起越界
+                                //最后根据索引值获取图片路径
+                                String path = cursor.getString(column_index);
+                                KLog.d(TAG, "path : %s", path);
+                                if(!TextUtils.isEmpty(path)) {
+                                    mLastPicPath = path;
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        KLog.w(TAG, "Exception", e);
+                    } finally {
+                        
+                    }
                 }
                 break;
             }
@@ -295,7 +332,7 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
             
             @Override
             public void onClick(View v) {
-                SmartToast.showLongToast(ActivityNewWeibo.this, "Albums clicked", false);
+                selectPhoto();
                 dlg.dismiss();
             }
         });
@@ -303,7 +340,6 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
             
             @Override
             public void onClick(View v) {
-                delPhoto();
                 takePhoto();
                 dlg.dismiss();
             }
@@ -319,12 +355,10 @@ public class ActivityNewWeibo extends BaseActivity implements OnClickListener{
     }
     
     /**
-     * 删掉原来的照片
+     * 从相册选择照片
      */
-    private void delPhoto() {
-        if(!TextUtils.isEmpty(mLastPicPath)) {
-            ImageUtils.deletePhoto(mLastPicPath);
-        }
+    private void selectPhoto() {
+        ImageUtils.selectPhotoFromAlbum(this, REQUEST_CODE_SELECT_PHOTO_FROM_ALBUM);
     }
     
     /**
