@@ -9,6 +9,10 @@
 	    android:layout_width="240dp"
 	    android:layout_height="match_parent"
 	    android:background="@color/drawer_main"
+	    android:paddingLeft="7dp"
+	    android:paddingRight="7dp"
+	    android:paddingTop="10dp"
+	    android:paddingBottom="10dp"
 	    android:orientation="vertical">
 	    
 	    <!-- 顶端用户信息 -->
@@ -25,10 +29,10 @@
 	            android:layout_height="45dp"
 	            android:scaleType="fitXY"
 	            android:src="@drawable/ic_launcher"
-	            android:layout_marginLeft="5sp"
-	            android:layout_marginRight="5sp"
-	            android:layout_marginTop="5sp"
-	            android:layout_marginBottom="5sp"
+	            android:layout_marginLeft="5dp"
+	            android:layout_marginRight="10dp"
+	            android:layout_marginTop="5dp"
+	            android:layout_marginBottom="5dp"
 	            />
 	            
 	        <!-- 用户名 -->

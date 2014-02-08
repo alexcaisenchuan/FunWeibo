@@ -21,18 +21,19 @@
         android:layout_alignParentLeft="true"
         />
     
-    <!-- 签到按钮 -->
-    <ImageView 
+    <!-- 地图按钮 -->
+    <Button
         android:id="@+id/img_map"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_gravity="center_vertical"
         android:layout_centerVertical="true"
         android:scaleType="fitXY"
-        android:src="@android:drawable/ic_dialog_map"
+        android:drawableLeft="@drawable/ic_map"
         android:layout_marginLeft="5sp"
         android:layout_marginRight="5sp"
         android:layout_alignParentRight="true"
+        style="?android:attr/buttonBarButtonStyle"
         />
     
     <LinearLayout 

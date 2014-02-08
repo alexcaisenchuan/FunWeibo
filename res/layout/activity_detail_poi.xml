@@ -6,120 +6,76 @@
 	<LinearLayout 
 	    android:layout_width="match_parent"
 	    android:layout_height="wrap_content"
-	    android:orientation="vertical">
+	    android:orientation="vertical"
+	    android:background="@drawable/corner_textview_only_one"
+	    android:layout_margin="10dp"
+	    android:padding="5dp">
 		
 	    <LinearLayout 
-	        android:layout_width="match_parent"
-	        android:layout_height="wrap_content"
-	        android:orientation="horizontal"
-	        >
+	        style="@style/detail_poi_linear_layout">
 	        
 	        <ImageView 
 	            android:id="@+id/img_place_img"
 	            android:layout_width="70dp"
 	            android:layout_height="70dp"
+	            android:layout_marginRight="10dp"
 	            android:scaleType="fitXY"
 	            android:src="@drawable/empty_photo"
-	            android:layout_marginLeft="5sp"
-	            android:layout_marginRight="15sp"
-	            android:layout_marginTop="5sp"
-	            android:layout_marginBottom="5sp"
 	            />
 	            
 	        <TextView 
 	            android:id="@+id/text_place_name"
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:textSize="18sp"
 	            android:layout_gravity="center_vertical"
-	            android:textIsSelectable="true"
+	            style="@style/detail_poi_text_value"
 	            />
 	    </LinearLayout>
 		    
 	    <LinearLayout 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-	        android:padding="5dp">
+            style="@style/detail_poi_linear_layout">
 	        
 	        <TextView 
 	            android:text="@string/text_place_address"
-	            android:layout_width="80dp"
-	            android:layout_height="wrap_content"
-	            android:textSize="18sp"/>
+	            style="@style/detail_poi_text_key"/>
 	        
 	        <TextView 
 	            android:id="@+id/text_place_address"
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:textSize="18sp"
-	            android:textIsSelectable="true"/>
-	        
+	            style="@style/detail_poi_text_value"/>
 	    </LinearLayout>
 	    
 	    <LinearLayout 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-	        android:padding="5dp">
+            style="@style/detail_poi_linear_layout">
 	        
 	        <TextView 
 	            android:text="@string/text_place_phone"
-	            android:layout_width="80dp"
-	            android:layout_height="wrap_content"
-	            android:textSize="18sp"/>
+	            style="@style/detail_poi_text_key"/>
 	        
 	        <TextView 
 	            android:id="@+id/text_place_phone"
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:textSize="18sp"
-	            android:textIsSelectable="true"
-	            android:autoLink="all"/>
-	        
+	            style="@style/detail_poi_text_value"/>
 	    </LinearLayout>
 	    
 	    <LinearLayout 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-	        android:padding="5dp">
+            style="@style/detail_poi_linear_layout">
 	        
 	        <TextView 
 	            android:text="@string/text_place_category"
-	            android:layout_width="80dp"
-	            android:layout_height="wrap_content"
-	            android:textSize="18sp"/>
+	            style="@style/detail_poi_text_key"/>
 	        
 	        <TextView 
 	            android:id="@+id/text_place_category"
-	            android:layout_width="match_parent"
-	            android:layout_height="wrap_content"
-	            android:textSize="18sp"
-	            android:textIsSelectable="true"/>
-	        
+	            style="@style/detail_poi_text_value"/>
 	    </LinearLayout>
 	    
 	    <LinearLayout 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="5dp">
+            style="@style/detail_poi_linear_layout">
             
             <TextView 
                 android:text="@string/text_place_url"
-                android:layout_width="80dp"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"/>
+                style="@style/detail_poi_text_key"/>
             
             <TextView 
                 android:id="@+id/text_place_url"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textIsSelectable="true"
-                android:autoLink="all"/>
-            
+                style="@style/detail_poi_text_value"/>
         </LinearLayout>
 	</LinearLayout>
 </ScrollView>

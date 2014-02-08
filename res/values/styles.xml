@@ -1,10 +1,11 @@
-<resources>
+<resources
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
     -->
-    <style name="AppBaseTheme" parent="android:Theme.Light">
+    <style name="AppBaseTheme" parent="android:style/Theme.Holo.Light">
         <!--
             Theme customizations available in newer API levels can go in
             res/values-vXX/styles.xml, while customizations related to
@@ -16,6 +17,40 @@
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
         <item name="android:windowNoTitle">true</item>
+        <item name="android:actionBarStyle">@style/myActionBarStyle</item>
     </style>
 
+    <!-- ActionBar样式 -->
+    <style name="myActionBarStyle" parent="android:style/Widget.Holo.ActionBar" >
+        <item name="android:background">#B6D2EC</item>
+        <item name="android:titleTextStyle">@style/AcBar_titleStyle</item>
+    </style>
+
+    <style name="AcBar_titleStyle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">#875958</item>
+    </style>
+
+    <!-- activity_detail_poi.xml相关 -->
+    <style name="detail_poi_linear_layout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:padding">5dp</item>
+    </style>
+    
+    <style name="detail_poi_text_key">
+        <item name="android:layout_width">80dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+    
+    <style name="detail_poi_text_value">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textIsSelectable">true</item>
+        <item name="android:autoLink">all</item>
+    </style>
+    
 </resources>
