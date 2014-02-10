@@ -61,6 +61,7 @@
     <string name="button_take_photo">拍照</string>
     <string name="button_feedback">反馈</string>
     <string name="button_logout">注销账号</string>
+    <string name="button_my">我</string>
     
     <!-- Switches -->
     <string name="switch_2g_pic">2/3G下低清图</string>

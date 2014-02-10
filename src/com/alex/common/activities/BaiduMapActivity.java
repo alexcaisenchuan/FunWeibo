@@ -49,8 +49,6 @@ public class BaiduMapActivity extends BaseActivity {
      *-------------------------*/
     private static final String TAG = BaiduMapActivity.class.getSimpleName();
     
-    /**设置地图中心*/
-    public static final String INTENT_SET_CENTER = "set_center";
     /**设置用户当前所在位置*/
     public static final String INTENT_SET_MY_POS = "set_my_pos";
     /**添加标记点*/
@@ -62,6 +60,8 @@ public class BaiduMapActivity extends BaseActivity {
     public static final String EXTRA_LONGTITUDE  = "longtitude";
     /**设置标题*/
     public static final String EXTRA_TITLE       = "title";
+    /**设置地址*/
+    public static final String EXTRA_ADDRESS     = "address";
     
     //message.what
     /**打开Pop窗*/
@@ -155,6 +155,8 @@ public class BaiduMapActivity extends BaseActivity {
     private PopupOverlay mPopWindow = null;
     /**弹出框的内容*/
     private Button mPopContent = null;
+    /**我的位置图层*/
+    private MyLocationOverlay myLocationOverlay = null;
     /**地图的handler*/
     private MapHandler mHandler = new MapHandler();
     
@@ -164,6 +166,8 @@ public class BaiduMapActivity extends BaseActivity {
     private double mMarkerLon = 0.0;
     /**标记点标题*/
     private String mMarkerTitle = "";
+    /**标记点地址*/
+    private String mMarkerAddress = "";
     
     /*--------------------------
      * public方法
@@ -171,20 +175,15 @@ public class BaiduMapActivity extends BaseActivity {
     /**
      * 打开地图，默认添加一个标记点，并且把地图中心设为此标记点
      */
-    public static void openMapWithMarker(Context context, double lat, double lon, String title) {
+    public static void openMapWithMarker(Context context, double lat, double lon, String title, String address) {
         Intent it = new Intent(context, BaiduMapActivity.class);
         
-        //设置中心
+        //添加标注点
         Bundle b = new Bundle();
         b.putDouble(EXTRA_LATITUDE, lat);
         b.putDouble(EXTRA_LONGTITUDE, lon);
-        it.putExtra(INTENT_SET_CENTER, b);
-        
-        //添加标注点
-        b = new Bundle();
-        b.putDouble(EXTRA_LATITUDE, lat);
-        b.putDouble(EXTRA_LONGTITUDE, lon);
         b.putString(EXTRA_TITLE, title);
+        b.putString(EXTRA_ADDRESS, address);
         it.putExtra(INTENT_ADD_MARKER, b);
         
         context.startActivity(it);
@@ -194,7 +193,22 @@ public class BaiduMapActivity extends BaseActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.  
         super.onCreateOptionsMenu(menu);  
-        //添加菜单项  
+        
+        //添加菜单项 ：我的位置
+        MenuItem my = menu.add(0, 0, 0, R.string.button_my);
+        //绑定到ActionBar    
+        my.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        //绑定点击事件
+        my.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                spanToMyLocation();
+                return false;
+            }
+        });
+        
+        //添加菜单项  ：分享
         MenuItem add = menu.add(0, 0, 0, R.string.button_share);
         //绑定到ActionBar    
         add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
@@ -207,6 +221,7 @@ public class BaiduMapActivity extends BaseActivity {
                 return false;
             }
         });
+        
         return true;
     }
     /*--------------------------
@@ -236,7 +251,7 @@ public class BaiduMapActivity extends BaseActivity {
         handleIntent();
         
         //设置用户所处位置
-        Position p = mApp.getCurrentLocation();
+        Position p = mApp.getCurrentLocation(true);
         if(p.isValid()) {
             setMyLocation(p.getLat(), p.getLon());
         }
@@ -302,26 +317,22 @@ public class BaiduMapActivity extends BaseActivity {
     private void handleIntent() {
         Intent it = getIntent();
         
-        //若设置了地图中心点
-        Bundle extra = it.getBundleExtra(INTENT_SET_CENTER);
-        if(extra != null) {
-            double lat = extra.getDouble(EXTRA_LATITUDE, 0.0);
-            double lon = extra.getDouble(EXTRA_LONGTITUDE, 0.0);
-            setCenter(lat, lon);
-        }
-        
         //若设置了添加Marker
-        extra = it.getBundleExtra(INTENT_ADD_MARKER);
+        Bundle extra = it.getBundleExtra(INTENT_ADD_MARKER);
         if(extra != null) {
             double lat = extra.getDouble(EXTRA_LATITUDE, 0.0);
             double lon = extra.getDouble(EXTRA_LONGTITUDE, 0.0);
             String title = extra.getString(EXTRA_TITLE, "");
+            String address = extra.getString(EXTRA_ADDRESS, "");
             
             mMarkerLat = lat;
             mMarkerLon = lon;
             mMarkerTitle = title;
+            mMarkerAddress = address;
             
-            addMarker(lat, lon, title);
+            addMarker(lat, lon, title, address);
+            
+            setCenter(lat, lon);
         }
     }
     
@@ -329,16 +340,17 @@ public class BaiduMapActivity extends BaseActivity {
      * 设置地图中心
      */
     private void setCenter(double lat, double lon) {
-        MapController mMapController = mMapView.getController();        //得到mMapView的控制权,可以用它控制和驱动平移和缩放
-        GeoPos point = new GeoPos(lat, lon);                            //用给定的经纬度构造一个GeoPoint，单位是微度 (度 * 1E6)
-        mMapController.setCenter(point);                                //设置地图中心点
-        mMapController.setZoom(DEFAULT_ZOOM_LEVEL);                     //设置地图zoom级别
+        MapController controller = mMapView.getController();        //得到mMapView的控制权,可以用它控制和驱动平移和缩放
+        Position pos = Position.gcj_to_bd(lat, lon);                //坐标转换
+        GeoPos point = new GeoPos(pos.getLat(), pos.getLon());      //用给定的经纬度构造一个GeoPoint，单位是微度 (度 * 1E6)
+        controller.setCenter(point);                                //设置地图中心点
+        controller.setZoom(DEFAULT_ZOOM_LEVEL);                     //设置地图zoom级别
     }
     
     /**
      * 把一个标注点添加到地图上
      */
-    private void addMarker(double lat, double lon, String title) {
+    private void addMarker(double lat, double lon, String title, String address) {
         //标记点图像
         Drawable mark = getResources().getDrawable(R.drawable.icon_gcoding);
         //创建Overlay
@@ -349,8 +361,9 @@ public class BaiduMapActivity extends BaseActivity {
         mMapView.getOverlays().add(overlay);
          
         //添加标注点
-        GeoPos p = new GeoPos(lat, lon);
-        OverlayItem item = new OverlayItem(p, title, title);
+        Position pos = Position.gcj_to_bd(lat, lon);        //坐标转换
+        GeoPos p = new GeoPos(pos.getLat(), pos.getLon());
+        OverlayItem item = new OverlayItem(p, title, address);
         overlay.addItem(item);
         sendMessage(MSG_OPEN_POP_WINDOW, 0, 0, item);
         
@@ -370,7 +383,7 @@ public class BaiduMapActivity extends BaseActivity {
      * 设置用户当前位置
      */
     private void setMyLocation(double lat, double lon) {
-        MyLocationOverlay myLocationOverlay = new MyLocationOverlay(mMapView);
+        myLocationOverlay = new MyLocationOverlay(mMapView);
         LocationData locData = new LocationData();
         //手动将位置源置为天安门，在实际应用中，请使用百度定位SDK获取位置信息，要在SDK中显示一个位置，需要使用百度经纬度坐标（bd09ll）
         locData.latitude = lat;
@@ -379,6 +392,17 @@ public class BaiduMapActivity extends BaseActivity {
         myLocationOverlay.setData(locData);
         mMapView.getOverlays().add(myLocationOverlay);
         mMapView.refresh();
+    }
+    
+    /**
+     * 地图动画移动到我的位置
+     */
+    private void spanToMyLocation() {
+        if(myLocationOverlay != null) {
+            LocationData data = myLocationOverlay.getMyLocation();
+            GeoPos point = new GeoPos(data.latitude, data.longitude);
+            mMapView.getController().animateTo(point);
+        }
     }
     
     /**
@@ -403,7 +427,7 @@ public class BaiduMapActivity extends BaseActivity {
         //&content=百度奎科大厦&output=html
         //&src=Fun微博&coord_type=gcj02
         String url = String.format("http://api.map.baidu.com/marker?location=%s,%s&title=%s&content=%s&output=html&src=%s&coord_type=gcj02",
-                                      mMarkerLat, mMarkerLon, mMarkerTitle, mMarkerTitle, getString(R.string.app_name));
+                                      mMarkerLat, mMarkerLon, mMarkerTitle, mMarkerAddress, getString(R.string.app_name));
         //获取短链接
         ShortUrlAPI api = new ShortUrlAPI(mToken);
         String url_long[] = {url};

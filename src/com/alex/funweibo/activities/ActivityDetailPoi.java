@@ -114,7 +114,7 @@ public class ActivityDetailPoi extends BaseActivity {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if(mPoi != null) {
-                    BaiduMapActivity.openMapWithMarker(ActivityDetailPoi.this, mPoi.latitude, mPoi.longtitude, mPoi.title);
+                    BaiduMapActivity.openMapWithMarker(ActivityDetailPoi.this, mPoi.latitude, mPoi.longtitude, mPoi.title, mPoi.address);
                 } else {
                     SmartToast.showLongToast(ActivityDetailPoi.this, R.string.hint_location_invalid, false);
                 }

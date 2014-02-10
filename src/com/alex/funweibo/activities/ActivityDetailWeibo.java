@@ -376,10 +376,16 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         
             case R.id.img_map: {
                 //打开地图
-                if(mStatus != null) {
-                    Place p = mStatus.getPlace();
-                    if(p != null) {
-                        BaiduMapActivity.openMapWithMarker(this, p.latitude, p.longtitude, p.title);
+                if(mPoi != null) {
+                    KLog.d(TAG, "open with poi");
+                    BaiduMapActivity.openMapWithMarker(this, mPoi.latitude, mPoi.longtitude, mPoi.title, mPoi.address);
+                } else {
+                    KLog.d(TAG, "open with poiid");
+                    if(mStatus != null) {
+                        Place p = mStatus.getPlace();
+                        if(p != null) {
+                            BaiduMapActivity.openMapWithMarker(this, p.latitude, p.longtitude, p.title, p.title);
+                        }
                     }
                 }
                 break;
