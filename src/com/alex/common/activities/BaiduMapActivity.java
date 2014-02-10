@@ -1,8 +1,17 @@
 package com.alex.common.activities;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.alex.common.AppConfig;
+import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.common.model.GeoPos;
 import com.alex.common.utils.KLog;
+import com.alex.common.utils.ShareUtils;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
 import com.baidu.mapapi.BMapManager;
@@ -15,6 +24,8 @@ import com.baidu.mapapi.map.OverlayItem;
 import com.baidu.mapapi.map.PopupClickListener;
 import com.baidu.mapapi.map.PopupOverlay;
 import com.baidu.platform.comapi.basestruct.GeoPoint;
+import com.weibo.sdk.android.WeiboException;
+import com.weibo.sdk.android.api.ShortUrlAPI;
 
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +33,10 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.widget.Button;
 
 /**
@@ -143,6 +158,13 @@ public class BaiduMapActivity extends BaseActivity {
     /**地图的handler*/
     private MapHandler mHandler = new MapHandler();
     
+    /**标记点纬度*/
+    private double mMarkerLat = 0.0;
+    /**标记点经度*/
+    private double mMarkerLon = 0.0;
+    /**标记点标题*/
+    private String mMarkerTitle = "";
+    
     /*--------------------------
      * public方法
      *-------------------------*/
@@ -168,6 +190,25 @@ public class BaiduMapActivity extends BaseActivity {
         context.startActivity(it);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.  
+        super.onCreateOptionsMenu(menu);  
+        //添加菜单项  
+        MenuItem add = menu.add(0, 0, 0, R.string.button_share);
+        //绑定到ActionBar    
+        add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        //绑定点击事件
+        add.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                share();
+                return false;
+            }
+        });
+        return true;
+    }
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -273,9 +314,14 @@ public class BaiduMapActivity extends BaseActivity {
         extra = it.getBundleExtra(INTENT_ADD_MARKER);
         if(extra != null) {
             double lat = extra.getDouble(EXTRA_LATITUDE, 0.0);
-            double log = extra.getDouble(EXTRA_LONGTITUDE, 0.0);
+            double lon = extra.getDouble(EXTRA_LONGTITUDE, 0.0);
             String title = extra.getString(EXTRA_TITLE, "");
-            addMarker(lat, log, title);
+            
+            mMarkerLat = lat;
+            mMarkerLon = lon;
+            mMarkerTitle = title;
+            
+            addMarker(lat, lon, title);
         }
     }
     
@@ -346,6 +392,105 @@ public class BaiduMapActivity extends BaseActivity {
             msg.arg2 = arg2;
             msg.obj  = obj;
             mHandler.sendMessage(msg);
+        }
+    }
+    
+    /**
+     * 分享地点
+     */
+    private void share() {
+        //http://api.map.baidu.com/marker?location=40.047669,116.313082&title=我的位置
+        //&content=百度奎科大厦&output=html
+        //&src=Fun微博&coord_type=gcj02
+        String url = String.format("http://api.map.baidu.com/marker?location=%s,%s&title=%s&content=%s&output=html&src=%s&coord_type=gcj02",
+                                      mMarkerLat, mMarkerLon, mMarkerTitle, mMarkerTitle, getString(R.string.app_name));
+        //获取短链接
+        ShortUrlAPI api = new ShortUrlAPI(mToken);
+        String url_long[] = {url};
+        api.shorten(url_long, new OnShortenUrlListener(this, url));
+    }
+    
+    /**
+     * 得到短链接后的处理监听器
+     */
+    private class OnShortenUrlListener extends OnHttpRequestReturnListener {
+
+        /**分享标题*/
+        private String shareTitle = "";
+        /**分享正文*/
+        private String shareText = "";
+        
+        public OnShortenUrlListener(BaseActivity base, String ori_url) {
+            super(base);
+            this.shareTitle = String.format("%s%s", getString(R.string.app_name), getString(R.string.common_share));
+            this.shareText = String.format("%s : %s , (%s%s)", 
+                                            mMarkerTitle, ori_url, getString(R.string.text_share_from), getString(R.string.app_name));
+        }
+
+        @Override
+        public void onComplete(String arg0) {
+            //解析返回json
+            String url = getRetShortenUrl(arg0);
+            
+            //若有效，则进行分享
+            if(!TextUtils.isEmpty(url)) {
+                //组装分享内容
+                shareText = String.format("%s : %s , (%s%s)", 
+                                           mMarkerTitle, url, getString(R.string.text_share_from), getString(R.string.app_name));
+            } else {
+                KLog.w(TAG, "getRetShortenUrl faild!");
+            }
+            
+            //分享
+            ShareUtils.share(BaiduMapActivity.this, shareTitle, shareText, null);
+        }
+        
+        @Override
+        public void onComplete4binary(ByteArrayOutputStream arg0) {
+            super.onComplete4binary(arg0);
+            //分享原网址
+            ShareUtils.share(BaiduMapActivity.this, shareTitle, shareText, null);
+        }
+        
+        @Override
+        public void onError(WeiboException e) {
+            super.onError(e);
+            //分享原网址
+            ShareUtils.share(BaiduMapActivity.this, shareTitle, shareText, null);
+        }
+        
+        @Override
+        public void onIOException(IOException e) {
+            super.onIOException(e);
+            //分享原网址
+            ShareUtils.share(BaiduMapActivity.this, shareTitle, shareText, null);
+        }
+        
+        /**
+         * 从返回的字符串中得到短链接
+         * @param str
+         * @return
+         */
+        private String getRetShortenUrl(String str) {
+            String ret = "";
+            
+            KLog.d(TAG, "getRetShortenUrl : %s", str);
+            if(!TextUtils.isEmpty(str)) {
+                try {
+                    JSONObject json = new JSONObject(str);
+                    JSONArray arr = json.getJSONArray("urls");
+                    if(arr != null && arr.length() >= 1) {
+                        JSONObject obj = arr.getJSONObject(0);
+                        String s_url = obj.optString("url_short", "");
+                        if(!TextUtils.isEmpty(s_url)) {
+                            ret = s_url;
+                        }
+                    }
+                } catch (JSONException e) {
+                    KLog.w(TAG, "JSONException", e);
+                }
+            }
+            return ret;
         }
     }
 }

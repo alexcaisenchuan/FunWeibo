@@ -307,7 +307,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
     private ImageView mUserFace = null;
     private TextView mWeiboTime = null;
     private TextView mWeiboSource = null;
-    private ImageView mImgMap = null;
+    private Button mImgMap = null;
     //listview第二行：微博信息
     private View mHeaderWeiboContent = null;
     private TextView mWeiboContent = null;
@@ -370,13 +370,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
             
             case R.id.button_share: {
                 //分享
-                String title = "";
-                String text = "";
-                if(mStatus != null) {
-                    title = mStatus.getPlace().title;
-                    text = mStatus.getText();
-                }
-                ShareUtils.share(ActivityDetailWeibo.this, title, text, null);
+                share();
                 break;
             }
         
@@ -425,7 +419,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                 return false;
             }
         });
-        return true; 
+        return true;
     }
     /*--------------------------
      * protected、packet方法
@@ -458,7 +452,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
         mUserFace = (ImageView)mHeaderWeiboUserInfo.findViewById(R.id.img_userface);
         mWeiboTime = (TextView)mHeaderWeiboUserInfo.findViewById(R.id.text_weibo_time);
         mWeiboSource = (TextView)mHeaderWeiboUserInfo.findViewById(R.id.text_weibo_source);
-        mImgMap = (ImageView)mHeaderWeiboUserInfo.findViewById(R.id.img_map);
+        mImgMap = (Button)mHeaderWeiboUserInfo.findViewById(R.id.img_map);
         mImgMap.setOnClickListener(this);
         
         mHeaderWeiboContent = View.inflate(this, R.layout.header_weibo_content, null);
@@ -687,5 +681,35 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                                          like_num,
                                          mCommentCount);
         mWeiboMore.setText(more_info);
+    }
+
+    /**
+     * 分享微博内容
+     */
+    private void share() {
+        String title = "";
+        String text = "";
+        String username = "";
+        String place = "";
+        String picUrl = "";
+        
+        //标题
+        title = String.format("%s%s", getString(R.string.app_name), getString(R.string.common_share));
+        
+        //正文
+        if(mStatus != null) {
+            if(mStatus.getUser() != null) {
+                username = String.format("@%s : ", mStatus.getUser().getName());
+            }
+            if(!TextUtils.isEmpty(mStatus.getOriginal_pic())) {
+                picUrl = String.format(" ,%s%s", getString(R.string.text_pic_url), mStatus.getOriginal_pic());
+            }
+            if(mStatus.getPlace() != null && !TextUtils.isEmpty(mStatus.getPlace().title)) {
+                place = String.format(" (%s%s)", getString(R.string.text_share_from), getString(R.string.app_name));
+            }
+            text = String.format("%s%s%s%s", username, mStatus.getText(), picUrl, place);
+        }
+        
+        ShareUtils.share(this, title, text, null);
     }
 }

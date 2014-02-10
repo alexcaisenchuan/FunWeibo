@@ -28,7 +28,6 @@ public class ShareUtils {
     /**
      * 进行分享
      * @param context
-     * @param activityTitle
      * @param msgTitle
      * @param msgText
      * @param imgPath
@@ -53,15 +52,10 @@ public class ShareUtils {
         String activityTitle = context.getString(R.string.title_share);
         
         intent.putExtra(Intent.EXTRA_SUBJECT, msgTitle);
-        //intent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml(TextUtils.htmlEncode(msgText)));
-        //intent.putExtra(Intent.EXTRA_HTML_TEXT, Html.fromHtml(msgText));
         intent.putExtra(Intent.EXTRA_TEXT, msgText);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         
         context.startActivity(Intent.createChooser(intent, activityTitle));
-        
-        //Activity activity=(Activity)context;
-        //activity.startActivityForResult(Intent.createChooser(intent, activityTitle), 10);
     }
     
     /*--------------------------

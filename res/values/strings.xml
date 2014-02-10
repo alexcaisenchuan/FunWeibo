@@ -2,6 +2,9 @@
 
     <string name="app_name">Fun微博</string>
 
+    <!-- 通用 -->
+    <string name="common_share">分享</string>
+    
     <!-- Hints -->
     <string name="hint_login_faild">登录失败！</string>
     <string name="hint_login_success">登录成功！</string>
@@ -42,7 +45,7 @@
     <string name="hint_new_weibo_back">退出后无法保存，确定？</string>
     <string name="hint_loading_img_faild">图片加载失败！</string>
     <string name="hint_loading_img_not_finish">图片未加载完成</string>
-    <string name="hint_logout_confirm">确认注销用户？</string>
+    <string name="hint_logout_confirm">确认注销账户？</string>
     
     <!-- Buttons -->
     <string name="button_ok">确定</string>
@@ -92,6 +95,8 @@
     <string name="text_place_category">分类</string>
     <string name="text_place_url">网址</string>
     <string name="text_place_none">暂无</string>
+    <string name="text_pic_url">图片地址:</string>
+    <string name="text_share_from">来自:</string>
     
     <!-- 微博提示 -->
     <string name="weibo_error_not_exist">原微博已删除！</string>
