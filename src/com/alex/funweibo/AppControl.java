@@ -95,7 +95,8 @@ public class AppControl extends Application{
             sb.append(location.getCity());
             
             KLog.d(TAG, sb.toString());*/
-            KLog.d(TAG, "onReceiveLocation , lat : %s , lon : %s", location.getLatitude(), location.getLongitude());
+            
+            //KLog.d(TAG, "onReceiveLocation , lat : %s , lon : %s", location.getLatitude(), location.getLongitude());
         }
 
         public void onReceivePoi(BDLocation poiLocation) {

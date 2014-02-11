@@ -46,6 +46,10 @@
     <string name="hint_loading_img_faild">图片加载失败！</string>
     <string name="hint_loading_img_not_finish">图片未加载完成</string>
     <string name="hint_logout_confirm">确认注销账户？</string>
+    <string name="hint_check_find_case">输入正确的检索条件！</string>
+    <string name="hint_auth_success">认证成功</string>
+    <string name="hint_auth_faild">认证失败：</string>
+    <string name="hint_init_faild">初始化错误！</string>
     
     <!-- Buttons -->
     <string name="button_ok">确定</string>

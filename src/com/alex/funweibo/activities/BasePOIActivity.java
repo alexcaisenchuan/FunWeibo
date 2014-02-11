@@ -58,7 +58,7 @@ public abstract class BasePOIActivity extends BaseActivity {
     private static final String TAG = BasePOIActivity.class.getSimpleName();
     
     /**调试打印开关*/
-    private static final boolean VERBOSE = true;
+    private static final boolean VERBOSE = false;
     
     ///////////////intent/////////////////
     /**设置默认显示的分类*/

@@ -68,7 +68,7 @@ public class Place implements java.io.Serializable{
             KLog.w(TAG, "Exception", e);
         }
         
-        KLog.d(TAG, toString());
+        //KLog.d(TAG, toString());
     }
     
     /* (non-Javadoc)

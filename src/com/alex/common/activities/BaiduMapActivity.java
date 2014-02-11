@@ -12,11 +12,14 @@ import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.common.model.GeoPos;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.ShareUtils;
+import com.alex.common.utils.SmartToast;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
 import com.baidu.mapapi.BMapManager;
+import com.baidu.mapapi.MKGeneralListener;
 import com.baidu.mapapi.map.ItemizedOverlay;
 import com.baidu.mapapi.map.LocationData;
+import com.baidu.mapapi.map.MKEvent;
 import com.baidu.mapapi.map.MapController;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationOverlay;
@@ -113,10 +116,36 @@ public class BaiduMapActivity extends BaseActivity {
 
         @Override
         public void onClickedPopup(int arg0) {
-            // TODO Auto-generated method stub
-            
+            //...
         }
         
+    }
+    
+    /**
+     * 常用事件监听，用来处理通常的网络错误，授权验证错误等
+     */
+    private class MyGeneralListener implements MKGeneralListener {
+        
+        @Override
+        public void onGetNetworkState(int iError) {
+            if (iError == MKEvent.ERROR_NETWORK_CONNECT) {
+                SmartToast.showLongToast(BaiduMapActivity.this, R.string.hint_check_network, false);
+            } else if (iError == MKEvent.ERROR_NETWORK_DATA) {
+                SmartToast.showLongToast(BaiduMapActivity.this, R.string.hint_check_find_case, false);
+            }
+        }
+
+        @Override
+        public void onGetPermissionState(int iError) {
+            //非零值表示key验证未通过
+            if (iError != 0) {
+                KLog.w(TAG, "onGetPermissionState faild : %s", iError);
+                SmartToast.showLongToast(BaiduMapActivity.this, getString(R.string.hint_auth_faild) + iError, false);
+            } else {
+                KLog.d(TAG, "onGetPermissionState success");
+                SmartToast.showLongToast(BaiduMapActivity.this, getString(R.string.hint_auth_success), false);
+            }
+        }
     }
     
     /**
@@ -151,6 +180,8 @@ public class BaiduMapActivity extends BaseActivity {
     private BMapManager mBMapMan = null;
     /**地图视图*/
     private MapView mMapView = null;
+    /**全局地图控制器*/
+    MapController mMapController = null;
     /**弹出框*/
     private PopupOverlay mPopWindow = null;
     /**弹出框的内容*/
@@ -224,6 +255,7 @@ public class BaiduMapActivity extends BaseActivity {
         
         return true;
     }
+    
     /*--------------------------
      * protected、packet方法
      *-------------------------*/
@@ -231,11 +263,11 @@ public class BaiduMapActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         KLog.d(TAG, "onCreate");
         
-        super.onCreate(savedInstanceState);
-
         //注意：请在试用setContentView前初始化BMapManager对象，否则会报错
         initMapManager();
-
+        
+        super.onCreate(savedInstanceState);
+        
         setContentView(R.layout.activity_baidu_map);
         
         mActionBar.setTitle(R.string.title_map);
@@ -258,33 +290,43 @@ public class BaiduMapActivity extends BaseActivity {
     }
     
     @Override
-    protected void onDestroy(){
-        if(mMapView != null) {
-            mMapView.destroy();
-        }
-        if(mBMapMan != null){
-            mBMapMan.destroy();
-            mBMapMan = null;
-        }
-        super.onDestroy();
-    }
-    
-    @Override
-    protected void onPause(){
+    protected void onPause() {
+        /**
+         *  MapView的生命周期与Activity同步，当activity挂起时需调用MapView.onPause()
+         */
         mMapView.onPause();
-        if(mBMapMan != null){
-           mBMapMan.stop();
-        }
         super.onPause();
     }
     
     @Override
-    protected void onResume(){
+    protected void onResume() {
+        /**
+         *  MapView的生命周期与Activity同步，当activity恢复时需调用MapView.onResume()
+         */
         mMapView.onResume();
-        if(mBMapMan != null){
-            mBMapMan.start();
-        }
         super.onResume();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        /**
+         *  MapView的生命周期与Activity同步，当activity销毁时需调用MapView.destroy()
+         */
+        mMapView.destroy();
+        super.onDestroy();
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mMapView.onSaveInstanceState(outState);
+        
+    }
+    
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mMapView.onRestoreInstanceState(savedInstanceState);
     }
     
     /*--------------------------
@@ -295,7 +337,9 @@ public class BaiduMapActivity extends BaseActivity {
      */
     private void initMapManager() {
         mBMapMan = new BMapManager(getApplication());
-        mBMapMan.init(AppConfig.BAIDU_API_KEY, null);  
+        if(!mBMapMan.init(AppConfig.BAIDU_API_KEY, new MyGeneralListener())) {
+            SmartToast.showLongToast(this, R.string.hint_init_faild, false);
+        }
     }
     
     /**
@@ -306,6 +350,9 @@ public class BaiduMapActivity extends BaseActivity {
         mMapView = (MapView)findViewById(R.id.bmapsView);
         mMapView.setBuiltInZoomControls(true);                      //设置启用内置的缩放控件
         mMapView.showScaleControl(true);                            //显示比例尺
+        
+        //地图控制器
+        mMapController = mMapView.getController();        //得到mMapView的控制权,可以用它控制和驱动平移和缩放
         
         //设置弹出窗
         mPopWindow = new PopupOverlay(mMapView, new MyPopupClickListener());
@@ -340,11 +387,10 @@ public class BaiduMapActivity extends BaseActivity {
      * 设置地图中心
      */
     private void setCenter(double lat, double lon) {
-        MapController controller = mMapView.getController();        //得到mMapView的控制权,可以用它控制和驱动平移和缩放
         Position pos = Position.gcj_to_bd(lat, lon);                //坐标转换
         GeoPos point = new GeoPos(pos.getLat(), pos.getLon());      //用给定的经纬度构造一个GeoPoint，单位是微度 (度 * 1E6)
-        controller.setCenter(point);                                //设置地图中心点
-        controller.setZoom(DEFAULT_ZOOM_LEVEL);                     //设置地图zoom级别
+        mMapController.setCenter(point);                                //设置地图中心点
+        mMapController.setZoom(DEFAULT_ZOOM_LEVEL);                     //设置地图zoom级别
     }
     
     /**
@@ -369,14 +415,6 @@ public class BaiduMapActivity extends BaseActivity {
         
         //刷新地图
         mMapView.refresh();
-        
-        //删除overlay
-        //itemOverlay.removeItem(itemOverlay.getItem(0));
-        //mMapView.refresh();
-        
-        //清除overlay
-        // itemOverlay.removeAll();
-        // mMapView.refresh();
     }
     
     /**
