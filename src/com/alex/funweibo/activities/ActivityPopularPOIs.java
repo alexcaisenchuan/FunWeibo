@@ -258,12 +258,16 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
      */
     private class GetPoiStatusesListener extends OnHttpRequestReturnListener {
 
+        /**请求的分类*/
+        private String mRequestCategory = "";
+        
         /**
          * 读取微博信息的回调函数
          * @param base 用于显示Toast的Activity对象
          */
-        public GetPoiStatusesListener(BaseActivity base) {
+        public GetPoiStatusesListener(BaseActivity base, String category) {
             super(base);
+            this.mRequestCategory = category;
         }
 
         /* (non-Javadoc)
@@ -272,20 +276,25 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         @Override
         public void onComplete(String arg0) {
             try {
-                //KLog.d(TAG, "ret : " + arg0);
-                KLog.d(TAG, "get poi status return");
-                
-                List<Status> list = Status.constructStatuses(arg0);
-                if(list != null && list.size() > 0) {
-                    //若本次获取的列表的分类与上次不一样，则要把之前的给清空
-                    cleanStatusJsonArrIfNeeded();
-                    //保存查询到的微博json，用于下次启动应用恢复
-                    saveStatusToJsonArr(arg0);
+                if(!TextUtils.isEmpty(mCurrentCategory) && !mCurrentCategory.equals(mRequestCategory)) {
+                    //分类已经改变了，就不把查询结果添加过去了
+                    KLog.w(TAG, "GetPois , category change : %s/%s", mCurrentCategory, mRequestCategory);
+                } else {
+                    //KLog.d(TAG, "ret : " + arg0);
+                    KLog.d(TAG, "get poi status return");
+                    
+                    List<Status> list = Status.constructStatuses(arg0);
+                    if(list != null && list.size() > 0) {
+                        //若本次获取的列表的分类与上次不一样，则要把之前的给清空
+                        cleanStatusJsonArrIfNeeded();
+                        //保存查询到的微博json，用于下次启动应用恢复
+                        saveStatusToJsonArr(arg0);
+                    }
+                    sendMessageToBaseHandler(MSG_REFRESH_LIST,
+                                             VALUE_REFRESH_LIST_ARG1_DEFAULT,
+                                             0,
+                                             list);
                 }
-                sendMessageToBaseHandler(MSG_REFRESH_LIST,
-                                         VALUE_REFRESH_LIST_ARG1_DEFAULT,
-                                         0,
-                                         list);
             } catch (com.weibo.sdk.android.org.json.JSONException e) {
                 KLog.w(TAG, "Exception", e);
                 showToastOnUIThread(R.string.hint_read_weibo_error);
@@ -805,7 +814,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                                  1,
                                  SORT2.SORT_BY_TIME,
                                  false,
-                                 new GetPoiStatusesListener(this));
+                                 new GetPoiStatusesListener(this, mCurrentCategory));
         }
     }
     

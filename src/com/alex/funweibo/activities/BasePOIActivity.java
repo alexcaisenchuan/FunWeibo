@@ -94,12 +94,16 @@ public abstract class BasePOIActivity extends BaseActivity {
      */
     private class GetPoisListener extends OnHttpRequestReturnListener {
 
+        /**请求的分类*/
+        private String mRequestCategory = "";
+        
         /**
          * 读取微博信息的回调函数
          * @param base 用于显示Toast的Activity对象
          */
-        public GetPoisListener(BaseActivity base) {
+        public GetPoisListener(BaseActivity base, String category) {
             super(base);
+            this.mRequestCategory = category;
         }
 
         /* (non-Javadoc)
@@ -108,20 +112,26 @@ public abstract class BasePOIActivity extends BaseActivity {
         @Override
         public void onComplete(String str) {
             try {
-                if(VERBOSE) {
-                    KLog.d(TAG, "GetPois , ret : %s", str);
-                }
 
-                List<Poi> list = new ArrayList<Poi>();
-                if(!TextUtils.isEmpty(str) && 
-                   !str.startsWith(WeiboDefines.RET_EMPTY_ARRAY)) {
-                    int total = WeiboResponse.getTotalNum(str);
-                    list = PoiList.getPoiList(str);
-                    sendMessageToBaseHandler(MSG_ON_GET_POIS, total, 0, list);
+                if(!TextUtils.isEmpty(mCurrentCategory) && !mCurrentCategory.equals(mRequestCategory)) {
+                    //分类已经改变了，就不把查询结果添加过去了
+                    KLog.w(TAG, "GetPois , category change : %s/%s", mCurrentCategory, mRequestCategory);
                 } else {
-                    onLoadFinish(false);
+                    if(VERBOSE) {
+                        KLog.d(TAG, "GetPois , ret : %s", str);
+                    }
+    
+                    List<Poi> list = new ArrayList<Poi>();
+                    if(!TextUtils.isEmpty(str) && 
+                       !str.startsWith(WeiboDefines.RET_EMPTY_ARRAY)) {
+                        int total = WeiboResponse.getTotalNum(str);
+                        list = PoiList.getPoiList(str);
+                        sendMessageToBaseHandler(MSG_ON_GET_POIS, total, 0, list);
+                    } else {
+                        onLoadFinish(false);
+                    }
+                    onGetPoiList(list);
                 }
-                onGetPoiList(list);
             } catch (Exception e) {
                 KLog.w(TAG, "JSONException while build status", e);
                 showToastOnUIThread(getString(R.string.hint_poi_read_faild) + e.toString());
@@ -506,7 +516,7 @@ public abstract class BasePOIActivity extends BaseActivity {
                                      mPoiCountToGetOneTime,
                                      page,
                                      false,
-                                     new GetPoisListener(this));
+                                     new GetPoisListener(this, mCurrentCategory));
                 
                 sendMessageToBaseHandler(MSG_SHOW_LOADING_HINT);
                 mGettingPoiList = true;
