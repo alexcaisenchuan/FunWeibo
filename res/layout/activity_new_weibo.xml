@@ -26,7 +26,7 @@
             android:textSize="20sp"
             android:text="@string/button_select_place"
 
-            android:background="@drawable/corner_background"
+            android:background="@drawable/selector_button_locate"
             android:drawableLeft="@android:drawable/ic_menu_myplaces"
             />
         

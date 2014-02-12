@@ -8,6 +8,9 @@ public class AppConfig {
     /*--------------------------
      * 常量
      *-------------------------*/
+    /**全局调试开关*/
+    public static final boolean DEBUG = true;
+    
     ///////////////////////////////百度相关///////////////////////////////////
     /**百度 API KEY*/
     public static final String BAIDU_API_KEY = "nAdzTUW1sKlw6EW6naalhQD2";

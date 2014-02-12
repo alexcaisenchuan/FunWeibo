@@ -10,11 +10,14 @@ import org.json.JSONObject;
 import com.alex.common.AppConfig;
 import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.common.model.GeoPos;
+import com.alex.common.utils.BaiduMapUtils;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.ShareUtils;
 import com.alex.common.utils.SmartToast;
 import com.alex.funweibo.R;
 import com.alex.funweibo.model.Position;
+import com.baidu.location.BDLocation;
+import com.baidu.location.BDLocationListener;
 import com.baidu.mapapi.BMapManager;
 import com.baidu.mapapi.MKGeneralListener;
 import com.baidu.mapapi.map.ItemizedOverlay;
@@ -39,7 +42,9 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
+import android.view.View.OnClickListener;
 import android.widget.Button;
 
 /**
@@ -116,7 +121,7 @@ public class BaiduMapActivity extends BaseActivity {
 
         @Override
         public void onClickedPopup(int arg0) {
-            //...
+            BaiduMapUtils.openBaiduMap(BaiduMapActivity.this, mMarkerLat, mMarkerLon, mMarkerTitle, mMarkerAddress, getString(R.string.app_name));
         }
         
     }
@@ -129,9 +134,13 @@ public class BaiduMapActivity extends BaseActivity {
         @Override
         public void onGetNetworkState(int iError) {
             if (iError == MKEvent.ERROR_NETWORK_CONNECT) {
-                SmartToast.showLongToast(BaiduMapActivity.this, R.string.hint_check_network, false);
+                if(AppConfig.DEBUG) {
+                    SmartToast.showLongToast(BaiduMapActivity.this, R.string.hint_check_network, false);
+                }
             } else if (iError == MKEvent.ERROR_NETWORK_DATA) {
-                SmartToast.showLongToast(BaiduMapActivity.this, R.string.hint_check_find_case, false);
+                if(AppConfig.DEBUG) {
+                    SmartToast.showLongToast(BaiduMapActivity.this, R.string.hint_check_find_case, false);
+                }
             }
         }
 
@@ -140,12 +149,46 @@ public class BaiduMapActivity extends BaseActivity {
             //非零值表示key验证未通过
             if (iError != 0) {
                 KLog.w(TAG, "onGetPermissionState faild : %s", iError);
-                SmartToast.showLongToast(BaiduMapActivity.this, getString(R.string.hint_auth_faild) + iError, false);
+                if(AppConfig.DEBUG) {
+                    SmartToast.showLongToast(BaiduMapActivity.this, getString(R.string.hint_auth_faild) + iError, false);
+                }
             } else {
                 KLog.d(TAG, "onGetPermissionState success");
-                SmartToast.showLongToast(BaiduMapActivity.this, getString(R.string.hint_auth_success), false);
+                if(AppConfig.DEBUG) {
+                    SmartToast.showLongToast(BaiduMapActivity.this, getString(R.string.hint_auth_success), false);
+                }
             }
         }
+    }
+    
+    /**
+     * 位置监听器
+     */
+    private class MyLocationListener implements BDLocationListener {
+
+        @Override
+        public void onReceiveLocation(BDLocation loc) {
+            if (loc == null) {
+                return;
+            }
+            
+            KLog.d(TAG, "onReceiveLocation : %s", loc);
+            Position p = new Position(loc.getLatitude(), loc.getLongitude());
+            p.setDirection(loc.getDerect());
+            p.setSpeed(loc.getSpeed());
+            p.setRadius(loc.getRadius());
+            setMyLocation(p);
+        }
+
+        @Override
+        public void onReceivePoi(BDLocation loc) {
+            if (loc == null) {
+                return;
+            }
+            
+            KLog.d(TAG, "onReceivePoi : %s", loc);
+        }
+        
     }
     
     /**
@@ -181,7 +224,7 @@ public class BaiduMapActivity extends BaseActivity {
     /**地图视图*/
     private MapView mMapView = null;
     /**全局地图控制器*/
-    MapController mMapController = null;
+    private MapController mMapController = null;
     /**弹出框*/
     private PopupOverlay mPopWindow = null;
     /**弹出框的内容*/
@@ -190,6 +233,8 @@ public class BaiduMapActivity extends BaseActivity {
     private MyLocationOverlay myLocationOverlay = null;
     /**地图的handler*/
     private MapHandler mHandler = new MapHandler();
+    /**位置监听器*/
+    private MyLocationListener mLocationListener = new MyLocationListener();
     
     /**标记点纬度*/
     private double mMarkerLat = 0.0;
@@ -225,11 +270,9 @@ public class BaiduMapActivity extends BaseActivity {
         // Inflate the menu; this adds items to the action bar if it is present.  
         super.onCreateOptionsMenu(menu);  
         
-        //添加菜单项 ：我的位置
+        //我的位置
         MenuItem my = menu.add(0, 0, 0, R.string.button_my);
-        //绑定到ActionBar    
         my.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        //绑定点击事件
         my.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             
             @Override
@@ -239,11 +282,9 @@ public class BaiduMapActivity extends BaseActivity {
             }
         });
         
-        //添加菜单项  ：分享
+        //分享
         MenuItem add = menu.add(0, 0, 0, R.string.button_share);
-        //绑定到ActionBar    
         add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        //绑定点击事件
         add.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             
             @Override
@@ -266,15 +307,10 @@ public class BaiduMapActivity extends BaseActivity {
         //注意：请在试用setContentView前初始化BMapManager对象，否则会报错
         initMapManager();
         
-        super.onCreate(savedInstanceState);
-        
-        setContentView(R.layout.activity_baidu_map);
-        
-        mActionBar.setTitle(R.string.title_map);
-        
         //初始化界面元素
-        mPopContent = new Button(this);
-        mPopContent.setBackgroundResource(R.drawable.background_pop);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_baidu_map);
+        initView();
         
         //注册地图
         initMap();
@@ -283,35 +319,31 @@ public class BaiduMapActivity extends BaseActivity {
         handleIntent();
         
         //设置用户所处位置
-        Position p = mApp.getCurrentLocation(true);
-        if(p.isValid()) {
-            setMyLocation(p.getLat(), p.getLon());
-        }
+        Position p = mApp.getCurrentLocation();
+        setMyLocation(p);
     }
     
     @Override
     protected void onPause() {
-        /**
-         *  MapView的生命周期与Activity同步，当activity挂起时需调用MapView.onPause()
-         */
+        //注销位置监听器
+        mApp.getLocationClient().unRegisterLocationListener(mLocationListener);
+        //MapView的生命周期与Activity同步，当activity挂起时需调用MapView.onPause()
         mMapView.onPause();
         super.onPause();
     }
     
     @Override
     protected void onResume() {
-        /**
-         *  MapView的生命周期与Activity同步，当activity恢复时需调用MapView.onResume()
-         */
+        //注册位置监听器
+        mApp.getLocationClient().registerLocationListener(mLocationListener);
+        //MapView的生命周期与Activity同步，当activity恢复时需调用MapView.onResume()
         mMapView.onResume();
         super.onResume();
     }
     
     @Override
     protected void onDestroy() {
-        /**
-         *  MapView的生命周期与Activity同步，当activity销毁时需调用MapView.destroy()
-         */
+        //MapView的生命周期与Activity同步，当activity销毁时需调用MapView.destroy()
         mMapView.destroy();
         super.onDestroy();
     }
@@ -338,8 +370,29 @@ public class BaiduMapActivity extends BaseActivity {
     private void initMapManager() {
         mBMapMan = new BMapManager(getApplication());
         if(!mBMapMan.init(AppConfig.BAIDU_API_KEY, new MyGeneralListener())) {
-            SmartToast.showLongToast(this, R.string.hint_init_faild, false);
+            KLog.w(TAG, "BMapManager init faild!");
+            if(AppConfig.DEBUG) {
+                SmartToast.showLongToast(this, R.string.hint_init_faild, false);
+            }
         }
+    }
+    
+    /**
+     * 初始化界面
+     */
+    private void initView() {
+        mActionBar.setTitle(R.string.title_map);
+        
+        mPopContent = new Button(this);
+        mPopContent.setMaxWidth(500);
+        mPopContent.setTextSize(18);
+        mPopContent.setBackgroundResource(R.drawable.selector_bg_pop);
+        mPopContent.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BaiduMapUtils.openBaiduMap(BaiduMapActivity.this, mMarkerLat, mMarkerLon, mMarkerTitle, mMarkerAddress, getString(R.string.app_name));
+            }
+        });
     }
     
     /**
@@ -352,7 +405,10 @@ public class BaiduMapActivity extends BaseActivity {
         mMapView.showScaleControl(true);                            //显示比例尺
         
         //地图控制器
-        mMapController = mMapView.getController();        //得到mMapView的控制权,可以用它控制和驱动平移和缩放
+        mMapController = mMapView.getController();
+        
+        //我的位置
+        myLocationOverlay = new MyLocationOverlay(mMapView);
         
         //设置弹出窗
         mPopWindow = new PopupOverlay(mMapView, new MyPopupClickListener());
@@ -419,17 +475,28 @@ public class BaiduMapActivity extends BaseActivity {
     
     /**
      * 设置用户当前位置
+     * @param p 要设置的位置，gcj坐标系
      */
-    private void setMyLocation(double lat, double lon) {
-        myLocationOverlay = new MyLocationOverlay(mMapView);
-        LocationData locData = new LocationData();
-        //手动将位置源置为天安门，在实际应用中，请使用百度定位SDK获取位置信息，要在SDK中显示一个位置，需要使用百度经纬度坐标（bd09ll）
-        locData.latitude = lat;
-        locData.longitude = lon;
-        locData.direction = 2.0f;
-        myLocationOverlay.setData(locData);
-        mMapView.getOverlays().add(myLocationOverlay);
-        mMapView.refresh();
+    private void setMyLocation(Position p) {
+        if(p != null && p.isValid()) {
+            //坐标转换
+            Position p_bd = Position.gcj_to_bd(p);
+            //创建位置
+            LocationData locData = new LocationData();
+            locData.latitude = p_bd.getLat();
+            locData.longitude = p_bd.getLon();
+            locData.direction = p_bd.getDirection();
+            locData.accuracy = p_bd.getRadius();
+            locData.speed = p_bd.getSpeed();
+            //设置位置
+            myLocationOverlay.setData(locData);
+            if(!mMapView.getOverlays().contains(myLocationOverlay)) {
+                mMapView.getOverlays().add(myLocationOverlay);
+            } else {
+                //KLog.d(TAG, "overlay added al-ready!");
+            }
+            mMapView.refresh();
+        }
     }
     
     /**
@@ -461,15 +528,10 @@ public class BaiduMapActivity extends BaseActivity {
      * 分享地点
      */
     private void share() {
-        //http://api.map.baidu.com/marker?location=40.047669,116.313082&title=我的位置
-        //&content=百度奎科大厦&output=html
-        //&src=Fun微博&coord_type=gcj02
-        String url = String.format("http://api.map.baidu.com/marker?location=%s,%s&title=%s&content=%s&output=html&src=%s&coord_type=gcj02",
-                                      mMarkerLat, mMarkerLon, mMarkerTitle, mMarkerAddress, getString(R.string.app_name));
-        //获取短链接
+        String url = BaiduMapUtils.getMarkerHtmlString(mMarkerLat, mMarkerLon, mMarkerTitle, mMarkerAddress, getString(R.string.app_name));
         ShortUrlAPI api = new ShortUrlAPI(mToken);
         String url_long[] = {url};
-        api.shorten(url_long, new OnShortenUrlListener(this, url));
+        api.shorten(url_long, new OnShortenUrlListener(this, url));     //转换成短链接
     }
     
     /**

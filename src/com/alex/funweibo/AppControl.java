@@ -44,6 +44,14 @@ import android.text.TextUtils;
  */
 public class AppControl extends Application{
     /*--------------------------
+     * 常量
+     *-------------------------*/
+    private static final String TAG = "AppControl";
+    
+    /**调试信息打印*/
+    private static final boolean VERBOSE = false;
+    
+    /*--------------------------
      * 自定义类型
      *-------------------------*/
     /**
@@ -69,34 +77,36 @@ public class AppControl extends Application{
             }
             
             //打印调试
-            /*StringBuffer sb = new StringBuffer(256);
-            sb.append("time : ");
-            sb.append(location.getTime());
-            sb.append("\nerror code : ");
-            sb.append(location.getLocType());
-            sb.append("\nlatitude : ");
-            sb.append(location.getLatitude());
-            sb.append("\nlontitude : ");
-            sb.append(location.getLongitude());
-            sb.append("\nradius : ");
-            sb.append(location.getRadius());
-            if (location.getLocType() == BDLocation.TypeGpsLocation) {
-                sb.append("\nspeed : ");
-                sb.append(location.getSpeed());
-                sb.append("\nsatellite : ");
-                sb.append(location.getSatelliteNumber());
-            } else if (location.getLocType() == BDLocation.TypeNetWorkLocation) {
-                sb.append("\naddr : ");
-                sb.append(location.getAddrStr());
+            if(VERBOSE) {
+                StringBuffer sb = new StringBuffer(256);
+                sb.append("time : ");
+                sb.append(location.getTime());
+                sb.append("\nerror code : ");
+                sb.append(location.getLocType());
+                sb.append("\nlatitude : ");
+                sb.append(location.getLatitude());
+                sb.append("\nlontitude : ");
+                sb.append(location.getLongitude());
+                sb.append("\nradius : ");
+                sb.append(location.getRadius());
+                if (location.getLocType() == BDLocation.TypeGpsLocation) {
+                    sb.append("\nspeed : ");
+                    sb.append(location.getSpeed());
+                    sb.append("\nsatellite : ");
+                    sb.append(location.getSatelliteNumber());
+                } else if (location.getLocType() == BDLocation.TypeNetWorkLocation) {
+                    sb.append("\naddr : ");
+                    sb.append(location.getAddrStr());
+                }
+                sb.append("\nstreet : ");
+                sb.append(location.getStreet());
+                sb.append("\ncity : ");
+                sb.append(location.getCity());
+                
+                KLog.d(TAG, sb.toString());
+                
+                KLog.d(TAG, "onReceiveLocation , lat : %s , lon : %s", location.getLatitude(), location.getLongitude());
             }
-            sb.append("\nstreet : ");
-            sb.append(location.getStreet());
-            sb.append("\ncity : ");
-            sb.append(location.getCity());
-            
-            KLog.d(TAG, sb.toString());*/
-            
-            //KLog.d(TAG, "onReceiveLocation , lat : %s , lon : %s", location.getLatitude(), location.getLongitude());
         }
 
         public void onReceivePoi(BDLocation poiLocation) {
@@ -107,29 +117,31 @@ public class AppControl extends Application{
             }
             
             //打印调试
-            StringBuffer sb = new StringBuffer(256);
-            sb.append("Poi time : ");
-            sb.append(poiLocation.getTime());
-            sb.append("\nerror code : ");
-            sb.append(poiLocation.getLocType());
-            sb.append("\nlatitude : ");
-            sb.append(poiLocation.getLatitude());
-            sb.append("\nlontitude : ");
-            sb.append(poiLocation.getLongitude());
-            sb.append("\nradius : ");
-            sb.append(poiLocation.getRadius());
-            if (poiLocation.getLocType() == BDLocation.TypeNetWorkLocation) {
-                sb.append("\naddr : ");
-                sb.append(poiLocation.getAddrStr());
+            if(VERBOSE) {
+                StringBuffer sb = new StringBuffer(256);
+                sb.append("Poi time : ");
+                sb.append(poiLocation.getTime());
+                sb.append("\nerror code : ");
+                sb.append(poiLocation.getLocType());
+                sb.append("\nlatitude : ");
+                sb.append(poiLocation.getLatitude());
+                sb.append("\nlontitude : ");
+                sb.append(poiLocation.getLongitude());
+                sb.append("\nradius : ");
+                sb.append(poiLocation.getRadius());
+                if (poiLocation.getLocType() == BDLocation.TypeNetWorkLocation) {
+                    sb.append("\naddr : ");
+                    sb.append(poiLocation.getAddrStr());
+                }
+                if (poiLocation.hasPoi()) {
+                    sb.append("\nPoi:");
+                    sb.append(poiLocation.getPoi());
+                } else {
+                    sb.append("noPoi information");
+                }
+                
+                KLog.d(TAG, sb.toString());
             }
-            if (poiLocation.hasPoi()) {
-                sb.append("\nPoi:");
-                sb.append(poiLocation.getPoi());
-            } else {
-                sb.append("noPoi information");
-            }
-            
-            KLog.d(TAG, sb.toString());
         }
     }
     
@@ -169,10 +181,6 @@ public class AppControl extends Application{
         }
         
     }
-    /*--------------------------
-     * 常量
-     *-------------------------*/
-    private static final String TAG = "AppControl";
     
     /*--------------------------
      * 成员变量

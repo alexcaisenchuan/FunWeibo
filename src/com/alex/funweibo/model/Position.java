@@ -35,6 +35,12 @@ public class Position {
     private double longtitude = INVALID_VALUE;
     /**地址*/
     private String address = "";
+    /**方向*/
+    private float direction = 0.0f;
+    /**速度*/
+    private float speed = 0.0f;
+    /**定位精度，单位：米*/
+    private float radius = 0.0f;
     
     /*--------------------------
      * public方法
@@ -77,6 +83,27 @@ public class Position {
     public String getAddress() {
         return this.address;
     }
+
+    /**
+     * @return the speed
+     */
+    public float getSpeed() {
+        return speed;
+    }
+    
+    /**
+     * @return the direction
+     */
+    public float getDirection() {
+        return direction;
+    }
+    
+    /**
+     * @return the radius
+     */
+    public float getRadius() {
+        return radius;
+    }
     
     /**
      * 设置纬度
@@ -97,6 +124,27 @@ public class Position {
      */
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    /**
+     * @param direction the direction to set
+     */
+    public void setDirection(float direction) {
+        this.direction = direction;
+    }
+
+    /**
+     * @param speed the speed to set
+     */
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+    
+    /**
+     * @param radius the radius to set
+     */
+    public void setRadius(float radius) {
+        this.radius = radius;
     }
     
     /**

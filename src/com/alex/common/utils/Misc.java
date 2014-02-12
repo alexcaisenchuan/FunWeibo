@@ -1,17 +1,31 @@
 package com.alex.common.utils;
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+
 /**
  * 一些杂项功能
  * @author caisenchuan
  */
 public class Misc {
-
+    /*--------------------------
+     * 常量
+     *-------------------------*/
+    private static final String TAG = Misc.class.getSimpleName();
+    
     /**地球半径，米*/
     private static final double EARTH_RADIUS = 6378137;
-    /**计算度数*/
+    
+    /*--------------------------
+     * 方法
+     *-------------------------*/
+    /**
+     * 计算度数
+     * */
     private static double rad(double d) {
        return d * Math.PI / 180.0;
     }
+    
     /**
      * 通过经纬度计算两点间的距离
      * @param lat1
@@ -31,5 +45,26 @@ public class Misc {
        s = s * EARTH_RADIUS;
        s = Math.round(s * 10) / 10;
        return s;
+    }
+    
+    /**
+     * 判断某个apk是否安装
+     * @param context 上下文，应用级别即可
+     * @param pktname 要查询的apk包名
+     * @return
+     */
+    public static boolean isAppInstalled(Context context, String pktname) {
+        PackageManager pm = context.getPackageManager();
+        boolean installed = false;
+        
+        try {
+            pm.getPackageInfo(pktname, PackageManager.GET_ACTIVITIES);
+            installed = true;
+        } catch(PackageManager.NameNotFoundException e) {
+            installed = false;
+            KLog.d(TAG, "Exception", e);
+        }
+        
+        return installed;
     }
 }

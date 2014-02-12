@@ -109,7 +109,7 @@
     
     <!-- menu -->
     <string name="menu_search">搜索</string>
-    <string name="menu_share">搜索</string>
+    <string name="menu_share">分享</string>
     <string name="menu_refresh">刷新</string>
     <string name="menu_query_all">全部</string>
     <string name="menu_query_item">部分</string>

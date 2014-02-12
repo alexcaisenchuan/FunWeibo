@@ -442,12 +442,11 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.  
-        super.onCreateOptionsMenu(menu);  
-        //添加菜单项  
+        super.onCreateOptionsMenu(menu);
+        
+        //签到按钮  
         MenuItem add = menu.add(0, 0, 0, getString(R.string.menu_checkin));
-        //绑定到ActionBar    
         add.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
-        //绑定点击事件
         add.setOnMenuItemClickListener(new OnMenuItemClickListener() {
             
             @Override
@@ -459,6 +458,19 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 return false;
             }
         });
+        
+        //刷新按钮
+        MenuItem refresh = menu.add(0, 0, 0, getString(R.string.menu_refresh));
+        refresh.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        refresh.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                selectCategory(mCurrentCategory);
+                return false;
+            }
+        });
+        
         return true; 
     }
     
