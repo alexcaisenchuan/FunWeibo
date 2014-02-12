@@ -19,7 +19,9 @@
 	
 	<color name="hint_top">#E5CBC8E3</color>
 	
-	<color name="drawer_main">#4B4B4B</color>
+	<color name="drawer_main">#E5ADC9E4</color>
 	
 	<color name="corner_textview_bg">#F0F0F0</color>
+	
+	<color name="weibo_login_text">#2A65B9</color>
 </resources>

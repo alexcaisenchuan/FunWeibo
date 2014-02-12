@@ -54,7 +54,7 @@
     <!-- Buttons -->
     <string name="button_ok">确定</string>
     <string name="button_cancel">取消</string>
-    <string name="button_weibo_login">登录新浪微博</string>
+    <string name="button_weibo_login">新浪微博登录</string>
     <string name="button_refresh">刷新</string>
     <string name="button_nearby">周边美食</string>
     <string name="button_select_place">选择地点</string>
@@ -71,6 +71,7 @@
     <string name="switch_2g_pic">2/3G下低清图</string>
     
     <!-- title -->
+    <string name="title_login">FunWeibo</string>
     <string name="title_new_weibo">签到</string>
     <string name="title_hot_place">热门地点</string>
     <string name="title_comment">评论</string>

@@ -2,12 +2,47 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/login_bg"
     android:orientation="vertical" >
     
-    <Button 
-        android:id="@+id/weibo_login"
+    <TextView 
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/button_weibo_login"
+        android:layout_weight="4"
         />
+
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="20dp"
+        android:layout_weight="3">
+        
+	    <TextView 
+	        android:id="@+id/text_login_title"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/title_login"
+	        android:textSize="65sp"
+	        android:textColor="@color/white"
+	        />
+    </LinearLayout>
+
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_weight="3">
+    
+	    <Button 
+	        android:id="@+id/weibo_login"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:paddingLeft="50dp"
+	        android:paddingRight="50dp"
+	        android:text="@string/button_weibo_login"
+	        android:drawableStart="@drawable/weibo_icon"
+	        android:drawablePadding="10dp"
+	        android:textColor="@color/weibo_login_text"
+        />
+    </LinearLayout>
 </LinearLayout>

@@ -25,9 +25,12 @@ import com.weibo.sdk.android.WeiboException;
 import com.weibo.sdk.android.sso.SsoHandler;
 
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.widget.TextView;
 
 /**
  * 登录界面
@@ -148,6 +151,9 @@ public class ActivityLogin extends BaseActivity implements OnClickListener{
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        //若参数无效，则显示授权界面
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        
         super.onCreate(savedInstanceState);
     
         //创建微博对象
@@ -158,8 +164,14 @@ public class ActivityLogin extends BaseActivity implements OnClickListener{
             //若参数有效，则进入主界面
             gotoMain();
         } else {
-            //若参数无效，则显示授权界面
             setContentView(R.layout.activity_login);
+            
+            //设置字体
+            TextView tv = (TextView)findViewById(R.id.text_login_title);  
+            //从assert中获取有资源，获得app的assert，采用getAserts()，通过给出在assert/下面的相对路径。在实际使用中，字体库可能存在于SD卡上，可以采用createFromFile()来替代createFromAsset。   
+            Typeface face = Typeface.createFromAsset(getAssets(), "fonts/Structr_Regular.ttf");  
+            tv.setTypeface(face);
+            
             //设置界面元素
             findViewById(R.id.weibo_login).setOnClickListener(this);
         }
