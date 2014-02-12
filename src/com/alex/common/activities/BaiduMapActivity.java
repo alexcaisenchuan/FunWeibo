@@ -29,6 +29,7 @@ import com.baidu.mapapi.map.MyLocationOverlay;
 import com.baidu.mapapi.map.OverlayItem;
 import com.baidu.mapapi.map.PopupClickListener;
 import com.baidu.mapapi.map.PopupOverlay;
+import com.baidu.mapapi.utils.CoordinateConvert;
 import com.baidu.platform.comapi.basestruct.GeoPoint;
 import com.weibo.sdk.android.WeiboException;
 import com.weibo.sdk.android.api.ShortUrlAPI;
@@ -443,8 +444,7 @@ public class BaiduMapActivity extends BaseActivity {
      * 设置地图中心
      */
     private void setCenter(double lat, double lon) {
-        Position pos = Position.gcj_to_bd(lat, lon);                //坐标转换
-        GeoPos point = new GeoPos(pos.getLat(), pos.getLon());      //用给定的经纬度构造一个GeoPoint，单位是微度 (度 * 1E6)
+        GeoPoint point = CoordinateConvert.fromGcjToBaidu(new GeoPos(lat, lon));      //用给定的经纬度构造一个GeoPoint，单位是微度 (度 * 1E6)
         mMapController.setCenter(point);                                //设置地图中心点
         mMapController.setZoom(DEFAULT_ZOOM_LEVEL);                     //设置地图zoom级别
     }
@@ -463,8 +463,7 @@ public class BaiduMapActivity extends BaseActivity {
         mMapView.getOverlays().add(overlay);
          
         //添加标注点
-        Position pos = Position.gcj_to_bd(lat, lon);        //坐标转换
-        GeoPos p = new GeoPos(pos.getLat(), pos.getLon());
+        GeoPoint p = CoordinateConvert.fromGcjToBaidu(new GeoPos(lat, lon));
         OverlayItem item = new OverlayItem(p, title, address);
         overlay.addItem(item);
         sendMessage(MSG_OPEN_POP_WINDOW, 0, 0, item);
@@ -480,14 +479,14 @@ public class BaiduMapActivity extends BaseActivity {
     private void setMyLocation(Position p) {
         if(p != null && p.isValid()) {
             //坐标转换
-            Position p_bd = Position.gcj_to_bd(p);
+            GeoPoint gp = CoordinateConvert.fromGcjToBaidu(new GeoPos(p.getLat(), p.getLon()));
             //创建位置
             LocationData locData = new LocationData();
-            locData.latitude = p_bd.getLat();
-            locData.longitude = p_bd.getLon();
-            locData.direction = p_bd.getDirection();
-            locData.accuracy = p_bd.getRadius();
-            locData.speed = p_bd.getSpeed();
+            locData.latitude = gp.getLatitudeE6() * 1.0 / 1E6;
+            locData.longitude = gp.getLongitudeE6() * 1.0 / 1E6;
+            locData.direction = p.getDirection();
+            locData.accuracy = p.getRadius();
+            locData.speed = p.getSpeed();
             //设置位置
             myLocationOverlay.setData(locData);
             if(!mMapView.getOverlays().contains(myLocationOverlay)) {

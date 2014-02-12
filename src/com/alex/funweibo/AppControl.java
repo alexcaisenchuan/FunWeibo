@@ -340,20 +340,7 @@ public class AppControl extends Application{
      * @return
      */
     public Position getCurrentLocation() {
-        return getCurrentLocation(false);
-    }
-    
-    /**
-     * 获取当前位置
-     * @param bd09 true - 获得百度坐标系的位置； false - 获得gcj02坐标系的位置；
-     * @return
-     */
-    public Position getCurrentLocation(boolean bd09) {
-        if(bd09) {
-            return Position.gcj_to_bd(this.mCurrentLocation);
-        } else {
-            return this.mCurrentLocation;
-        }
+        return this.mCurrentLocation;
     }
     
     /**
