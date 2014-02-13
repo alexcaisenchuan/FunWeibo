@@ -283,7 +283,7 @@ public class AppControl extends Application{
                 .displayer(new FadeInBitmapDisplayer(50))
                 .bitmapConfig(Bitmap.Config.RGB_565)
                 .imageScaleType(ImageScaleType.EXACTLY)
-                .showStubImage(R.drawable.empty_photo)
+                .showImageOnLoading(R.drawable.empty_photo)
                 .showImageForEmptyUri(R.drawable.empty_photo)
                 .showImageOnFail(R.drawable.empty_photo)
                 .build();

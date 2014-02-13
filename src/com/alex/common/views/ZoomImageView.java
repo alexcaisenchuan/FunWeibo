@@ -1,5 +1,7 @@
 package com.alex.common.views;
 
+import com.alex.common.utils.KLog;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -130,17 +132,27 @@ public class ZoomImageView extends ImageView {
 	 */
 	private double lastFingerDis;
 
+	public ZoomImageView(Context context) {
+	    super(context);
+	    currentStatus = STATUS_INIT;
+	    //sourceBitmap = getBitmapFromResources(context, R.drawable.empty_photo);
+	}
+	
 	/**
 	 * ZoomImageView构造函数，将当前操作状态设为STATUS_INIT。
-	 * 
-	 * @param context
-	 * @param attrs
 	 */
 	public ZoomImageView(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		currentStatus = STATUS_INIT;
+		//sourceBitmap = getBitmapFromResources(context, R.drawable.empty_photo);
 	}
-
+	
+	public ZoomImageView(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        currentStatus = STATUS_INIT;
+        //sourceBitmap = getBitmapFromResources(context, R.drawable.empty_photo);
+    }
+	
 	/**
 	 * 将待展示的图片设置进来。
 	 * 
@@ -149,10 +161,13 @@ public class ZoomImageView extends ImageView {
 	 */
 	@Override
 	public void setImageBitmap(Bitmap bitmap) {
+	    KLog.d("", "setImageBitmap : %s", bitmap);
 		sourceBitmap = bitmap;
 		invalidate();
 	}
-
+	
+	
+	
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		super.onLayout(changed, left, top, right, bottom);
@@ -259,7 +274,9 @@ public class ZoomImageView extends ImageView {
 		case STATUS_INIT:
 			initBitmap(canvas);
 		default:
-			canvas.drawBitmap(sourceBitmap, matrix, null);
+		    if(sourceBitmap != null) {
+		        canvas.drawBitmap(sourceBitmap, matrix, null);
+		    }
 			break;
 		}
 	}
@@ -270,44 +287,46 @@ public class ZoomImageView extends ImageView {
 	 * @param canvas
 	 */
 	private void zoom(Canvas canvas) {
-		matrix.reset();
-		// 将图片按总缩放比例进行缩放
-		matrix.postScale(totalRatio, totalRatio);
-		float scaledWidth = sourceBitmap.getWidth() * totalRatio;
-		float scaledHeight = sourceBitmap.getHeight() * totalRatio;
-		float translateX = 0f;
-		float translateY = 0f;
-		// 如果当前图片宽度小于屏幕宽度，则按屏幕中心的横坐标进行水平缩放。否则按两指的中心点的横坐标进行水平缩放
-		if (currentBitmapWidth < width) {
-			translateX = (width - scaledWidth) / 2f;
-		} else {
-			translateX = totalTranslateX * scaledRatio + centerPointX * (1 - scaledRatio);
-			// 进行边界检查，保证图片缩放后在水平方向上不会偏移出屏幕
-			if (translateX > 0) {
-				translateX = 0;
-			} else if (width - translateX > scaledWidth) {
-				translateX = width - scaledWidth;
-			}
-		}
-		// 如果当前图片高度小于屏幕高度，则按屏幕中心的纵坐标进行垂直缩放。否则按两指的中心点的纵坐标进行垂直缩放
-		if (currentBitmapHeight < height) {
-			translateY = (height - scaledHeight) / 2f;
-		} else {
-			translateY = totalTranslateY * scaledRatio + centerPointY * (1 - scaledRatio);
-			// 进行边界检查，保证图片缩放后在垂直方向上不会偏移出屏幕
-			if (translateY > 0) {
-				translateY = 0;
-			} else if (height - translateY > scaledHeight) {
-				translateY = height - scaledHeight;
-			}
-		}
-		// 缩放后对图片进行偏移，以保证缩放后中心点位置不变
-		matrix.postTranslate(translateX, translateY);
-		totalTranslateX = translateX;
-		totalTranslateY = translateY;
-		currentBitmapWidth = scaledWidth;
-		currentBitmapHeight = scaledHeight;
-		canvas.drawBitmap(sourceBitmap, matrix, null);
+	    if(sourceBitmap != null) {
+    		matrix.reset();
+    		// 将图片按总缩放比例进行缩放
+    		matrix.postScale(totalRatio, totalRatio);
+    		float scaledWidth = sourceBitmap.getWidth() * totalRatio;
+    		float scaledHeight = sourceBitmap.getHeight() * totalRatio;
+    		float translateX = 0f;
+    		float translateY = 0f;
+    		// 如果当前图片宽度小于屏幕宽度，则按屏幕中心的横坐标进行水平缩放。否则按两指的中心点的横坐标进行水平缩放
+    		if (currentBitmapWidth < width) {
+    			translateX = (width - scaledWidth) / 2f;
+    		} else {
+    			translateX = totalTranslateX * scaledRatio + centerPointX * (1 - scaledRatio);
+    			// 进行边界检查，保证图片缩放后在水平方向上不会偏移出屏幕
+    			if (translateX > 0) {
+    				translateX = 0;
+    			} else if (width - translateX > scaledWidth) {
+    				translateX = width - scaledWidth;
+    			}
+    		}
+    		// 如果当前图片高度小于屏幕高度，则按屏幕中心的纵坐标进行垂直缩放。否则按两指的中心点的纵坐标进行垂直缩放
+    		if (currentBitmapHeight < height) {
+    			translateY = (height - scaledHeight) / 2f;
+    		} else {
+    			translateY = totalTranslateY * scaledRatio + centerPointY * (1 - scaledRatio);
+    			// 进行边界检查，保证图片缩放后在垂直方向上不会偏移出屏幕
+    			if (translateY > 0) {
+    				translateY = 0;
+    			} else if (height - translateY > scaledHeight) {
+    				translateY = height - scaledHeight;
+    			}
+    		}
+    		// 缩放后对图片进行偏移，以保证缩放后中心点位置不变
+    		matrix.postTranslate(translateX, translateY);
+    		totalTranslateX = translateX;
+    		totalTranslateY = translateY;
+    		currentBitmapWidth = scaledWidth;
+    		currentBitmapHeight = scaledHeight;
+    		canvas.drawBitmap(sourceBitmap, matrix, null);
+	    }
 	}
 
 	/**
@@ -316,17 +335,19 @@ public class ZoomImageView extends ImageView {
 	 * @param canvas
 	 */
 	private void move(Canvas canvas) {
-		matrix.reset();
-		// 根据手指移动的距离计算出总偏移值
-		float translateX = totalTranslateX + movedDistanceX;
-		float translateY = totalTranslateY + movedDistanceY;
-		// 先按照已有的缩放比例对图片进行缩放
-		matrix.postScale(totalRatio, totalRatio);
-		// 再根据移动距离进行偏移
-		matrix.postTranslate(translateX, translateY);
-		totalTranslateX = translateX;
-		totalTranslateY = translateY;
-		canvas.drawBitmap(sourceBitmap, matrix, null);
+	    if(sourceBitmap != null) {
+    		matrix.reset();
+    		// 根据手指移动的距离计算出总偏移值
+    		float translateX = totalTranslateX + movedDistanceX;
+    		float translateY = totalTranslateY + movedDistanceY;
+    		// 先按照已有的缩放比例对图片进行缩放
+    		matrix.postScale(totalRatio, totalRatio);
+    		// 再根据移动距离进行偏移
+    		matrix.postTranslate(translateX, translateY);
+    		totalTranslateX = translateX;
+    		totalTranslateY = translateY;
+    		canvas.drawBitmap(sourceBitmap, matrix, null);
+	    }
 	}
 
 	/**
@@ -401,5 +422,4 @@ public class ZoomImageView extends ImageView {
 		centerPointX = (xPoint0 + xPoint1) / 2;
 		centerPointY = (yPoint0 + yPoint1) / 2;
 	}
-
 }

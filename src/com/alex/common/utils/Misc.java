@@ -2,6 +2,9 @@ package com.alex.common.utils;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 /**
  * 一些杂项功能
@@ -66,5 +69,16 @@ public class Misc {
         }
         
         return installed;
+    }
+    
+    /**
+     * 从Resource解析出Bitmap
+     * @param context
+     * @param resId
+     * @return
+     */
+    public static Bitmap getBitmapFromResources(Context context, int resId) {
+        Resources res = context.getResources();
+        return BitmapFactory.decodeResource(res, resId);
     }
 }

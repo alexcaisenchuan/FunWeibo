@@ -5,22 +5,22 @@ import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.FileUtils.PathType;
 import com.alex.common.views.ZoomImageView;
 import com.alex.funweibo.R;
-import com.ta.util.bitmap.TABitmapCacheWork;
-import com.ta.util.bitmap.TABitmapCallBackHanlder;
-import com.ta.util.bitmap.TADownloadBitmapHandler;
-import com.ta.util.extend.draw.DensityUtils;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.MenuItem.OnMenuItemClickListener;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 /**
@@ -40,29 +40,6 @@ public class ImageLoadActivity extends BaseActivity{
     /*--------------------------
      * 自定义类型
      *-------------------------*/
-    private class ImageFetchCallBack extends TABitmapCallBackHanlder {
-        @Override
-        public void onStart(ImageView t, Object data) {
-            super.onStart(t, data);
-            mProgress.setVisibility(View.VISIBLE);
-            mImageBuffer = null;
-        }
-        
-        @Override
-        public void onSuccess(ImageView imageView, Object data, byte[] buffer) {
-            super.onSuccess(imageView, data, buffer);
-            mProgress.setVisibility(View.GONE);
-            mImageBuffer = buffer;
-        }
-        
-        @Override
-        public void onFailure(ImageView t, Object data) {
-            super.onFailure(t, data);
-            mProgress.setVisibility(View.GONE);
-            SmartToast.showLongToast(ImageLoadActivity.this, R.string.hint_loading_img_faild, false);
-            mImageBuffer = null;
-        }
-    }
 
     /*--------------------------
      * 成员变量
@@ -70,10 +47,8 @@ public class ImageLoadActivity extends BaseActivity{
     //数据
     /**图片网址*/
     private String mUrl = "";
-    /**图片加载器*/
-    private TABitmapCacheWork mImageFetcher = null;
     /**图片缓存*/
-    private byte[] mImageBuffer = null;
+    private Bitmap mImageBuffer = null;
     
     //界面元素
     private ZoomImageView mImage = null;
@@ -106,7 +81,6 @@ public class ImageLoadActivity extends BaseActivity{
         mProgress = (ProgressBar)findViewById(R.id.prog_load_image);
         
         handleIntent();
-        initImageFetcher();
         startLoad();
     }
     
@@ -141,27 +115,48 @@ public class ImageLoadActivity extends BaseActivity{
             mUrl = url;
         }
     }
-
-    /**
-     * 初始化图片加载器
-     */
-    private void initImageFetcher() {
-        TADownloadBitmapHandler f = new TADownloadBitmapHandler(this,
-                DensityUtils.dipTopx(this, 256),
-                DensityUtils.dipTopx(this, 256));
-        ImageFetchCallBack callback = new ImageFetchCallBack();
-        callback.setLoadingImage(this, R.drawable.empty_photo);
-        mImageFetcher = new TABitmapCacheWork(this);
-        mImageFetcher.setProcessDataHandler(f);
-        mImageFetcher.setCallBackHandler(callback);
-        mImageFetcher.setFileCache(mApp.getFileCache());
-    }
     
     /**
      * 开始加载图片
      */
     private void startLoad() {
-        mImageFetcher.loadFormCache(mUrl, mImage);
+        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+        .cacheOnDisc(true)
+        .cacheInMemory(true)
+        .displayer(new FadeInBitmapDisplayer(50))
+        .bitmapConfig(Bitmap.Config.RGB_565)
+        .imageScaleType(ImageScaleType.EXACTLY)
+        .build();
+        
+        ImageLoadingListener listener = new ImageLoadingListener() {
+            
+            @Override
+            public void onLoadingStarted(String imageUri, View view) {
+                mProgress.setVisibility(View.VISIBLE);
+                mImageBuffer = null;
+            }
+            
+            @Override
+            public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                mProgress.setVisibility(View.GONE);
+                SmartToast.showLongToast(ImageLoadActivity.this, R.string.hint_loading_img_faild, false);
+                mImageBuffer = null;
+            }
+            
+            @Override
+            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                mProgress.setVisibility(View.GONE);
+                mImageBuffer = loadedImage;
+            }
+            
+            @Override
+            public void onLoadingCancelled(String imageUri, View view) {
+                mProgress.setVisibility(View.GONE);
+                mImageBuffer = null;
+            }
+        };
+        
+        ImageLoader.getInstance().displayImage(mUrl, mImage, defaultOptions, listener);
     }
     
     /**
@@ -171,7 +166,7 @@ public class ImageLoadActivity extends BaseActivity{
         if(mImageBuffer == null) {
             showToastOnUIThread(R.string.hint_loading_img_not_finish);
         } else {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(mImageBuffer, 0, mImageBuffer.length);
+            Bitmap bitmap = mImageBuffer;
             String path = ImageUtils.savePicToSD(PathType.DOWNLOAD, bitmap);
             showToastOnUIThread(String.format("%s%s", getString(R.string.hint_photo_saved), path));
         }
