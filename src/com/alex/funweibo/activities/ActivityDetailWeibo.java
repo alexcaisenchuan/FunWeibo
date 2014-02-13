@@ -166,7 +166,7 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
             Comment cmt = getComment(position);
             //用户头像
             //mApp.getImageFetcher().loadFormCache(cmt.getUser().getProfileImageURL(), holder.mUserface);
-            ImageLoader.getInstance().displayImage(cmt.getUser().getProfileImageURL().toString(), mUserFace);
+            ImageLoader.getInstance().displayImage(cmt.getUser().getProfileImageURL().toString(), holder.mUserface);
             if(cmt != null) {
                 holder.mComment.setText(cmt.getText());         //评论内容
                 User user = cmt.getUser();
