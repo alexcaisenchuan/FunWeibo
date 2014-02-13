@@ -23,6 +23,7 @@ import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.StringUtils;
 import com.alex.common.utils.WeiboUtils;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.weibo.sdk.android.api.CommentsAPI;
 import com.weibo.sdk.android.api.StatusesAPI;
 import com.weibo.sdk.android.api.WeiboAPI.AUTHOR_FILTER;
@@ -164,7 +165,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
             //设置评论内容
             Comment cmt = getComment(position);
             //用户头像
-            mApp.getImageFetcher().loadFormCache(cmt.getUser().getProfileImageURL(), holder.mUserface);
+            //mApp.getImageFetcher().loadFormCache(cmt.getUser().getProfileImageURL(), holder.mUserface);
+            ImageLoader.getInstance().displayImage(cmt.getUser().getProfileImageURL().toString(), mUserFace);
             if(cmt != null) {
                 holder.mComment.setText(cmt.getText());         //评论内容
                 User user = cmt.getUser();
@@ -545,7 +547,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                         //用户名
                         mUserName.setText(user.getName());
                         //用户头像
-                        mApp.getImageFetcher().loadFormCache(user.getProfileImageURL(), mUserFace);
+                        //mApp.getImageFetcher().loadFormCache(user.getProfileImageURL(), mUserFace);
+                        ImageLoader.getInstance().displayImage(user.getProfileImageURL().toString(), mUserFace);
                     }
                     //设置微博信息
                     mWeiboTime.setText(StringUtils.getDateString(mStatus.getCreatedAt()));
@@ -572,7 +575,8 @@ public class ActivityDetailWeibo extends BaseActivity implements OnClickListener
                     if(!TextUtils.isEmpty(pic_url)) {
                         mWeiboPic.setVisibility(View.VISIBLE);
                         mWeiboPicBorder.setVisibility(View.VISIBLE);
-                        mApp.getImageFetcher().loadFormCache(pic_url, mWeiboPic);
+                        //mApp.getImageFetcher().loadFormCache(pic_url, mWeiboPic);
+                        ImageLoader.getInstance().displayImage(pic_url, mWeiboPic);
                     } else {
                         mWeiboPic.setVisibility(View.GONE);
                         mWeiboPicBorder.setVisibility(View.GONE);

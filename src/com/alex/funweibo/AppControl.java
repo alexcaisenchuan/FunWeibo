@@ -22,6 +22,12 @@ import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.nostra13.universalimageloader.cache.memory.impl.UsingFreqLimitedMemoryCache;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+import com.nostra13.universalimageloader.core.assist.ImageScaleType;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 import com.ta.util.bitmap.TABitmapCacheWork;
 import com.ta.util.bitmap.TABitmapCallBackHanlder;
 import com.ta.util.bitmap.TADownloadBitmapHandler;
@@ -36,6 +42,7 @@ import com.weibo.sdk.android.net.RequestListener;
 import com.weibo.sdk.android.org.json.JSONException;
 
 import android.app.Application;
+import android.graphics.Bitmap;
 import android.text.TextUtils;
 
 /**
@@ -268,6 +275,22 @@ public class AppControl extends Application{
         
         //读取当前登录的用户信息
         getCurrentUserInfo();
+        
+        //ImageLoader
+        DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
+                .cacheOnDisc(true)
+                .cacheInMemory(true)
+                .displayer(new FadeInBitmapDisplayer(50))
+                .bitmapConfig(Bitmap.Config.RGB_565)
+                .imageScaleType(ImageScaleType.EXACTLY)
+                .showStubImage(R.drawable.empty_photo)
+                .showImageForEmptyUri(R.drawable.empty_photo)
+                .showImageOnFail(R.drawable.empty_photo)
+                .build();
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(getApplicationContext())
+                .memoryCache(new UsingFreqLimitedMemoryCache(16 * 1024 * 1024))
+                .defaultDisplayImageOptions(defaultOptions).build();
+        ImageLoader.getInstance().init(config);
     }
 
     /**

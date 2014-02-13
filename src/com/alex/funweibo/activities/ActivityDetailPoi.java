@@ -19,6 +19,7 @@ import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.SmartToast;
 import com.alex.funweibo.R;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.api.PlaceAPI;
 import com.weibo.sdk.android.model.Poi;
@@ -157,7 +158,8 @@ public class ActivityDetailPoi extends BaseActivity {
                     setTextView(mTextPlaceCategory, poi.category_name);
                     setTextView(mTextPlaceUrl, poi.url);
                     if(!TextUtils.isEmpty(poi.poi_pic)) {
-                        mApp.getImageFetcher().loadFormCache(poi.poi_pic, mImagePlaceImg);
+                        //mApp.getImageFetcher().loadFormCache(poi.poi_pic, mImagePlaceImg);
+                        ImageLoader.getInstance().displayImage(poi.poi_pic, mImagePlaceImg);
                     }
                     mPoi = poi;
                 }

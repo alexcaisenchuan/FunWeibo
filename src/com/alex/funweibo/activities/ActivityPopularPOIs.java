@@ -28,6 +28,7 @@ import com.huewu.pla.lib.internal.PLA_AbsListView;
 import com.huewu.pla.lib.internal.PLA_AbsListView.OnScrollListener;
 import com.huewu.pla.lib.internal.PLA_AdapterView;
 import com.huewu.pla.lib.internal.PLA_AdapterView.OnItemClickListener;
+import com.nostra13.universalimageloader.core.ImageLoader;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.fb.FeedbackAgent;
 import com.umeng.update.UmengUpdateAgent;
@@ -198,7 +199,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                     Bitmap bm = ImageUtils.createNewBitmapAndCompressByFile(url, 300, 300);
                     holder.mPic.setImageBitmap(bm);
                 } else {
-                    mApp.getImageFetcher().loadFormCache(url, holder.mPic);
+                    //mApp.getImageFetcher().loadFormCache(url, holder.mPic);
+                    ImageLoader.getInstance().displayImage(url, holder.mPic);
                 }
             }
             //其他信息
@@ -939,6 +941,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             String username = user.getName();
             
             mApp.getImageFetcher().loadFormCache(userface_url, mImageUserface);
+            //ImageLoader.getInstance().displayImage(userface_url, mImageUserface);     //ImageLoader会闪动
             mTextUsername.setText(username);
         }
     }
