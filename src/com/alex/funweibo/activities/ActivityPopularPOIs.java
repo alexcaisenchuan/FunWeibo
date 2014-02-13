@@ -577,8 +577,9 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         
         //设置listview
         mListContent = (MultiColumnListView)findViewById(R.id.list_weibo_content);
-        mListContent.addFooterView(mLoadView);
-        mListContent.addFooterView(mReloadView);
+        mListContent.addFooterView(mFooterView);
+        //mListContent.addFooterView(mLoadView);
+        //mListContent.addFooterView(mReloadView);
         //设置adapter
         mAdapter = new ListAdapter(this);
         mListContent.setAdapter(mAdapter);

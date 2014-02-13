@@ -83,8 +83,9 @@ public abstract class BasePOIActivity extends BaseActivity {
     private static final int DEFAULT_SEARCH_CNT   = 5;
     /**默认搜索半径，单位：米*/
     private static final int DEFAULT_SEARCH_RANGE = 2000;
+    /**Footer view的个数*/
+    private static final int FOOTER_VIEW_NUM = 1;
 
-    
     /*--------------------------
      * 自定义类型
      *-------------------------*/
@@ -241,6 +242,7 @@ public abstract class BasePOIActivity extends BaseActivity {
      *-------------------------*/
     /*-----------protected------------*/
     ////////////////////////////Views/////////////////////////
+    protected View mFooterView = null;
     /**底部加载提示*/
     protected View mLoadView = null;
     /**底部重新加载提示*/
@@ -363,8 +365,11 @@ public abstract class BasePOIActivity extends BaseActivity {
         }
         
         //底部加载提示
-        mLoadView = getLayoutInflater().inflate(R.layout.footer_load, null);
-        mReloadView = getLayoutInflater().inflate(R.layout.footer_reload, null);
+        mFooterView = getLayoutInflater().inflate(R.layout.footer_load, null);
+        //mLoadView = getLayoutInflater().inflate(R.layout.footer_load, null);
+        //mReloadView = getLayoutInflater().inflate(R.layout.footer_reload, null);
+        mLoadView = mFooterView.findViewById(R.id.text_loading);
+        mReloadView = mFooterView.findViewById(R.id.text_reload);
         mReloadView.setOnClickListener(new OnReloadClickListener());
         mReloadView.setVisibility(View.GONE);       //一开始隐藏此提示框
         
@@ -445,7 +450,8 @@ public abstract class BasePOIActivity extends BaseActivity {
         //KLog.d(TAG, "firstVisibleItem = %d , visibleItemCount = %d , totalItemCount = %d",
         //             firstVisibleItem, visibleItemCount, totalItemCount);
         
-        mLastItem = firstVisibleItem + visibleItemCount - 2;  //减2是因为上面加了FooterView
+        //减是因为上面加了FooterView
+        mLastItem = firstVisibleItem + visibleItemCount - FOOTER_VIEW_NUM;  
     }
     
     /**
@@ -487,7 +493,7 @@ public abstract class BasePOIActivity extends BaseActivity {
             onCategorySelected(category);
             
             //显示加载提示
-            setLoadView(true);
+            sendMessageToBaseHandler(MSG_SHOW_LOADING_HINT);
             
             //加载poi信息
             getNextNearbyPois();
@@ -656,7 +662,7 @@ public abstract class BasePOIActivity extends BaseActivity {
      * @author caisenchuan
      */
     private void setReloadView(boolean enable) {
-        if(mLoadView != null) {
+        if(mReloadView != null) {
             if(enable) {
                 mReloadView.setVisibility(View.VISIBLE);
             } else {
