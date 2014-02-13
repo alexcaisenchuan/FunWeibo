@@ -1,16 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent">
     
-    <!-- 评论框 -->
-	<EditText
-	    android:id="@+id/edit_comment"
+	<LinearLayout
 	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:gravity="top|left"
-	    android:hint="@string/text_new_weibo_text_hint"
-	    />
-	
-</LinearLayout>
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical" 
+	    android:padding="5dp">
+	    
+	    <!-- 评论框 -->
+		<EditText
+		    android:id="@+id/edit_comment"
+		    android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:gravity="top|left"
+		    android:hint="@string/text_new_weibo_text_hint"
+		    
+		    android:padding="5dp"
+		    android:minLines="5"
+		    android:background="@android:drawable/editbox_background_normal"
+		    />
+		
+	</LinearLayout>
+
+</ScrollView>

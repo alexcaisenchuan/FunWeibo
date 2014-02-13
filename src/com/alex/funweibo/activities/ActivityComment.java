@@ -6,8 +6,6 @@ import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MenuItem.OnMenuItemClickListener;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 import com.alex.common.activities.BaseActivity;
@@ -19,7 +17,7 @@ import com.alex.funweibo.R;
  * @author caisenchuan
  *
  */
-public class ActivityComment extends BaseActivity implements OnClickListener{
+public class ActivityComment extends BaseActivity {
     /*--------------------------
      * 常量
      *-------------------------*/
@@ -58,10 +56,6 @@ public class ActivityComment extends BaseActivity implements OnClickListener{
         return true; 
     }
     
-    @Override
-    public void onClick(View v) {
-        //...
-    }
     /*--------------------------
      * protected方法
      *-------------------------*/
