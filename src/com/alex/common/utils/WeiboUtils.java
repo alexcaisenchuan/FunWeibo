@@ -130,10 +130,10 @@ public class WeiboUtils {
                 }
                 if(buffer == null) {
                     url = status.getThumbnail_pic();
-                    KLog.d(TAG, "get thumbnail pic");
+                    //KLog.d(TAG, "get thumbnail pic");
                 } else {
                     //若middle_pic已经在缓存中，则返回之
-                    KLog.d(TAG, "middle pic in cache, use it!");
+                    //KLog.d(TAG, "middle pic in cache, use it!");
                 }
             } else {
                 //...

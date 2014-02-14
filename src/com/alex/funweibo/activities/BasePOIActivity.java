@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MenuItem.OnActionExpandListener;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -113,7 +114,6 @@ public abstract class BasePOIActivity extends BaseActivity {
         @Override
         public void onComplete(String str) {
             try {
-
                 if(!TextUtils.isEmpty(mCurrentCategory) && !mCurrentCategory.equals(mRequestCategory)) {
                     //分类已经改变了，就不把查询结果添加过去了
                     KLog.w(TAG, "GetPois , category change : %s/%s", mCurrentCategory, mRequestCategory);
@@ -132,13 +132,12 @@ public abstract class BasePOIActivity extends BaseActivity {
                         onLoadFinish(false);
                     }
                     onGetPoiList(list);
+                    mGettingPoiList = false;
                 }
             } catch (Exception e) {
                 KLog.w(TAG, "JSONException while build status", e);
                 showToastOnUIThread(getString(R.string.hint_poi_read_faild) + e.toString());
                 onLoadFinish(false);
-            } finally {
-                mGettingPoiList = false;
             }
         }
         
@@ -150,7 +149,12 @@ public abstract class BasePOIActivity extends BaseActivity {
             try {
                 super.onComplete4binary(arg0);
             } finally {
-                onLoadFinish(false);
+                if(!TextUtils.isEmpty(mCurrentCategory) && !mCurrentCategory.equals(mRequestCategory)) {
+                    //分类已经改变了
+                    KLog.w(TAG, "GetPois , category change : %s/%s", mCurrentCategory, mRequestCategory);
+                } else {
+                    onLoadFinish(false);
+                }
             }
         }
         
@@ -162,7 +166,12 @@ public abstract class BasePOIActivity extends BaseActivity {
             try {
                 super.onError(e);
             } finally {
-                onLoadFinish(false);
+                if(!TextUtils.isEmpty(mCurrentCategory) && !mCurrentCategory.equals(mRequestCategory)) {
+                    //分类已经改变了
+                    KLog.w(TAG, "GetPois , category change : %s/%s", mCurrentCategory, mRequestCategory);
+                } else {
+                    onLoadFinish(false);
+                }
             }
         }
         
@@ -174,7 +183,12 @@ public abstract class BasePOIActivity extends BaseActivity {
             try {
                 super.onIOException(e);
             } finally {
-                onLoadFinish(false);
+                if(!TextUtils.isEmpty(mCurrentCategory) && !mCurrentCategory.equals(mRequestCategory)) {
+                    //分类已经改变了
+                    KLog.w(TAG, "GetPois , category change : %s/%s", mCurrentCategory, mRequestCategory);
+                } else {
+                    onLoadFinish(false);
+                }
             }
         }
     }
@@ -191,7 +205,7 @@ public abstract class BasePOIActivity extends BaseActivity {
             
             //首次定位完成后，读取一次poi列表
             if(!mHasGetPoiList) {
-                getNextNearbyPois();
+                getNextNearbyPois(false);
             }
         }
 
@@ -233,7 +247,7 @@ public abstract class BasePOIActivity extends BaseActivity {
     private class OnReloadClickListener implements OnClickListener {
         @Override
         public void onClick(View v) {
-            getNextNearbyPois();
+            getNextNearbyPois(true);
         }
     }
     
@@ -344,6 +358,18 @@ public abstract class BasePOIActivity extends BaseActivity {
             });
         }
         
+        //刷新按钮
+        MenuItem refresh = menu.add(0, 0, 0, getString(R.string.menu_refresh));
+        refresh.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        refresh.setOnMenuItemClickListener(new OnMenuItemClickListener() {
+            
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                selectCategory(mCurrentCategory);
+                return false;
+            }
+        });
+        
         return true;
     }
     /*--------------------------
@@ -432,7 +458,7 @@ public abstract class BasePOIActivity extends BaseActivity {
         //下拉到空闲是，且最后一个item的数等于数据的总数时，进行更新
         if(mLastItem >= mCount  && scrollState == SCROLL_STATE_IDLE) {
             if(mPoiList == null || mPoiList.hasMore()) {
-                getNextNearbyPois();
+                getNextNearbyPois(false);
             } else {
                 SmartToast.showLongToast(this, R.string.hint_no_more, true);
             }
@@ -496,15 +522,15 @@ public abstract class BasePOIActivity extends BaseActivity {
             sendMessageToBaseHandler(MSG_SHOW_LOADING_HINT);
             
             //加载poi信息
-            getNextNearbyPois();
+            getNextNearbyPois(true);
         }
     }
     
     /**
      * 读取附近的poi信息，每调用一次，都会尝试读取下一组poi
      */
-    protected void getNextNearbyPois() {
-        if(mGettingPoiList) {
+    protected void getNextNearbyPois(boolean force) {
+        if(mGettingPoiList && !force) {
             KLog.w(TAG, "Getting poi list already!");
         } else {
             Position pos = mApp.getCurrentLocation();
