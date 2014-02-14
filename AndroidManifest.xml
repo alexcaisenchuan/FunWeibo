@@ -133,6 +133,12 @@
             android:configChanges="orientation|keyboardHidden|screenSize">
         </activity>
         
+        <activity
+            android:name="com.alex.funweibo.activities.ActivityAbout"
+            android:label="@string/app_name"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+        </activity>
+        
         <activity 
             android:name="com.alex.common.activities.ImageLoadActivity"
             android:label="@string/app_name"

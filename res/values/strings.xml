@@ -64,6 +64,7 @@
     <string name="button_albums">打开手机相册</string>
     <string name="button_take_photo">拍照</string>
     <string name="button_feedback">反馈</string>
+    <string name="button_about">关于</string>
     <string name="button_logout">注销账号</string>
     <string name="button_my">我</string>
     
@@ -80,6 +81,7 @@
     <string name="title_full_image">查看图片</string>
     <string name="title_detail">详情</string>
     <string name="title_map">查看地图</string>
+    <string name="title_about">关于</string>
     
     <!-- Text -->
     <string name="text_weibo_num">条微博</string>

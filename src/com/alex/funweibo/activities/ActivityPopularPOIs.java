@@ -386,6 +386,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     private TextView mTextUsername;
     private Switch mSwitch2GPic;
     private Button mButtonFeedback;
+    private Button mButtonAbout;
     private Button mButtonLogout;
     /**顶端提示框*/
     private TextView mTextHintTop;
@@ -425,6 +426,11 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             case R.id.button_feedback:
                 FeedbackAgent agent = new FeedbackAgent(this);
                 agent.startFeedbackActivity();
+                break;
+                
+            case R.id.button_about:
+                Intent it = new Intent(this, ActivityAbout.class);
+                startActivity(it);
                 break;
                 
             case R.id.button_logout:
@@ -571,6 +577,8 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         mSwitch2GPic.setOnCheckedChangeListener(new Switch2GPicCheckListener());
         mButtonFeedback = (Button)findViewById(R.id.button_feedback);
         mButtonFeedback.setOnClickListener(this);
+        mButtonAbout = (Button)findViewById(R.id.button_about);
+        mButtonAbout.setOnClickListener(this);
         mButtonLogout = (Button)findViewById(R.id.button_logout);
         mButtonLogout.setOnClickListener(this);
         

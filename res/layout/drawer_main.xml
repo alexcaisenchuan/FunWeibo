@@ -8,7 +8,7 @@
         android:layout_gravity="start"
 	    android:layout_width="240dp"
 	    android:layout_height="match_parent"
-	    android:background="@color/drawer_main"
+	    android:background="@drawable/shape_gradient_drawer_main"
 	    android:paddingLeft="7dp"
 	    android:paddingRight="7dp"
 	    android:paddingTop="10dp"
@@ -70,6 +70,14 @@
 	            android:text="@string/button_feedback"
 	            android:textColor="@color/white"
 	            />
+	        
+	        <Button
+                android:id="@+id/button_about"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/button_about"
+                android:textColor="@color/white"
+                />
 	        
 	        <Button
 	            android:id="@+id/button_logout"

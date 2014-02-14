@@ -5,6 +5,8 @@
     
     <color name="black">#FF000000</color>
     
+    <color name="gray">#F0F0F0</color>
+    
     <color name="sepline">#E5879DB2</color>
     
 	<color name="suggest_list_background">#E5FFDB5E</color>
