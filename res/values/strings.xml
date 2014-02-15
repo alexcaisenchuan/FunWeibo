@@ -51,6 +51,7 @@
     <string name="hint_auth_success">认证成功</string>
     <string name="hint_auth_faild">认证失败：</string>
     <string name="hint_init_faild">初始化错误！</string>
+    <string name="hint_loc_invalid">定位中&#8230;</string>
     
     <!-- Buttons -->
     <string name="button_ok">确定</string>
@@ -105,6 +106,7 @@
     <string name="text_place_none">暂无</string>
     <string name="text_pic_url">图片地址:</string>
     <string name="text_share_from">来自:</string>
+    <string name="text_unknown_place">未知位置</string>
     
     <!-- 微博提示 -->
     <string name="weibo_error_not_exist">原微博已删除！</string>

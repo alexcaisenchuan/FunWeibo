@@ -384,6 +384,7 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     private ActionBarDrawerToggle mDrawerToggle;
     private ImageView mImageUserface;
     private TextView mTextUsername;
+    private TextView mTextCurrLoc;
     private Switch mSwitch2GPic;
     private Button mButtonFeedback;
     private Button mButtonAbout;
@@ -548,18 +549,18 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
                 ) {
             public void onDrawerClosed(View view) {
                 KLog.d(TAG, "onDrawerClosed");
-                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+                //invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
             public void onDrawerOpened(View drawerView) {
                 KLog.d(TAG, "onDrawerOpened");
                 invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                restoreCurrUserFromSharePref();
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mImageUserface = (ImageView)findViewById(R.id.img_userface);
         mTextUsername = (TextView)findViewById(R.id.text_username);
+        mTextCurrLoc = (TextView)findViewById(R.id.text_curr_loc);
         mSwitch2GPic = (Switch)findViewById(R.id.switch_2g_pic);
         mSwitch2GPic.setChecked(SettingKeeper.readPicLowQualityUnderMobile(this));
         mSwitch2GPic.setOnCheckedChangeListener(new Switch2GPicCheckListener());
@@ -595,10 +596,18 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
         
         //尝试从SharePref中恢复数据
         restoreStatusFromSharePref();
-        restoreCurrUserFromSharePref();
+        setUserInfoInDrawer();
         
         //检测升级，使用友盟
         UmengUpdateAgent.update(this);
+    }
+    
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        KLog.d(TAG, "onPrepareOptionsMenu");
+        setUserInfoInDrawer();
+        setCurrLocInDrawer();
+        return super.onPrepareOptionsMenu(menu);
     }
     
     @Override
@@ -928,9 +937,9 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     }
     
     /**
-     * 尝试从SharePref中恢复用户信息
+     * 显示用户信息在侧边栏
      */
-    private void restoreCurrUserFromSharePref() {
+    private void setUserInfoInDrawer() {
         User user = mApp.getCurrUser();
         if(user != null) {
             String userface_url = user.getProfileImageURL().toString();
@@ -939,6 +948,18 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
             mApp.getImageFetcher().loadFormCache(userface_url, mImageUserface);
             //ImageLoader.getInstance().displayImage(userface_url, mImageUserface);     //ImageLoader会闪动
             mTextUsername.setText(username);
+        }
+    }
+    
+    /**
+     * 显示当前位置信息在侧边栏
+     */
+    private void setCurrLocInDrawer() {
+        String addr = mApp.getCurrentLocation().getAddress();
+        if(TextUtils.isEmpty(addr)) {
+            mTextCurrLoc.setText(R.string.text_unknown_place);
+        } else {
+            mTextCurrLoc.setText(addr);
         }
     }
     

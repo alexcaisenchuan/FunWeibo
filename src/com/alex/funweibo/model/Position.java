@@ -203,8 +203,9 @@ public class Position {
     public static boolean isValid(double lat, double lon) {
         boolean ret = false;
         
-        if(lat == 0.0 && lon == 0.0) {
+        if((lat == 0.0 && lon == 0.0) || lat == 4.9E-324 || lon == 4.9E-324) {
             //对于百度定位来说，两个都返回0也是无效的地址
+            //4.9E-324也是无效的地址
             ret = false;
         } else {
             //纬度：-90 ~ 90

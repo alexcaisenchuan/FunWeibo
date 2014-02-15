@@ -77,6 +77,8 @@ public abstract class BasePOIActivity extends BaseActivity {
     private static final int MSG_ON_GET_POIS          = MSG_EXTEND_BASE + 3;
     /**显示/隐藏重新加载提示框*/
     private static final int MSG_SET_RELOAD_HINT      = MSG_EXTEND_BASE + 4;
+    /**地点无效提示*/
+    private static final int MSG_LOC_INVALID_HINT     = MSG_EXTEND_BASE + 5;
     
     /////////////////其他/////////////////
     private static final int SCROLL_STATE_IDLE = 0;
@@ -518,9 +520,6 @@ public abstract class BasePOIActivity extends BaseActivity {
             //子类可能要做一些响应的处理
             onCategorySelected(category);
             
-            //显示加载提示
-            sendMessageToBaseHandler(MSG_SHOW_LOADING_HINT);
-            
             //加载poi信息
             getNextNearbyPois(true);
         }
@@ -553,6 +552,8 @@ public abstract class BasePOIActivity extends BaseActivity {
                 sendMessageToBaseHandler(MSG_SHOW_LOADING_HINT);
                 mGettingPoiList = true;
                 mHasGetPoiList = true;
+            } else {
+                sendMessageToBaseHandler(MSG_LOC_INVALID_HINT);
             }
         }
     }
@@ -601,6 +602,11 @@ public abstract class BasePOIActivity extends BaseActivity {
                     
                     mCurrPoiPage++;
                 }
+                break;
+            }
+            
+            case MSG_LOC_INVALID_HINT: {
+                SmartToast.showLongToast(this, R.string.hint_loc_invalid, true);
                 break;
             }
             
