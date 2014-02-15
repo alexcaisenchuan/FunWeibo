@@ -2,7 +2,7 @@ package com.alex.common.utils;
 
 import java.io.File;
 
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 
 import android.content.Context;
 import android.content.Intent;

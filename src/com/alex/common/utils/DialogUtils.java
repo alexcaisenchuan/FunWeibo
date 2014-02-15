@@ -5,7 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 
 /**
  * 一些常用的Dialog显示工具类

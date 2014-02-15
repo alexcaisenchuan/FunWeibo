@@ -11,7 +11,7 @@ package com.alex.funweibo.activities;
 
 import java.util.List;
 
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 import com.alex.funweibo.model.Position;
 import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.common.activities.BaseActivity;

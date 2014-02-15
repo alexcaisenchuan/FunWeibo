@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.alex.funweibo.model.Position;
+import com.alex.yaha.R;
 import com.alex.common.AppConfig;
 import com.alex.common.keep.WeiboAuthInfoKeeper;
 import com.alex.common.keep.WeiboDataKeeper;

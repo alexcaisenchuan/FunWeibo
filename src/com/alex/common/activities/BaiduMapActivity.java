@@ -14,7 +14,7 @@ import com.alex.common.utils.BaiduMapUtils;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.ShareUtils;
 import com.alex.common.utils.SmartToast;
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 import com.alex.funweibo.model.Position;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
@@ -150,9 +150,7 @@ public class BaiduMapActivity extends BaseActivity {
             //非零值表示key验证未通过
             if (iError != 0) {
                 KLog.w(TAG, "onGetPermissionState faild : %s", iError);
-                if(AppConfig.DEBUG) {
-                    SmartToast.showLongToast(BaiduMapActivity.this, getString(R.string.hint_auth_faild) + iError, false);
-                }
+                SmartToast.showLongToast(BaiduMapActivity.this, getString(R.string.hint_auth_faild) + iError, false);
             } else {
                 KLog.d(TAG, "onGetPermissionState success");
                 if(AppConfig.DEBUG) {

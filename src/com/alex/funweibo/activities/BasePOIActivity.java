@@ -28,7 +28,7 @@ import com.alex.common.OnHttpRequestReturnListener;
 import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.KLog;
 import com.alex.common.utils.SmartToast;
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 import com.alex.funweibo.model.Position;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;

@@ -4,7 +4,7 @@ import com.alex.common.utils.ImageUtils;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.FileUtils.PathType;
 import com.alex.common.views.ZoomImageView;
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.assist.FailReason;

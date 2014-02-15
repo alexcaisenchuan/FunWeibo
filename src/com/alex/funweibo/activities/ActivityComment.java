@@ -10,7 +10,7 @@ import android.widget.EditText;
 
 import com.alex.common.activities.BaseActivity;
 import com.alex.common.utils.SmartToast;
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 
 /**
  * 评论界面

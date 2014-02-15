@@ -6,7 +6,7 @@ import android.webkit.WebView;
 import android.widget.TextView;
 
 import com.alex.common.activities.BaseActivity;
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 
 /**
  * 关于界面

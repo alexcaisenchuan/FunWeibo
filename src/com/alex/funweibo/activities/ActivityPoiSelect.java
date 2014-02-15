@@ -19,7 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.alex.common.utils.KLog;
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 import com.weibo.sdk.android.model.Poi;
 
 public class ActivityPoiSelect extends BasePOIActivity implements OnScrollListener{

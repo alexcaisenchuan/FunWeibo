@@ -1,7 +1,8 @@
 <resources>
 
-    <string name="app_name">Fun微博</string>
-
+    <string name="app_name">呀哈</string>
+    <string name="app_name_en">YaHa</string>
+    
     <!-- 通用 -->
     <string name="common_share">分享</string>
     
@@ -72,7 +73,6 @@
     <string name="switch_2g_pic">2/3G下低清图</string>
     
     <!-- title -->
-    <string name="title_login">FunWeibo</string>
     <string name="title_new_weibo">签到</string>
     <string name="title_hot_place">热门地点</string>
     <string name="title_comment">评论</string>

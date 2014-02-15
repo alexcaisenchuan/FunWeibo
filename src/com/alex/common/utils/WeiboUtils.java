@@ -11,7 +11,7 @@ import com.alex.common.activities.BaseActivity;
 import com.alex.common.keep.SettingKeeper;
 import com.alex.common.utils.NetworkUtils.NetworkType;
 import com.alex.funweibo.AppControl;
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 import com.ta.util.cache.TAFileCache;
 import com.weibo.sdk.android.Oauth2AccessToken;
 import com.weibo.sdk.android.WeiboException;

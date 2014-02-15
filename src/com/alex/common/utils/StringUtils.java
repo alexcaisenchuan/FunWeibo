@@ -3,7 +3,7 @@ package com.alex.common.utils;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 import com.weibo.sdk.android.WeiboDefines;
 
 import android.content.Context;

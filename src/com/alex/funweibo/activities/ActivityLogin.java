@@ -12,7 +12,7 @@ package com.alex.funweibo.activities;
 import java.text.SimpleDateFormat;
 
 import com.alex.common.AppConfig;
-import com.alex.funweibo.R;
+import com.alex.yaha.R;
 import com.alex.common.activities.BaseActivity;
 import com.alex.common.keep.WeiboAuthInfoKeeper;
 import com.alex.common.utils.SmartToast;
