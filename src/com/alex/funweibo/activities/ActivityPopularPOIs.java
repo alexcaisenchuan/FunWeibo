@@ -617,18 +617,6 @@ public class ActivityPopularPOIs extends BasePOIActivity implements OnScrollList
     }
     
     @Override
-    protected void onResume() {
-        super.onResume();
-        MobclickAgent.onResume(this);       //友盟统计使用
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        MobclickAgent.onPause(this);        //友盟统计使用
-    }
-    
-    @Override
     protected void onStop() {
         KLog.d(TAG, "onStop");
         super.onStop();

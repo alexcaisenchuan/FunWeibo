@@ -12,6 +12,7 @@ package com.alex.common.activities;
 import com.alex.funweibo.AppControl;
 import com.alex.common.utils.SmartToast;
 import com.alex.common.utils.KLog;
+import com.umeng.analytics.MobclickAgent;
 import com.weibo.sdk.android.Oauth2AccessToken;
 
 import android.app.ActionBar;
@@ -213,6 +214,17 @@ public abstract class BaseActivity extends Activity {
         // TODO Auto-generated method stub
     }
     
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);       //友盟统计使用
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPause(this);        //友盟统计使用
+    }
     /*--------------------------
      * private方法
      *-------------------------*/
